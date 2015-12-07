@@ -1,0 +1,23 @@
+# Eclipse
+.classpath
+.project
+.settings/
+ 
+# IntelliJ IDEA
+.idea/
+*.iml
+*.iws
+
+ 
+# Maven
+log/
+target/
+
+# Java
+*.class
+*.jar
+*.war
+*.ear
+
+# Temporary files
+*~
