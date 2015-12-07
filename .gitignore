@@ -1,0 +1,24 @@
+# Eclipse
+.classpath
+.project
+.settings/
+ 
+# IntelliJ IDEA
+.idea/
+*.iml
+*.iws
+
+ 
+# Maven
+log/
+target/
+dependency-reduced-pom.xml
+
+# Java
+*.class
+*.jar
+*.war
+*.ear
+
+# Temporary files
+*~

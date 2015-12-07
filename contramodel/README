@@ -1,0 +1,34 @@
+
+                          Contra Model
+
+  What is it?
+  -----------
+  The contramodel is an unmanaged extension for Neo4j server. It can be deployed
+  in Neo4j and accessed through HTTP requests. Acording to the Neo4j's manuals,
+  an unmanaged extension provides more performance than using Cypher queries within
+  the application itself.
+
+
+  How to install?
+  ---------------
+  1. Create the JAR file using the following command from the contramodel directory.
+
+        mvn package
+
+  2. Copy the targets/contramodel-1.0-SNAPSHOT.jar file to {NEO4J_HOME}/plugins
+
+  3. Append the following line to {NEO4J_HOME}/conf/neo4j-server.properties
+
+        org.neo4j.server.thirdparty_jaxrs_classes=com.aslan.contramodel.extension=/contra
+
+  Here the /contra is the context root to access this extension.
+
+
+  How to use?
+  -----------
+  Send HTTP requests to http://localhost:7474/contra/{resource} with necessary details.
+
+  Using PostMan:
+    # URL:              http://localhost:7474/contra/person/find/+94770780210
+    # METHOD:           GET
+    # AUTHENTICATION:   Basic Auth with Username and Password of Neo4j
