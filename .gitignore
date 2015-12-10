@@ -22,3 +22,4 @@ dependency-reduced-pom.xml
 
 # Temporary files
 *~
+neo4j-home/
