@@ -17,3 +17,4 @@
 #
 
 split=com.aslan.contracep.function.SplitStringFunctionExtension
+within=com.aslan.contracep.function.GeoFenceFunctionExtension
