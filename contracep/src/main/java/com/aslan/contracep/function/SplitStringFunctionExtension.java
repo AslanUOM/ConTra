@@ -7,7 +7,7 @@ import org.wso2.siddhi.query.api.definition.Attribute;
 import org.wso2.siddhi.query.api.definition.Attribute.Type;
 import org.wso2.siddhi.query.api.exception.ExecutionPlanValidationException;
 
-public class SubStringFunctionExtension extends FunctionExecutor {
+public class SplitStringFunctionExtension extends FunctionExecutor {
 
 	@Override
 	public void start() {

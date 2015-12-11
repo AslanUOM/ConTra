@@ -16,4 +16,4 @@
 # under the License.
 #
 
-split=com.aslan.contracep.function.SubStringFunctionExtension
+split=com.aslan.contracep.function.SplitStringFunctionExtension
