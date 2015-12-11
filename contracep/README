@@ -1,0 +1,25 @@
+
+                          Contra CEP Extension
+
+  What is it?
+  -----------
+  The contracep is an extension for WSO2 CEP. It can be deployed
+  in WSO2 CEP and accessed from Siddhi query. This extension contains custom functions,
+  windows and streams which are required by ConTra.
+
+
+  How to install?
+  ---------------
+  1. Create the JAR file using the following command from the contracep directory.
+
+        mvn package
+
+  2. Copy the targets/contracep-1.0-SNAPSHOT.jar file to {CEP_HOME}/repository/components/lib
+
+  3. Restart the CEP.
+
+
+  How to use?
+  -----------
+  1. Functions:
+        Use contra:<function-name> in Siddhi query.
