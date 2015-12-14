@@ -2,7 +2,7 @@ package com.aslan.contramodel.extension;
 
 import com.aslan.contramodel.entity.Person;
 import junit.framework.TestCase;
-import org.junit.Test;
+import org.junit.*;
 import org.neo4j.function.Function;
 import org.neo4j.graphdb.DynamicLabel;
 import org.neo4j.graphdb.GraphDatabaseService;
@@ -12,16 +12,17 @@ import org.neo4j.harness.ServerControls;
 import org.neo4j.harness.TestServerBuilders;
 import org.neo4j.test.server.HTTP;
 
+import static org.junit.Assert.assertEquals;
 import static org.neo4j.helpers.collection.MapUtil.map;
 
 /**
  * Created by gobinath on 12/9/15.
  */
-public class PersonResourceTest extends TestCase {
-    private ServerControls server;
+public class PersonResourceTest {
+    private static ServerControls server;
 
-    @Override
-    protected void setUp() throws Exception {
+    @BeforeClass
+    public static void setUp() throws Exception {
         server = TestServerBuilders.newInProcessBuilder()
                 .withExtension("/contra", PersonResource.class)
                 .withFixture(new Function<GraphDatabaseService, Void>() {
@@ -37,8 +38,8 @@ public class PersonResourceTest extends TestCase {
                 .newServer();
     }
 
-    @Override
-    protected void tearDown() throws Exception {
+    @AfterClass
+    public static void tearDown() throws Exception {
         server.close();
     }
 
@@ -48,6 +49,7 @@ public class PersonResourceTest extends TestCase {
 
         assertEquals("Alice", response.get("person").get("name").getTextValue());
     }
+
 
     @Test
     public void testCreate() throws Exception {
