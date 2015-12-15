@@ -49,7 +49,7 @@ public class TimelineResourceTest {
         // Check the status.
         assertEquals("Error in request.", HttpURLConnection.HTTP_OK, response.status());
 
-        Result result = server.graph().execute("MATCH (r:TimelineRoot {value: 'TimelineRoot'})-[:NEXT_LEVEL]->(y:Year {value: {year}})-[:NEXT_LEVEL]->(m:Month {value: {month}})-[:NEXT_LEVEL]->(d:Day {value: {day}}) RETURN ID(d) as id", map("year", 1991, "month", 4, "day", 20));
+        Result result = server.graph().execute("MATCH (r:TimelineRoot {value: 'TimelineRoot'})-[:CHILD]->(y:Year {value: {year}})-[:CHILD]->(m:Month {value: {month}})-[:CHILD]->(d:Day {value: {day}}) RETURN ID(d) as id", map("year", 1991, "month", 4, "day", 20));
 
         assertEquals("Person is not created.", response.get("id").getLongValue(), result.next().get("id"));
     }
@@ -59,7 +59,7 @@ public class TimelineResourceTest {
         HTTP.POST(server.httpURI().resolve("/contra/timeline/create/1991-02-02").toString());
         HTTP.POST(server.httpURI().resolve("/contra/timeline/create/1991-02-02").toString());
 
-        Result result = server.graph().execute("MATCH (r:TimelineRoot {value: 'TimelineRoot'})-[:NEXT_LEVEL]->(y:Year {value: {year}})-[:NEXT_LEVEL]->(m:Month {value: {month}})-[:NEXT_LEVEL]->(d:Day {value: {day}}) RETURN COUNT(d) as count", map("year", 1991, "month", 2, "day", 2));
+        Result result = server.graph().execute("MATCH (r:TimelineRoot {value: 'TimelineRoot'})-[:CHILD]->(y:Year {value: {year}})-[:CHILD]->(m:Month {value: {month}})-[:CHILD]->(d:Day {value: {day}}) RETURN COUNT(d) as count", map("year", 1991, "month", 2, "day", 2));
 
         assertEquals("Person is not created.", Long.valueOf(1), result.next().get("count"));
     }
@@ -73,8 +73,8 @@ public class TimelineResourceTest {
         assertEquals("Error in request.", HttpURLConnection.HTTP_OK, res1.status());
         assertEquals("Error in request.", HttpURLConnection.HTTP_OK, res2.status());
 
-        String query = "MATCH (r:TimelineRoot {value: 'TimelineRoot'})-[:NEXT_LEVEL]->(y:Year {value: 2015})-[:NEXT_LEVEL]->(m:Month {value: 4})-[:NEXT_LEVEL]->(d1:Day), "
-                + "(m)-[:NEXT_LEVEL]->(d2:Day) WHERE (d1)-[:NEXT]->(d2) RETURN d1.value as day1, d2.value as day2";
+        String query = "MATCH (r:TimelineRoot {value: 'TimelineRoot'})-[:CHILD]->(y:Year {value: 2015})-[:CHILD]->(m:Month {value: 4})-[:CHILD]->(d1:Day), "
+                + "(m)-[:CHILD]->(d2:Day) WHERE (d1)-[:NEXT]->(d2) RETURN d1.value as day1, d2.value as day2";
 
         Result result = server.graph().execute(query);
 
@@ -88,6 +88,29 @@ public class TimelineResourceTest {
     }
 
     @Test
+    public void testLinkBetweenTwoYears() throws Exception {
+        HTTP.Response res1 = HTTP.POST(server.httpURI().resolve("/contra/timeline/create/1985-04-20").toString());
+        HTTP.Response res2 = HTTP.POST(server.httpURI().resolve("/contra/timeline/create/1980-01-02").toString());
+
+        // Check the status.
+        assertEquals("Error in request.", HttpURLConnection.HTTP_OK, res1.status());
+        assertEquals("Error in request.", HttpURLConnection.HTTP_OK, res2.status());
+
+        String query = "MATCH (r:TimelineRoot {value: 'TimelineRoot'})-[:CHILD]->(y:Year {value: 1980})-[:CHILD]->(m:Month {value: 1})-[:CHILD]->(d1:Day) "
+                + "MATCH (d1)-[:NEXT]->(d2:Day) RETURN d1.value as day1, d2.value as day2";
+
+        Result result = server.graph().execute(query);
+
+        assertEquals("Dates are not created", true, result.hasNext());
+
+        Map<String, Object> map = result.next();
+
+        assertEquals("Failed to create two adjacent days.", 2, map.get("day1"));
+
+        assertEquals("Failed to create two adjacent days.", 20, map.get("day2"));
+    }
+
+    @Test
     public void testLinkBetweenTwoAdjacentMonths() throws Exception {
         HTTP.Response res1 = HTTP.POST(server.httpURI().resolve("/contra/timeline/create/2014-04-20").toString());
         HTTP.Response res2 = HTTP.POST(server.httpURI().resolve("/contra/timeline/create/2014-05-30").toString());
@@ -96,8 +119,8 @@ public class TimelineResourceTest {
         assertEquals("Error in request.", HttpURLConnection.HTTP_OK, res1.status());
         assertEquals("Error in request.", HttpURLConnection.HTTP_OK, res2.status());
 
-        String query = "MATCH (r:TimelineRoot {value: 'TimelineRoot'})-[:NEXT_LEVEL]->(y:Year {value: 2014})-[:NEXT_LEVEL]->(m1:Month {value: 4}), "
-                + "(y)-[:NEXT_LEVEL]->(m2:Month) WHERE (m1)-[:NEXT]->(m2) RETURN m1.value as month1, m2.value as month2";
+        String query = "MATCH (r:TimelineRoot {value: 'TimelineRoot'})-[:CHILD]->(y:Year {value: 2014})-[:CHILD]->(m1:Month {value: 4}), "
+                + "(y)-[:CHILD]->(m2:Month) WHERE (m1)-[:NEXT]->(m2) RETURN m1.value as month1, m2.value as month2";
 
         Result result = server.graph().execute(query);
 
