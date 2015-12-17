@@ -1,10 +1,11 @@
 package com.aslan.contramodel.extension;
 
-import com.aslan.contramodel.entity.Person;
-import junit.framework.TestCase;
-import org.junit.*;
+
+import com.aslan.contra.dto.Person;
+import org.junit.AfterClass;
+import org.junit.BeforeClass;
+import org.junit.Test;
 import org.neo4j.function.Function;
-import org.neo4j.graphdb.DynamicLabel;
 import org.neo4j.graphdb.GraphDatabaseService;
 import org.neo4j.graphdb.Result;
 import org.neo4j.graphdb.Transaction;
@@ -53,7 +54,12 @@ public class PersonResourceTest {
 
     @Test
     public void testCreate() throws Exception {
-        HTTP.Response response = HTTP.POST(server.httpURI().resolve("/contra/person/create").toString(), map("name", "Bob", "email", "bob@gmail.com", "phoneNumber", "+94773333333"));
+        Person person = new Person();
+        person.setName("Bob");
+        person.setEmail("bob@gmail.com");
+        person.setPhoneNumber("+94773333333");
+
+        HTTP.Response response = HTTP.POST(server.httpURI().resolve("/contra/person/create").toString(), person);
 
         // Check the status.
         assertEquals("Error in request.", 200, response.status());

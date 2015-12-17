@@ -16,43 +16,37 @@ public class TimelineService extends Service {
     private final Logger LOGGER = LoggerFactory.getLogger(TimelineService.class);
 
 
-
     public TimelineService(GraphDatabaseService databaseService) {
         super(databaseService);
     }
 
-    public long createCurrentDate() {
+    public Long createCurrentDate() {
         return createDate(LocalDate.now());
     }
 
-    public long createDate(LocalDate date) {
+    public Long createDate(LocalDate date) {
         return createDay(date);
     }
 
     private Long createTimelineRoot() {
-        Result result = databaseService.execute("MATCH (n:TimelineRoot {value : 'TimelineRoot'}) RETURN ID(n) as id");
-        if (!result.hasNext()) {
-            result = databaseService.execute("CREATE (n:TimelineRoot { value : 'TimelineRoot'}) RETURN ID(n) as id");
+        Long id = executeAndReturnID("MATCH (n:TimelineRoot {value : 'TimelineRoot'}) RETURN ID(n) as id");
+        if (id == null) {
+            id = executeAndReturnID("CREATE (n:TimelineRoot { value : 'TimelineRoot'}) RETURN ID(n) as id");
 
-            int nodesCreated = result.getQueryStatistics().getNodesCreated();
-            LOGGER.debug("Timeline Root created: " + (nodesCreated == 1));
+            LOGGER.debug("Timeline Root is created with id {}", id);
         }
-        return (Long) result.next().get("id");
+        return id;
     }
-
 
 
     /////////////////////////////////// METHODS RELATED TO YEAR ///////////////////////////////////
     private Long createYear(int year) {
+        LOGGER.debug("Creating year {}", year);
         Long rootID = createTimelineRoot();
-        Long yearID = null;
-
-        Result result = databaseService.execute("MATCH (:TimelineRoot)-[:CHILD]->(y:Year {value: {year}}) RETURN ID(y) as id", map("year", year));
-        if (!result.hasNext()) {
+        Long yearID = executeAndReturnID("MATCH (:TimelineRoot)-[:CHILD]->(y:Year {value: {year}}) RETURN ID(y) as id", "year", year);
+        if (yearID == null) {
             // Create the year
-            result = databaseService.execute("MATCH (root:TimelineRoot) WHERE ID(root) = {root_id} CREATE (root)-[:CHILD]->(y:Year { value : {year}}) RETURN ID(y) as id", map("year", year, "root_id", rootID));
-
-            yearID = (Long) result.next().get("id");
+            yearID = executeAndReturnID("MATCH (root:TimelineRoot) WHERE ID(root) = {root_id} CREATE (root)-[:CHILD]->(y:Year { value : {year}}) RETURN ID(y) as id", "year", year, "root_id", rootID);
 
             Long prevID = prevYearID(year);
             Long nextID = null;
@@ -64,18 +58,19 @@ public class TimelineService extends Service {
 
             // Delete the existing link
             if (prevID != null && nextID != null) {
+                LOGGER.debug("Deleting the existing relationship {} -[NEXT]-> {}", prevID, nextID);
                 databaseService.execute("MATCH (p:Year)-[next:NEXT]->(n:Year) WHERE ID(p) = {prev_id} AND ID(n) = {next_id} DELETE next", map("prev_id", prevID, "next_id", nextID));
             }
             // Create new links
             if (prevID != null) {
+                LOGGER.debug("Creating the relationship {} -[NEXT]-> {}", prevID, yearID);
                 databaseService.execute("MATCH (p:Year), (n:Year) WHERE ID(p) = {prev_id} AND ID(n) = {next_id} CREATE (p)-[:NEXT]->(n)", map("prev_id", prevID, "next_id", yearID));
             }
             if (nextID != null) {
+                LOGGER.debug("Creating the relationship {} -[NEXT]-> {}", yearID, nextID);
                 databaseService.execute("MATCH (p:Year), (n:Year) WHERE ID(p) = {prev_id} AND ID(n) = {next_id} CREATE (p)-[:NEXT]->(n)", map("prev_id", yearID, "next_id", nextID));
             }
-            LOGGER.debug("Year created: " + yearID);
-        } else {
-            yearID = (Long) result.next().get("id");
+            LOGGER.debug("Year {} is created with the id {}", year, yearID);
         }
 
         return yearID;
@@ -116,13 +111,12 @@ public class TimelineService extends Service {
 
     /////////////////////////////////// METHODS RELATED TO MONTH ///////////////////////////////////
     private Long createMonth(int year, int month) {
+        LOGGER.debug("Creating month {}-{}", year, month);
         Long yearID = createYear(year);
-        Long monthID = null;
-        Result result = databaseService.execute("MATCH (year)-[:CHILD]->(m:Month {value: {createMonth}}) WHERE ID(year) = {year_id} RETURN ID(m) as id", map("year_id", yearID, "createMonth", month));
-        if (!result.hasNext()) {
-            result = databaseService.execute("MATCH (year) WHERE ID(year) = {year_id} CREATE (year)-[:CHILD]->(m:Month { value : {createMonth}}) RETURN ID(m) as id", map("year_id", yearID, "createMonth", month));
+        Long monthID = executeAndReturnID("MATCH (year)-[:CHILD]->(m:Month {value: {createMonth}}) WHERE ID(year) = {year_id} RETURN ID(m) as id", "year_id", yearID, "createMonth", month);
+        if (monthID == null) {
+            monthID = executeAndReturnID("MATCH (year) WHERE ID(year) = {year_id} CREATE (year)-[:CHILD]->(m:Month { value : {createMonth}}) RETURN ID(m) as id", "year_id", yearID, "createMonth", month);
 
-            monthID = (Long) result.next().get("id");
 
             Long prevID = prevMonthID(year, month);
             Long nextID = null;
@@ -134,19 +128,20 @@ public class TimelineService extends Service {
 
             // Delete the existing link
             if (prevID != null && nextID != null) {
+                LOGGER.debug("Deleting the existing relationship {} -[NEXT]-> {}", prevID, nextID);
                 databaseService.execute("MATCH (p:Month)-[next:NEXT]->(n:Month) WHERE ID(p) = {prev_id} AND ID(n) = {next_id} DELETE next", map("prev_id", prevID, "next_id", nextID));
             }
             // Create new links
             if (prevID != null) {
+                LOGGER.debug("Creating the relationship {} -[NEXT]-> {}", prevID, monthID);
                 databaseService.execute("MATCH (p:Month),(n:Month) WHERE ID(p) = {prev_id} AND ID(n) = {next_id} CREATE (p)-[:NEXT]->(n)", map("prev_id", prevID, "next_id", monthID));
             }
             if (nextID != null) {
+                LOGGER.debug("Creating the relationship {} -[NEXT]-> {}", monthID, nextID);
                 databaseService.execute("MATCH (p:Month),(n:Month) WHERE ID(p) = {prev_id} AND ID(n) = {next_id} CREATE (p)-[:NEXT]->(n)", map("prev_id", monthID, "next_id", nextID));
             }
 
-            LOGGER.debug("Month created: " + monthID);
-        } else {
-            monthID = (Long) result.next().get("id");
+            LOGGER.debug("Month {}-{} is created with the id {}", year, month, monthID);
         }
         return monthID;
     }
@@ -196,18 +191,17 @@ public class TimelineService extends Service {
 
     /////////////////////////////////// METHODS RELATED TO DAY ///////////////////////////////////
     private Long createDay(LocalDate date) {
-        LOGGER.debug("Create date: " + date);
+        LOGGER.debug("Creating day {}", date);
+
         int year = date.getYear();
         int month = date.getMonthValue();
         int day = date.getDayOfMonth();
 
         Long monthID = createMonth(year, month);
-        Long dayID = null;
-        Result result = databaseService.execute("MATCH (m:Month)-[:CHILD]->(d:Day {value: {day}}) WHERE ID(m) = {month_id} RETURN ID(d) as id", map("month_id", monthID, "day", day));
-        if (!result.hasNext()) {
-            result = databaseService.execute("MATCH (m:Month) WHERE ID(m) = {month_id} CREATE (m)-[:CHILD]->(d:Day { value : {day}}) RETURN ID(d) as id", map("month_id", monthID, "day", day));
+        Long dayID = executeAndReturnID("MATCH (m:Month)-[:CHILD]->(d:Day {value: {day}}) WHERE ID(m) = {month_id} RETURN ID(d) as id", "month_id", monthID, "day", day);
+        if (dayID == null) {
+            dayID = executeAndReturnID("MATCH (m:Month) WHERE ID(m) = {month_id} CREATE (m)-[:CHILD]->(d:Day { value : {day}}) RETURN ID(d) as id", "month_id", monthID, "day", day);
 
-            dayID = (Long) result.next().get("id");
 
             Long prevID = prevDayID(year, month, day);
             Long nextID = null;
@@ -219,20 +213,22 @@ public class TimelineService extends Service {
 
             // Delete the existing link
             if (prevID != null && nextID != null) {
+                LOGGER.debug("Deleting the existing relationship {} -[NEXT]-> {}", prevID, nextID);
                 databaseService.execute("MATCH (p:Day)-[next:NEXT]->(n:Day) WHERE ID(p) = {prev_id} AND ID(n) = {next_id} DELETE next", map("prev_id", prevID, "next_id", nextID));
             }
             // Create new links
             if (prevID != null) {
+                LOGGER.debug("Creating the relationship {} -[NEXT]-> {}", prevID, dayID);
                 databaseService.execute("MATCH (p:Day), (n:Day) WHERE ID(p) = {prev_id} AND ID(n) = {next_id} CREATE (p)-[:NEXT]->(n)", map("prev_id", prevID, "next_id", dayID));
             }
             if (nextID != null) {
+                LOGGER.debug("Creating the relationship {} -[NEXT]-> {}", dayID, nextID);
                 databaseService.execute("MATCH (p:Day), (n:Day) WHERE ID(p) = {prev_id} AND ID(n) = {next_id} CREATE (p)-[:NEXT]->(n)", map("prev_id", dayID, "next_id", nextID));
             }
 
-            LOGGER.debug("Day created: " + dayID);
-        } else {
-            dayID = (Long) result.next().get("id");
+            LOGGER.debug("Day {} is created with the id {}", date, dayID);
         }
+
         return dayID;
     }
 

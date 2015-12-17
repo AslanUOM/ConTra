@@ -51,6 +51,7 @@ public class TimelineResourceTest {
 
         Result result = server.graph().execute("MATCH (r:TimelineRoot {value: 'TimelineRoot'})-[:CHILD]->(y:Year {value: {year}})-[:CHILD]->(m:Month {value: {month}})-[:CHILD]->(d:Day {value: {day}}) RETURN ID(d) as id", map("year", 1991, "month", 4, "day", 20));
 
+
         assertEquals("Person is not created.", response.get("id").getLongValue(), result.next().get("id"));
     }
 

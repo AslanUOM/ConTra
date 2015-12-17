@@ -1,4 +1,4 @@
-package com.aslan.contramodel.entity;
+package com.aslan.contra.dto;
 
 import java.io.Serializable;
 
@@ -23,5 +23,10 @@ public class Country implements Serializable {
 
     public void setCode(String code) {
         this.code = code;
+    }
+
+    @Override
+    public String toString() {
+        return name;
     }
 }

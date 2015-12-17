@@ -1,7 +1,7 @@
 package com.aslan.contramodel.extension;
 
-import com.aslan.contramodel.entity.Country;
-import com.aslan.contramodel.entity.Location;
+import com.aslan.contra.dto.Country;
+import com.aslan.contra.dto.Location;
 import org.codehaus.jackson.map.ObjectMapper;
 import org.neo4j.graphdb.GraphDatabaseService;
 import org.slf4j.Logger;
@@ -35,7 +35,7 @@ public class LocationResource {
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
     public Response createCountry(Country country) {
-        LOGGER.debug("Request to create country: " + country);
+        LOGGER.debug("Request to create country {} is received", country);
         service.createCountry(country);
         return Response.status(HttpURLConnection.HTTP_OK).build();
     }
@@ -45,7 +45,7 @@ public class LocationResource {
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
     public Response createRegion(Location region) {
-        LOGGER.debug("Request to create region: " + region);
+        LOGGER.debug("Request to create region {} is received", region);
         service.createRegion(region);
         return Response.status(HttpURLConnection.HTTP_OK).build();
     }
@@ -55,7 +55,7 @@ public class LocationResource {
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
     public Response createLocation(Location location) {
-        LOGGER.debug("Request to create location: " + location);
+        LOGGER.debug("Request to create location {} is received", location);
         service.createLocation(location);
         return Response.status(HttpURLConnection.HTTP_OK).build();
     }

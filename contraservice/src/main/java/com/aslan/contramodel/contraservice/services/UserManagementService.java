@@ -1,8 +1,8 @@
 package com.aslan.contramodel.contraservice.services;
 
 
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import javax.validation.constraints.NotNull;
 import javax.ws.rs.GET;
@@ -21,7 +21,7 @@ public class UserManagementService {
     /**
      * Logger to log the events.
      */
-    private static final Logger LOGGER = LogManager.getLogger(UserManagementService.class);
+    private final Logger LOGGER = LoggerFactory.getLogger(UserManagementService.class);
 
     /**
      * This method returns a java.util.Map<String, String> which contains the
@@ -35,7 +35,7 @@ public class UserManagementService {
     @Path("/profile/{userId}")
     @Produces(MediaType.APPLICATION_JSON)
     public Response getProfile(@NotNull @PathParam("userId") String userId) {
-        LOGGER.debug("Get request for profile: " + userId);
+        LOGGER.debug("Get request for profile: {}", userId);
         return Response.status(HttpURLConnection.HTTP_OK).build();
     }
 }

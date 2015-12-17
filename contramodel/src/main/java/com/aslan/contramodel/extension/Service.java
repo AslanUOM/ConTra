@@ -19,7 +19,12 @@ public abstract class Service {
 
     public final Long executeAndReturnID(String query, Object... objects) {
         Long id = null;
-        Result result = databaseService.execute(query, map(objects));
+        Result result;
+        if (objects.length == 0) {
+            result = databaseService.execute(query);
+        } else {
+            result = databaseService.execute(query, map(objects));
+        }
         if (result.hasNext()) {
             id = (Long) result.next().get("id");
         }
@@ -28,7 +33,12 @@ public abstract class Service {
 
     public final Integer executeAndReturnValue(String query, Object... objects) {
         Integer value = null;
-        Result result = databaseService.execute(query, map(objects));
+        Result result;
+        if (objects.length == 0) {
+            result = databaseService.execute(query);
+        } else {
+            result = databaseService.execute(query, map(objects));
+        }
         if (result.hasNext()) {
             value = (Integer) result.next().get("value");
         }

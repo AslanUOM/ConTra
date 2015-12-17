@@ -10,11 +10,11 @@
 
   How to install?
   ---------------
-  1. Create the JAR file using the following command from the contracep directory.
+  1. Create the JAR file using the following command from the ConTra directory.
 
         mvn package
 
-  2. Copy the targets/contracep-1.0-SNAPSHOT.jar file to {CEP_HOME}/repository/components/lib
+  2. Copy the contracep/targets/contracep-1.0-SNAPSHOT.jar file to {CEP_HOME}/repository/components/lib
 
   3. Restart the CEP.
 

@@ -1,4 +1,4 @@
-package com.aslan.contramodel.entity;
+package com.aslan.contra.dto;
 
 /**
  * Created by gobinath on 12/16/15.

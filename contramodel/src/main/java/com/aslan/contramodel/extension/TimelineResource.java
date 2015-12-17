@@ -18,6 +18,8 @@ import java.time.DateTimeException;
 import java.time.LocalDate;
 import java.time.format.DateTimeParseException;
 
+import static org.neo4j.helpers.collection.MapUtil.map;
+
 /**
  * Created by gobinath on 12/14/15.
  */
@@ -37,26 +39,16 @@ public class TimelineResource {
     @Produces(MediaType.APPLICATION_JSON)
     public Response create(@PathParam("year") String year, @PathParam("month") String month, @PathParam("day") String day) throws IOException {
         String strDate = year + "-" + month + "-" + day;
-        LOGGER.info("Request to create: " + strDate);
+        LOGGER.debug("Request to create date {} is received", strDate);
 
         Response response = null;
 
         try {
             LocalDate date = LocalDate.parse(strDate);
-
-            long id = service.createDate(date);
-            JSONObject object = new JSONObject();
-
-            try {
-                object.put("id", id);
-                response = Response.status(HttpURLConnection.HTTP_OK).entity(object.toString()).build();
-            } catch (JSONException e) {
-                LOGGER.error(e.getMessage(), e);
-                response = Response.status(HttpURLConnection.HTTP_INTERNAL_ERROR).entity("Date is not created").build();
-            }
-
+            Long id = service.createDate(date);
+            response = Response.status(HttpURLConnection.HTTP_OK).entity(map("id", id)).build();
         } catch (DateTimeParseException e) {
-            LOGGER.error(e.getMessage(), e);
+            LOGGER.error("Exception in parsing tht date " + strDate, e);
 
             response = Response.status(HttpURLConnection.HTTP_BAD_REQUEST).entity("Invalid date format: " + strDate).build();
         }

@@ -11,11 +11,15 @@
 
   How to install?
   ---------------
-  1. Create the JAR file using the following command from the contramodel directory.
+  1. Create the JAR file using the following command from the ConTra directory.
 
         mvn package
 
-  2. Copy the targets/contramodel-1.0-SNAPSHOT.jar file to {NEO4J_HOME}/plugins
+  If you wat to package the contramodel only, use the following command from the ConTra directory.
+
+        mvn -pl contradto,contramodel package
+
+  2. Copy the contramodel/targets/contramodel-1.0-SNAPSHOT.jar file to {NEO4J_HOME}/plugins
 
   3. Append the following line to {NEO4J_HOME}/conf/neo4j-server.properties
 

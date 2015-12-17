@@ -1,7 +1,7 @@
 package com.aslan.contramodel.extension;
 
 
-import com.aslan.contramodel.entity.Person;
+import com.aslan.contra.dto.Person;
 import org.neo4j.graphdb.GraphDatabaseService;
 import org.neo4j.graphdb.Result;
 import org.neo4j.helpers.collection.IteratorUtil;
@@ -27,37 +27,58 @@ public class PersonService extends Service {
 
     public void create(Person person) {
         if (person == null) {
+            LOGGER.debug("Null argument to create method");
             return;
         }
-        Result result = databaseService.execute("CREATE (n:Person { name : {name}, email : {email}, phoneNumber: {phoneNumber}})", map("name", person.getName(), "email", person.getEmail(), "phoneNumber", person.getPhoneNumber()));
-        int nodesCreated = result.getQueryStatistics().getNodesCreated();
-        LOGGER.info("Number of nodes created: " + nodesCreated);
+        Long id = executeAndReturnID("MATCH (n:Person {phoneNumber: {phoneNumber}}) RETURN ID(n) as id", "phoneNumber", person.getPhoneNumber());
+        if (id == null) {
+            // Create new person
+            id = executeAndReturnID("CREATE (n:Person { name : {name}, email : {email}, phoneNumber: {phoneNumber}}) RETURN ID(n) as id", "name", person.getName(), "email", person.getEmail(), "phoneNumber", person.getPhoneNumber());
+
+            LOGGER.debug("New person {} with id {} is created", person, id);
+        } else {
+            LOGGER.debug("Person {} already exists with an id {}", person, id);
+            update(id, person.getName(), person.getEmail());
+        }
+
+    }
+
+    public void update(Long id, String name, String email) {
+        if (id == null || isNullOrEmpty(name) || isNullOrEmpty(email)) {
+            LOGGER.debug("Null argument to update method");
+            return;
+        }
+        Result result = databaseService.execute("MATCH (n:Person) WHERE ID(n) = {person_id} SET n.name = {name}, n.email = {email}", map("person_id", id, "name", name, "email", email));
+        int propertiesSet = result.getQueryStatistics().getPropertiesSet();
+        LOGGER.debug("Person with id {} is updated to name: {} email: {}", id, name, email);
     }
 
     public void update(String phoneNumber, String name, String email) {
-        LOGGER.debug("Request to update the person: {" + phoneNumber + ", " + name + ", " + email + "}");
         if (isNullOrEmpty(phoneNumber) || isNullOrEmpty(name) || isNullOrEmpty(email)) {
+            LOGGER.debug("Null argument to update method");
             return;
         }
         Result result = databaseService.execute("MATCH (n:Person {phoneNumber: {phoneNumber}) SET n.name = {name}, n.email = {email}", map("name", name, "email", email, "phoneNumber", phoneNumber));
         int propertiesSet = result.getQueryStatistics().getPropertiesSet();
-        LOGGER.info("Number of properties set: " + propertiesSet);
+        LOGGER.debug("Person with phone number {} is updated to name: {} email: {}", phoneNumber, name, email);
     }
 
     public void delete(String phoneNumber) {
         LOGGER.debug("Request to delete the person: {" + phoneNumber + "}");
         if (isNullOrEmpty(phoneNumber)) {
+            LOGGER.debug("Null argument to delete method");
             return;
         }
         Result result = databaseService.execute("MATCH (n:Person {phoneNumber: {phone_number}) DETACH DELETE n", map("phoneNumber", phoneNumber));
-        int nodesDeleted = result.getQueryStatistics().getNodesDeleted();
-        LOGGER.info("Number of nodes deleted: " + nodesDeleted);
+        LOGGER.debug("Person with phone number {} is deleted", phoneNumber);
     }
 
     public Map<String, Object> find(String phoneNumber) {
         if (isNullOrEmpty(phoneNumber)) {
+            LOGGER.debug("Null argument to find method");
             return Collections.emptyMap();
         }
+        LOGGER.debug("Searching for the person with phone number {}", phoneNumber);
         // Execute the query
         Result result = databaseService.execute(
                 "MATCH (person:Person) WHERE person.phoneNumber = {phoneNumber} RETURN {phoneNumber:person.phoneNumber,name:person.name,email:person.email} as person",
@@ -69,20 +90,14 @@ public class PersonService extends Service {
 
     public void makeFriends(String phoneNumber, String friendPhoneNumber) {
         if (isNullOrEmpty(phoneNumber) || isNullOrEmpty(friendPhoneNumber)) {
+            LOGGER.debug("Null argument to makeFriends method");
             return;
         }
+
+        LOGGER.debug("Creating relationship {} -[FRIEND]-> {}", phoneNumber, friendPhoneNumber);
 
         databaseService.execute(
                 "MATCH (person:Person {phoneNumber: {person_id}}), (friend:Person {phoneNumber: {friend_id}}) CREATE (person)-[:FRIEND]->(friend)",
                 map("person_id", phoneNumber, "friend_id", friendPhoneNumber));
-    }
-
-    public String[] findNearByFriends(String phoneNumber) {
-        final String[] EMPTY_ARRAY = new String[0];
-        if (isNullOrEmpty(phoneNumber)) {
-            return EMPTY_ARRAY;
-        }
-        return IteratorUtil.asCollection(databaseService.execute("MATCH (person:Person)-[:CURRENT_LOCATION]->(location)<-[:CURRENT_LOCATION]-(friends)<-[:FRIEND]-(person) WHERE person.phoneNumber = {phone_number} RETURN friends",
-                map("phone_number", phoneNumber))).toArray(EMPTY_ARRAY);
     }
 }

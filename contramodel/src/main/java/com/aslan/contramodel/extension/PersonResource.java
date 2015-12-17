@@ -1,7 +1,7 @@
 package com.aslan.contramodel.extension;
 
 
-import com.aslan.contramodel.entity.Person;
+import com.aslan.contra.dto.Person;
 import org.codehaus.jackson.map.ObjectMapper;
 import org.neo4j.graphdb.GraphDatabaseService;
 import org.neo4j.shell.util.json.JSONException;
@@ -35,7 +35,7 @@ public class PersonResource {
     @Path("/find/{phoneNumber}")
     @Produces(MediaType.APPLICATION_JSON)
     public Response find(@PathParam("phoneNumber") String phoneNumber) throws IOException {
-        LOGGER.info("Request to find: " + phoneNumber);
+        LOGGER.debug("Request to find person with id {} is received", phoneNumber);
         Map<String, Object> result = service.find(phoneNumber);
         JSONObject object = new JSONObject(result);
         return Response.status(HttpURLConnection.HTTP_OK).entity(object.toString()).build();
@@ -46,11 +46,10 @@ public class PersonResource {
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
     public Response create(Person person) {
+        LOGGER.debug("Request to create person {} is received", person);
         if (person == null || person.getPhoneNumber() == null || person.getName() == null || person.getEmail() == null) {
             return Response.status(HttpURLConnection.HTTP_BAD_REQUEST).build();
         }
-
-        LOGGER.debug("Request to create a person: " + person);
         service.create(person);
         return Response.status(HttpURLConnection.HTTP_OK).build();
     }

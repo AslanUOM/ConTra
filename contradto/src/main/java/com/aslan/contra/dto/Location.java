@@ -1,4 +1,4 @@
-package com.aslan.contramodel.entity;
+package com.aslan.contra.dto;
 
 import java.io.Serializable;
 

@@ -1,7 +1,8 @@
 package com.aslan.contramodel.extension;
 
-import com.aslan.contramodel.entity.Country;
-import com.aslan.contramodel.entity.Location;
+
+import com.aslan.contra.dto.Country;
+import com.aslan.contra.dto.Location;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;

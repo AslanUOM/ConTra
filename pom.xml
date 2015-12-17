@@ -12,6 +12,6 @@
         <module>contraservice</module>
         <module>contramodel</module>
         <module>contracep</module>
+        <module>contradto</module>
     </modules>
-
 </project>
