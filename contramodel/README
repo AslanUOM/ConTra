@@ -17,7 +17,7 @@
 
   If you wat to package the contramodel only, use the following command from the ConTra directory.
 
-        mvn -pl contradto,contramodel package
+        mvn -pl contramodel -am package
 
   2. Copy the contramodel/targets/contramodel-1.0-SNAPSHOT.jar file to {NEO4J_HOME}/plugins
 
