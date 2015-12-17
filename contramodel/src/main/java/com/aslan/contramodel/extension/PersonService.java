@@ -17,13 +17,12 @@ import static org.neo4j.helpers.collection.MapUtil.map;
 /**
  * Created by gobinath on 12/8/15.
  */
-public class PersonService {
+public class PersonService extends Service {
     private final Logger LOGGER = LoggerFactory.getLogger(PersonService.class);
 
-    private final GraphDatabaseService databaseService;
 
     public PersonService(GraphDatabaseService databaseService) {
-        this.databaseService = databaseService;
+        super(databaseService);
     }
 
     public void create(Person person) {
@@ -66,6 +65,16 @@ public class PersonService {
 
         // Return the result
         return IteratorUtil.singleOrNull(result);
+    }
+
+    public void makeFriends(String phoneNumber, String friendPhoneNumber) {
+        if (isNullOrEmpty(phoneNumber) || isNullOrEmpty(friendPhoneNumber)) {
+            return;
+        }
+
+        databaseService.execute(
+                "MATCH (person:Person {phoneNumber: {person_id}}), (friend:Person {phoneNumber: {friend_id}}) CREATE (person)-[:FRIEND]->(friend)",
+                map("person_id", phoneNumber, "friend_id", friendPhoneNumber));
     }
 
     public String[] findNearByFriends(String phoneNumber) {

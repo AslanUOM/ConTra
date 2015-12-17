@@ -12,13 +12,13 @@ import static org.neo4j.helpers.collection.MapUtil.map;
 /**
  * Created by gobinath on 12/11/15.
  */
-public class TimelineService {
+public class TimelineService extends Service {
     private final Logger LOGGER = LoggerFactory.getLogger(TimelineService.class);
 
-    private final GraphDatabaseService databaseService;
+
 
     public TimelineService(GraphDatabaseService databaseService) {
-        this.databaseService = databaseService;
+        super(databaseService);
     }
 
     public long createCurrentDate() {
@@ -40,23 +40,7 @@ public class TimelineService {
         return (Long) result.next().get("id");
     }
 
-    private Long getNodeID(String query, Object... objects) {
-        Long id = null;
-        Result result = databaseService.execute(query, map(objects));
-        if (result.hasNext()) {
-            id = (Long) result.next().get("id");
-        }
-        return id;
-    }
 
-    private Integer getNodeValue(String query, Object... objects) {
-        Integer value = null;
-        Result result = databaseService.execute(query, map(objects));
-        if (result.hasNext()) {
-            value = (Integer) result.next().get("value");
-        }
-        return value;
-    }
 
     /////////////////////////////////// METHODS RELATED TO YEAR ///////////////////////////////////
     private Long createYear(int year) {
@@ -73,7 +57,7 @@ public class TimelineService {
             Long prevID = prevYearID(year);
             Long nextID = null;
             if (prevID != null) {
-                nextID = getNodeID("MATCH (p:Year)-[:NEXT]->(n:Year) WHERE ID(p) = {prev_id} RETURN ID(n) as id", "prev_id", prevID);
+                nextID = executeAndReturnID("MATCH (p:Year)-[:NEXT]->(n:Year) WHERE ID(p) = {prev_id} RETURN ID(n) as id", "prev_id", prevID);
             } else {
                 nextID = nextYearID(year);
             }
@@ -98,34 +82,34 @@ public class TimelineService {
     }
 
     private Long yearNode(int year) {
-        return getNodeID("MATCH (:TimelineRoot)-[:CHILD]->(y:Year {value: {year}}) RETURN ID(y) as id", "year", year);
+        return executeAndReturnID("MATCH (:TimelineRoot)-[:CHILD]->(y:Year {value: {year}}) RETURN ID(y) as id", "year", year);
     }
 
     private Integer firstYearValue() {
-        return getNodeValue("MATCH (:TimelineRoot)-[:CHILD]->(y:Year) RETURN MIN(y.value) as value");
+        return executeAndReturnValue("MATCH (:TimelineRoot)-[:CHILD]->(y:Year) RETURN MIN(y.value) as value");
     }
 
     private Integer lastYearValue() {
-        return getNodeValue("MATCH (:TimelineRoot)-[:CHILD]->(y:Year) RETURN MAX(y.value) as value");
+        return executeAndReturnValue("MATCH (:TimelineRoot)-[:CHILD]->(y:Year) RETURN MAX(y.value) as value");
     }
 
     private Integer prevYearValue(int year) {
-        return getNodeValue("MATCH (:TimelineRoot)-[:CHILD]->(y:Year) WHERE y.value < {year}\n" +
+        return executeAndReturnValue("MATCH (:TimelineRoot)-[:CHILD]->(y:Year) WHERE y.value < {year}\n" +
                 "RETURN y.value as value ORDER BY y.value DESC LIMIT 1", "year", year);
     }
 
     private Long prevYearID(int year) {
-        return getNodeID("MATCH (:TimelineRoot)-[:CHILD]->(y:Year) WHERE y.value < {year}\n" +
+        return executeAndReturnID("MATCH (:TimelineRoot)-[:CHILD]->(y:Year) WHERE y.value < {year}\n" +
                 "RETURN ID(y) as id ORDER BY y.value DESC LIMIT 1", "year", year);
     }
 
     private Integer nextYearValue(int year) {
-        return getNodeValue("MATCH (:TimelineRoot)-[:CHILD]->(y:Year) WHERE y.value > {year}\n" +
+        return executeAndReturnValue("MATCH (:TimelineRoot)-[:CHILD]->(y:Year) WHERE y.value > {year}\n" +
                 "RETURN y.value as value ORDER BY y.value ASC LIMIT 1", "year", year);
     }
 
     private Long nextYearID(int year) {
-        return getNodeID("MATCH (:TimelineRoot)-[:CHILD]->(y:Year) WHERE y.value > {year}\n" +
+        return executeAndReturnID("MATCH (:TimelineRoot)-[:CHILD]->(y:Year) WHERE y.value > {year}\n" +
                 "RETURN ID(y) as id ORDER BY y.value ASC LIMIT 1", "year", year);
     }
     //////////////////////////////////////////////////////////////////////////////////////////////
@@ -143,7 +127,7 @@ public class TimelineService {
             Long prevID = prevMonthID(year, month);
             Long nextID = null;
             if (prevID != null) {
-                nextID = getNodeID("MATCH (p:Month)-[:NEXT]->(n:Month) WHERE ID(p) = {prev_id} RETURN ID(n) as id", "prev_id", prevID);
+                nextID = executeAndReturnID("MATCH (p:Month)-[:NEXT]->(n:Month) WHERE ID(p) = {prev_id} RETURN ID(n) as id", "prev_id", prevID);
             } else {
                 nextID = nextMonthID(year, month);
             }
@@ -168,25 +152,25 @@ public class TimelineService {
     }
 
     private Integer firstMonthValue(int year) {
-        return getNodeValue("MATCH (:TimelineRoot)-[:CHILD]->(y:Year {value: {year}})-[:CHILD]->(m:Month) RETURN MIN(m.value) as value", "year", year);
+        return executeAndReturnValue("MATCH (:TimelineRoot)-[:CHILD]->(y:Year {value: {year}})-[:CHILD]->(m:Month) RETURN MIN(m.value) as value", "year", year);
     }
 
     private Long firstMonthID(int year) {
-        return getNodeID("MATCH (:TimelineRoot)-[:CHILD]->(y:Year {value: {year}})-[:CHILD]->(m:Month) WITH MIN(m.value) as min\n" +
+        return executeAndReturnID("MATCH (:TimelineRoot)-[:CHILD]->(y:Year {value: {year}})-[:CHILD]->(m:Month) WITH MIN(m.value) as min\n" +
                 "MATCH (:TimelineRoot)-[:CHILD]->(y:Year {value: {year}})-[:CHILD]->(m:Month) WHERE m.value = min RETURN ID(m) as id", "year", year);
     }
 
     private Integer lastMonthValue(int year) {
-        return getNodeValue("MATCH (:TimelineRoot)-[:CHILD]->(y:Year {value: {year}})-[:CHILD]->(m:Month) RETURN MAX(m.value) as value", "year", year);
+        return executeAndReturnValue("MATCH (:TimelineRoot)-[:CHILD]->(y:Year {value: {year}})-[:CHILD]->(m:Month) RETURN MAX(m.value) as value", "year", year);
     }
 
     private Long lastMonthID(int year) {
-        return getNodeID("MATCH (:TimelineRoot)-[:CHILD]->(y:Year {value: {year}})-[:CHILD]->(m:Month) WITH MAX(m.value) as max\n" +
+        return executeAndReturnID("MATCH (:TimelineRoot)-[:CHILD]->(y:Year {value: {year}})-[:CHILD]->(m:Month) WITH MAX(m.value) as max\n" +
                 "MATCH (:TimelineRoot)-[:CHILD]->(y:Year {value: {year}})-[:CHILD]->(m:Month) WHERE m.value = max RETURN ID(m) as id", "year", year);
     }
 
     private Long prevMonthID(int year, int month) {
-        Long previousMonth = getNodeID("MATCH (:TimelineRoot)-[:CHILD]->(y:Year {value: {year}})-[:CHILD]->(m:Month) WHERE m.value < {createMonth}\n" +
+        Long previousMonth = executeAndReturnID("MATCH (:TimelineRoot)-[:CHILD]->(y:Year {value: {year}})-[:CHILD]->(m:Month) WHERE m.value < {createMonth}\n" +
                 "RETURN ID(m) as id ORDER BY m.value DESC LIMIT 1", "year", year, "createMonth", month);
         if (previousMonth == null) {
             Integer previousYear = prevYearValue(year);
@@ -198,7 +182,7 @@ public class TimelineService {
     }
 
     private Long nextMonthID(int year, int month) {
-        Long nextMonth = getNodeID("MATCH (:TimelineRoot)-[:CHILD]->(y:Year {value: {year}})-[:CHILD]->(m:Month) WHERE m.value > {createMonth}\n" +
+        Long nextMonth = executeAndReturnID("MATCH (:TimelineRoot)-[:CHILD]->(y:Year {value: {year}})-[:CHILD]->(m:Month) WHERE m.value > {createMonth}\n" +
                 "RETURN ID(m) as id ORDER BY m.value ASC LIMIT 1", "year", year, "createMonth", month);
         if (nextMonth == null) {
             Integer nextYear = nextYearValue(year);
@@ -228,7 +212,7 @@ public class TimelineService {
             Long prevID = prevDayID(year, month, day);
             Long nextID = null;
             if (prevID != null) {
-                nextID = getNodeID("MATCH (p:Day)-[:NEXT]->(n:Day) WHERE ID(p) = {prev_id} RETURN ID(n) as id", "prev_id", prevID);
+                nextID = executeAndReturnID("MATCH (p:Day)-[:NEXT]->(n:Day) WHERE ID(p) = {prev_id} RETURN ID(n) as id", "prev_id", prevID);
             } else {
                 nextID = nextDayID(year, month, day);
             }
@@ -253,26 +237,26 @@ public class TimelineService {
     }
 
     private Integer firstDayValue(int year, int month) {
-        return getNodeValue("MATCH (:TimelineRoot)-[:CHILD]->(y:Year {value: {year}})-[:CHILD]->(m:Month {value: {createMonth})-[:CHILD]->(d:Day) RETURN MIN(d.value) as value", "year", year, "createMonth", month);
+        return executeAndReturnValue("MATCH (:TimelineRoot)-[:CHILD]->(y:Year {value: {year}})-[:CHILD]->(m:Month {value: {createMonth})-[:CHILD]->(d:Day) RETURN MIN(d.value) as value", "year", year, "createMonth", month);
     }
 
     private Long firstDayID(Long monthID) {
-        return getNodeID("MATCH (m:Month)-[:CHILD]->(d:Day) WHERE ID(m) = {month_id} WITH MIN(d.value) as min\n" +
+        return executeAndReturnID("MATCH (m:Month)-[:CHILD]->(d:Day) WHERE ID(m) = {month_id} WITH MIN(d.value) as min\n" +
                 "MATCH (m:Month)-[:CHILD]->(d:Day) WHERE ID(m) = {month_id} AND d.value = min RETURN ID(d) as id", "month_id", monthID);
     }
 
 
     private Integer lastDayValue(int year, int month) {
-        return getNodeValue("MATCH (:TimelineRoot)-[:CHILD]->(y:Year {value: {year}})-[:CHILD]->(m:Month {value: {createMonth})-[:CHILD]->(d:Day) RETURN MAX(d.value) as value", "year", year, "createMonth", month);
+        return executeAndReturnValue("MATCH (:TimelineRoot)-[:CHILD]->(y:Year {value: {year}})-[:CHILD]->(m:Month {value: {createMonth})-[:CHILD]->(d:Day) RETURN MAX(d.value) as value", "year", year, "createMonth", month);
     }
 
     private Long lastDayID(Long monthID) {
-        return getNodeID("MATCH (m:Month)-[:CHILD]->(d:Day) WHERE ID(m) = {month_id} WITH MAX(d.value) as max\n" +
+        return executeAndReturnID("MATCH (m:Month)-[:CHILD]->(d:Day) WHERE ID(m) = {month_id} WITH MAX(d.value) as max\n" +
                 "MATCH (m:Month)-[:CHILD]->(d:Day) WHERE ID(m) = {month_id} AND d.value = max RETURN ID(d) as id", "month_id", monthID);
     }
 
     private Long prevDayID(int year, int month, int day) {
-        Long previousDay = getNodeID("MATCH (:TimelineRoot)-[:CHILD]->(y:Year {value: {year}})-[:CHILD]->(m:Month {value: {createMonth}})-[:CHILD]->(d:Day) WHERE d.value < {day}\n" +
+        Long previousDay = executeAndReturnID("MATCH (:TimelineRoot)-[:CHILD]->(y:Year {value: {year}})-[:CHILD]->(m:Month {value: {createMonth}})-[:CHILD]->(d:Day) WHERE d.value < {day}\n" +
                 "RETURN ID(d) as id ORDER BY d.value DESC LIMIT 1", "year", year, "createMonth", month, "day", day);
         if (previousDay == null) {
             Long previousMonth = prevMonthID(year, month);
@@ -284,7 +268,7 @@ public class TimelineService {
     }
 
     private Long nextDayID(int year, int month, int day) {
-        Long nextDay = getNodeID("MATCH (:TimelineRoot)-[:CHILD]->(y:Year {value: {year}})-[:CHILD]->(m:Month {value: {createMonth}})-[:CHILD]->(d:Day) WHERE d.value > {day}\n" +
+        Long nextDay = executeAndReturnID("MATCH (:TimelineRoot)-[:CHILD]->(y:Year {value: {year}})-[:CHILD]->(m:Month {value: {createMonth}})-[:CHILD]->(d:Day) WHERE d.value > {day}\n" +
                 "RETURN ID(d) as id ORDER BY d.value ASC LIMIT 1", "year", year, "createMonth", month, "day", day);
         if (nextDay == null) {
             Long nextMonth = nextMonthID(year, month);
