@@ -36,9 +36,8 @@ public class PersonResource {
     @Produces(MediaType.APPLICATION_JSON)
     public Response find(@PathParam("phoneNumber") String phoneNumber) throws IOException {
         LOGGER.debug("Request to find person with id {} is received", phoneNumber);
-        Map<String, Object> result = service.find(phoneNumber);
-        JSONObject object = new JSONObject(result);
-        return Response.status(HttpURLConnection.HTTP_OK).entity(object.toString()).build();
+        Person result = service.find(phoneNumber);
+        return Response.status(HttpURLConnection.HTTP_OK).entity(result).build();
     }
 
     @POST

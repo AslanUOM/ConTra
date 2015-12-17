@@ -2,6 +2,7 @@ package com.aslan.contramodel.extension;
 
 
 import com.aslan.contra.dto.Person;
+import com.google.gson.Gson;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -11,6 +12,8 @@ import org.neo4j.graphdb.Result;
 import org.neo4j.graphdb.Transaction;
 import org.neo4j.harness.ServerControls;
 import org.neo4j.harness.TestServerBuilders;
+import org.neo4j.shell.util.json.JSONObject;
+import org.neo4j.shell.util.json.JSONParser;
 import org.neo4j.test.server.HTTP;
 
 import static org.junit.Assert.assertEquals;
@@ -47,8 +50,9 @@ public class PersonResourceTest {
     @Test
     public void testFind() throws Exception {
         HTTP.Response response = HTTP.GET(server.httpURI().resolve("/contra/person/find/+94771234567").toString());
-
-        assertEquals("Alice", response.get("person").get("name").getTextValue());
+        Gson gson = new Gson();
+        Person person = gson.fromJson(response.rawContent(), Person.class);
+        assertEquals("Alice", person.getName());
     }
 
 

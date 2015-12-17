@@ -80,6 +80,13 @@
             <artifactId>junit</artifactId>
             <version>4.11</version>
         </dependency>
+
+        <dependency>
+            <groupId>com.google.code.gson</groupId>
+            <artifactId>gson</artifactId>
+            <version>2.5</version>
+        </dependency>
+
     </dependencies>
 
     <build>
@@ -112,6 +119,7 @@
                                     <exclude>org.neo4j.*</exclude>
                                     <exclude>javax.ws.rs-api</exclude>
                                     <exclude>junit</exclude>
+                                    <exclude>gson</exclude>
                                 </excludes>
                             </artifactSet>
                         </configuration>

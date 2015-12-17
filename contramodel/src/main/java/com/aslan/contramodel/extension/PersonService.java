@@ -73,19 +73,29 @@ public class PersonService extends Service {
         LOGGER.debug("Person with phone number {} is deleted", phoneNumber);
     }
 
-    public Map<String, Object> find(String phoneNumber) {
+    public Person find(String phoneNumber) {
+        Person person = null;
         if (isNullOrEmpty(phoneNumber)) {
             LOGGER.debug("Null argument to find method");
-            return Collections.emptyMap();
-        }
-        LOGGER.debug("Searching for the person with phone number {}", phoneNumber);
-        // Execute the query
-        Result result = databaseService.execute(
-                "MATCH (person:Person) WHERE person.phoneNumber = {phoneNumber} RETURN {phoneNumber:person.phoneNumber,name:person.name,email:person.email} as person",
-                map("phoneNumber", phoneNumber));
+        } else {
+            LOGGER.debug("Searching for the person with phone number {}", phoneNumber);
+            // Execute the query
+            Result result = databaseService.execute(
+                    "MATCH (person:Person) WHERE person.phoneNumber = {phoneNumber} RETURN person.phoneNumber as phoneNumber, person.name as name, person.email as email",
+                    map("phoneNumber", phoneNumber));
 
-        // Return the result
-        return IteratorUtil.singleOrNull(result);
+
+            // Return the result
+            Map<String, Object> map = IteratorUtil.singleOrNull(result);
+
+            if (map != null) {
+                person = new Person();
+                person.setPhoneNumber((String) map.get("phoneNumber"));
+                person.setName((String) map.get("name"));
+                person.setEmail((String) map.get("email"));
+            }
+        }
+        return person;
     }
 
     public void makeFriends(String phoneNumber, String friendPhoneNumber) {
