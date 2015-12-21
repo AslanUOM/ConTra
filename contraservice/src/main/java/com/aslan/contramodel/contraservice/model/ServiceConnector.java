@@ -10,11 +10,11 @@ import javax.ws.rs.client.WebTarget;
  * Created by gobinath on 12/17/15.
  */
 public abstract class ServiceConnector {
-    private String username = "neo4j";
+    private final String username = "neo4j";
     private final String password = "admin";
 
     public final WebTarget createWebTarget(String url) {
-        HttpAuthenticationFeature feature = HttpAuthenticationFeature.basic("neo4j", "admin");
+        HttpAuthenticationFeature feature = HttpAuthenticationFeature.basic(username, password);
 
         Client client = ClientBuilder.newClient();
         client.register(feature);

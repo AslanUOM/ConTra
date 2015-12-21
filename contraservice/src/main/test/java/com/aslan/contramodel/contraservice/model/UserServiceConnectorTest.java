@@ -6,6 +6,8 @@ import org.junit.Test;
 import static org.junit.Assert.assertEquals;
 
 /**
+ * Before running this test, make sure that your Neo4j is up and running with contramodel plugin.
+ * <p>
  * Created by gobinath on 12/17/15.
  */
 public class UserServiceConnectorTest {

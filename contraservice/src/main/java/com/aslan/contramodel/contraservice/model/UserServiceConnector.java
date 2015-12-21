@@ -41,11 +41,10 @@ public class UserServiceConnector extends ServiceConnector {
     }
 
     public Person find(String phoneNumber) {
-        LOGGER.debug("Search for a person with id {}", phoneNumber);
+        LOGGER.debug("Searching for a person with id {}", phoneNumber);
         String url = PERSON_URL + "/find/{phone_number}";
         WebTarget target = createWebTarget(UriBuilder.fromPath(url).resolveTemplate("phone_number", phoneNumber).toString());
 
-        LOGGER.debug(target.getUri().toString());
         Invocation.Builder builder = target.request();
         Person person = builder.get(Person.class);
         return person;
