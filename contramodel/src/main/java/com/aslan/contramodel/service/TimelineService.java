@@ -1,17 +1,13 @@
-package com.aslan.contramodel.extension;
+package com.aslan.contramodel.service;
 
 import org.neo4j.graphdb.GraphDatabaseService;
-import org.neo4j.graphdb.Result;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.time.ZoneOffset;
 import java.time.temporal.ChronoUnit;
-import java.util.Map;
 
-import static com.aslan.contramodel.util.Utility.isNullOrEmpty;
 import static org.neo4j.helpers.collection.MapUtil.map;
 
 /**
@@ -78,21 +74,11 @@ public class TimelineService extends Service {
         return yearID;
     }
 
-//
-//    private Integer prevYearValue(String userID, int year) {
-//        return executeAndReturnValue("MATCH (:TimelineRoot)-[:CHILD]->(y:Year) WHERE y.value < {year}\n" +
-//                "RETURN y.value as value ORDER BY y.value DESC LIMIT 1", "year", year);
-//    }
 
     private Long prevYearID(String userID, int year) {
         return executeAndReturnID("MATCH (:Person {phoneNumber: {phone_number}})-[:TIMELINE]->(:TimelineRoot)-[:CHILD]->(y:Year) WHERE y.value < {year}\n" +
                 "RETURN ID(y) as id ORDER BY y.value DESC LIMIT 1", "phone_number", userID, "year", year);
     }
-
-//    private Integer nextYearValue(String userID, int year) {
-//        return executeAndReturnValue("MATCH (:TimelineRoot)-[:CHILD]->(y:Year) WHERE y.value > {year}\n" +
-//                "RETURN y.value as value ORDER BY y.value ASC LIMIT 1", "year", year);
-//    }
 
     private Long nextYearID(String userID, int year) {
         return executeAndReturnID("MATCH (:Person {phoneNumber: {phone_number}})-[:TIMELINE]->(:TimelineRoot)-[:CHILD]->(y:Year) WHERE y.value > {year}\n" +
@@ -104,9 +90,9 @@ public class TimelineService extends Service {
     private Long createMonth(String userID, int year, int month) {
         LOGGER.debug("Creating month {}-{}", year, month);
         Long yearID = createYear(userID, year);
-        Long monthID = executeAndReturnID("MATCH (y:Year)-[:CHILD]->(m:Month {value: {createMonth}}) WHERE ID(y) = {year_id} RETURN ID(m) as id", "year_id", yearID, "createMonth", month);
+        Long monthID = executeAndReturnID("MATCH (y:Year)-[:CHILD]->(m:Month {value: {month}}) WHERE ID(y) = {year_id} RETURN ID(m) as id", "year_id", yearID, "month", month);
         if (monthID == null) {
-            monthID = executeAndReturnID("MATCH (y:Year) WHERE ID(y) = {year_id} CREATE (y)-[:CHILD]->(m:Month { value : {createMonth}}) RETURN ID(m) as id", "year_id", yearID, "createMonth", month);
+            monthID = executeAndReturnID("MATCH (y:Year) WHERE ID(y) = {year_id} CREATE (y)-[:CHILD]->(m:Month { value : {month}}) RETURN ID(m) as id", "year_id", yearID, "month", month);
 
 
             Long prevID = prevMonthID(userID, year, month);
@@ -149,8 +135,8 @@ public class TimelineService extends Service {
     }
 
     private Long prevMonthID(String userID, int year, int month) {
-        Long previousMonth = executeAndReturnID("MATCH (:Person {phoneNumber: {phone_number}})-[:TIMELINE]->(:TimelineRoot)-[:CHILD]->(:Year {value: {year}})-[:CHILD]->(m:Month) WHERE m.value < {createMonth}\n" +
-                "RETURN ID(m) as id ORDER BY m.value DESC LIMIT 1", "phone_number", userID, "year", year, "createMonth", month);
+        Long previousMonth = executeAndReturnID("MATCH (:Person {phoneNumber: {phone_number}})-[:TIMELINE]->(:TimelineRoot)-[:CHILD]->(:Year {value: {year}})-[:CHILD]->(m:Month) WHERE m.value < {month}\n" +
+                "RETURN ID(m) as id ORDER BY m.value DESC LIMIT 1", "phone_number", userID, "year", year, "month", month);
         if (previousMonth == null) {
             Long previousYear = prevYearID(userID, year);
             if (previousYear != null) {
@@ -161,8 +147,8 @@ public class TimelineService extends Service {
     }
 
     private Long nextMonthID(String userID, int year, int month) {
-        Long nextMonth = executeAndReturnID("MATCH (:Person {phoneNumber: {phone_number}})-[:TIMELINE]->(:TimelineRoot)-[:CHILD]->(:Year {value: {year}})-[:CHILD]->(m:Month) WHERE m.value > {createMonth}\n" +
-                "RETURN ID(m) as id ORDER BY m.value ASC LIMIT 1", "phone_number", userID, "year", year, "createMonth", month);
+        Long nextMonth = executeAndReturnID("MATCH (:Person {phoneNumber: {phone_number}})-[:TIMELINE]->(:TimelineRoot)-[:CHILD]->(:Year {value: {year}})-[:CHILD]->(m:Month) WHERE m.value > {month}\n" +
+                "RETURN ID(m) as id ORDER BY m.value ASC LIMIT 1", "phone_number", userID, "year", year, "month", month);
         if (nextMonth == null) {
             Long nextYear = nextYearID(userID, year);
             if (nextYear != null) {
@@ -229,8 +215,8 @@ public class TimelineService extends Service {
     }
 
     private Long prevDayID(String userID, int year, int month, int day) {
-        Long previousDay = executeAndReturnID("MATCH (:Person {phoneNumber: {phone_number}})-[:TIMELINE]->(:TimelineRoot)-[:CHILD]->(:Year {value: {year}})-[:CHILD]->(:Month {value: {createMonth}})-[:CHILD]->(d:Day) WHERE d.value < {day}\n" +
-                "RETURN ID(d) as id ORDER BY d.value DESC LIMIT 1", "phone_number", userID, "year", year, "createMonth", month, "day", day);
+        Long previousDay = executeAndReturnID("MATCH (:Person {phoneNumber: {phone_number}})-[:TIMELINE]->(:TimelineRoot)-[:CHILD]->(:Year {value: {year}})-[:CHILD]->(:Month {value: {month}})-[:CHILD]->(d:Day) WHERE d.value < {day}\n" +
+                "RETURN ID(d) as id ORDER BY d.value DESC LIMIT 1", "phone_number", userID, "year", year, "month", month, "day", day);
         if (previousDay == null) {
             Long previousMonth = prevMonthID(userID, year, month);
             if (previousMonth != null) {
@@ -241,8 +227,8 @@ public class TimelineService extends Service {
     }
 
     private Long nextDayID(String userID, int year, int month, int day) {
-        Long nextDay = executeAndReturnID("MATCH (:Person {phoneNumber: {phone_number}})-[:TIMELINE]->(:TimelineRoot)-[:CHILD]->(:Year {value: {year}})-[:CHILD]->(:Month {value: {createMonth}})-[:CHILD]->(d:Day) WHERE d.value > {day}\n" +
-                "RETURN ID(d) as id ORDER BY d.value ASC LIMIT 1", "phone_number", userID, "year", year, "createMonth", month, "day", day);
+        Long nextDay = executeAndReturnID("MATCH (:Person {phoneNumber: {phone_number}})-[:TIMELINE]->(:TimelineRoot)-[:CHILD]->(:Year {value: {year}})-[:CHILD]->(:Month {value: {month}})-[:CHILD]->(d:Day) WHERE d.value > {day}\n" +
+                "RETURN ID(d) as id ORDER BY d.value ASC LIMIT 1", "phone_number", userID, "year", year, "month", month, "day", day);
         if (nextDay == null) {
             Long nextMonth = nextMonthID(userID, year, month);
             if (nextMonth != null) {

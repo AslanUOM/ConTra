@@ -1,11 +1,10 @@
-package com.aslan.contramodel.extension;
+package com.aslan.contramodel.resource;
 
 
 import com.aslan.contra.dto.Person;
+import com.aslan.contramodel.service.PersonService;
 import org.codehaus.jackson.map.ObjectMapper;
 import org.neo4j.graphdb.GraphDatabaseService;
-import org.neo4j.shell.util.json.JSONException;
-import org.neo4j.shell.util.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -15,7 +14,6 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import java.io.IOException;
 import java.net.HttpURLConnection;
-import java.util.Map;
 
 /**
  * Created by gobinath on 12/8/15.

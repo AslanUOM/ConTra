@@ -1,9 +1,7 @@
-package com.aslan.contramodel.extension;
+package com.aslan.contramodel.service;
 
 import org.neo4j.graphdb.GraphDatabaseService;
 import org.neo4j.graphdb.Result;
-
-import java.util.Map;
 
 import static org.neo4j.helpers.collection.MapUtil.map;
 

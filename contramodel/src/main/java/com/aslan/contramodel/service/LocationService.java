@@ -1,4 +1,4 @@
-package com.aslan.contramodel.extension;
+package com.aslan.contramodel.service;
 
 
 import com.aslan.contra.dto.Location;

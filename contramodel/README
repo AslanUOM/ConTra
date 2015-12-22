@@ -23,7 +23,7 @@
 
   3. Append the following line to {NEO4J_HOME}/conf/neo4j-server.properties
 
-        org.neo4j.server.thirdparty_jaxrs_classes=com.aslan.contramodel.extension=/contra
+        org.neo4j.server.thirdparty_jaxrs_classes=com.aslan.contramodel.resource=/contra
 
   Here the /contra is the context root to access this extension.
 

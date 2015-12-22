@@ -1,7 +1,6 @@
-package com.aslan.contramodel.extension;
+package com.aslan.contramodel.service;
 
 
-import com.aslan.contra.dto.Location;
 import com.aslan.contra.dto.Person;
 import org.neo4j.graphdb.GraphDatabaseService;
 import org.neo4j.graphdb.Result;
@@ -9,11 +8,6 @@ import org.neo4j.helpers.collection.IteratorUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.time.ZoneOffset;
-import java.time.temporal.ChronoUnit;
-import java.util.Collections;
 import java.util.Map;
 
 import static com.aslan.contramodel.util.Utility.isNullOrEmpty;

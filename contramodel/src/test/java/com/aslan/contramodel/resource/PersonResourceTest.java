@@ -1,4 +1,4 @@
-package com.aslan.contramodel.extension;
+package com.aslan.contramodel.resource;
 
 
 import com.aslan.contra.dto.Person;
@@ -12,8 +12,6 @@ import org.neo4j.graphdb.Result;
 import org.neo4j.graphdb.Transaction;
 import org.neo4j.harness.ServerControls;
 import org.neo4j.harness.TestServerBuilders;
-import org.neo4j.shell.util.json.JSONObject;
-import org.neo4j.shell.util.json.JSONParser;
 import org.neo4j.test.server.HTTP;
 
 import static org.junit.Assert.assertEquals;

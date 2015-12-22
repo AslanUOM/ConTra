@@ -1,6 +1,7 @@
-package com.aslan.contramodel.extension;
+package com.aslan.contramodel.resource;
 
 import com.aslan.contra.dto.Location;
+import com.aslan.contramodel.service.LocationService;
 import org.codehaus.jackson.map.ObjectMapper;
 import org.neo4j.graphdb.GraphDatabaseService;
 import org.slf4j.Logger;

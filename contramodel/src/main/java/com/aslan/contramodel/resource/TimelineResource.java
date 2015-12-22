@@ -1,10 +1,9 @@
-package com.aslan.contramodel.extension;
+package com.aslan.contramodel.resource;
 
 import com.aslan.contra.dto.Time;
+import com.aslan.contramodel.service.TimelineService;
 import org.codehaus.jackson.map.ObjectMapper;
 import org.neo4j.graphdb.GraphDatabaseService;
-import org.neo4j.shell.util.json.JSONException;
-import org.neo4j.shell.util.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -14,11 +13,7 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import java.io.IOException;
 import java.net.HttpURLConnection;
-import java.text.DateFormat;
-import java.time.DateTimeException;
-import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.time.format.DateTimeParseException;
 
 import static org.neo4j.helpers.collection.MapUtil.map;
 

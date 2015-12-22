@@ -1,4 +1,4 @@
-package com.aslan.contramodel.extension;
+package com.aslan.contramodel.resource;
 
 import com.aslan.contra.dto.Time;
 import org.junit.AfterClass;
