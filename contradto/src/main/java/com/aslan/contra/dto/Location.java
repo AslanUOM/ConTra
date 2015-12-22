@@ -8,7 +8,7 @@ import java.io.Serializable;
 public class Location implements Serializable {
     private String name;
     private String code;
-    private String regionalCode;
+    private Location parent;
     private double latitude;
     private double longitude;
 
@@ -28,12 +28,12 @@ public class Location implements Serializable {
         this.code = code;
     }
 
-    public String getRegionalCode() {
-        return regionalCode;
+    public Location getParent() {
+        return parent;
     }
 
-    public void setRegionalCode(String regionalCode) {
-        this.regionalCode = regionalCode;
+    public void setParent(Location parent) {
+        this.parent = parent;
     }
 
     public double getLatitude() {

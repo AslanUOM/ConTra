@@ -6,7 +6,12 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.ZoneOffset;
+import java.time.temporal.ChronoUnit;
+import java.util.Map;
 
+import static com.aslan.contramodel.util.Utility.isNullOrEmpty;
 import static org.neo4j.helpers.collection.MapUtil.map;
 
 /**
@@ -20,18 +25,15 @@ public class TimelineService extends Service {
         super(databaseService);
     }
 
-    public Long createCurrentDate() {
-        return createDate(LocalDate.now());
+    public Long createTime(String userID, LocalDateTime time) {
+        time = time.truncatedTo(ChronoUnit.MINUTES);
+        return createMinute(userID, time.toLocalDate(), time.getHour(), time.getMinute());
     }
 
-    public Long createDate(LocalDate date) {
-        return createDay(date);
-    }
-
-    private Long createTimelineRoot() {
-        Long id = executeAndReturnID("MATCH (n:TimelineRoot {value : 'TimelineRoot'}) RETURN ID(n) as id");
+    private Long createTimelineRoot(String userID) {
+        Long id = executeAndReturnID("MATCH (p:Person {phoneNumber: {phone_number}})-[:TIMELINE]->(n:TimelineRoot {value : 'TimelineRoot'}) RETURN ID(n) as id", "phone_number", userID);
         if (id == null) {
-            id = executeAndReturnID("CREATE (n:TimelineRoot { value : 'TimelineRoot'}) RETURN ID(n) as id");
+            id = executeAndReturnID("MATCH (p:Person {phoneNumber: {phone_number}}) CREATE (p)-[:TIMELINE]->(n:TimelineRoot { value : 'TimelineRoot'}) RETURN ID(n) as id", "phone_number", userID);
 
             LOGGER.debug("Timeline Root is created with id {}", id);
         }
@@ -40,20 +42,20 @@ public class TimelineService extends Service {
 
 
     /////////////////////////////////// METHODS RELATED TO YEAR ///////////////////////////////////
-    private Long createYear(int year) {
+    private Long createYear(String userID, int year) {
         LOGGER.debug("Creating year {}", year);
-        Long rootID = createTimelineRoot();
-        Long yearID = executeAndReturnID("MATCH (:TimelineRoot)-[:CHILD]->(y:Year {value: {year}}) RETURN ID(y) as id", "year", year);
+        Long rootID = createTimelineRoot(userID);
+        Long yearID = executeAndReturnID("MATCH (r:TimelineRoot)-[:CHILD]->(y:Year {value: {year}}) WHERE ID(r) = {root_id} RETURN ID(y) as id", "root_id", rootID, "year", year);
         if (yearID == null) {
             // Create the year
-            yearID = executeAndReturnID("MATCH (root:TimelineRoot) WHERE ID(root) = {root_id} CREATE (root)-[:CHILD]->(y:Year { value : {year}}) RETURN ID(y) as id", "year", year, "root_id", rootID);
+            yearID = executeAndReturnID("MATCH (r:TimelineRoot) WHERE ID(r) = {root_id} CREATE (r)-[:CHILD]->(y:Year { value : {year}}) RETURN ID(y) as id", "root_id", rootID, "year", year);
 
-            Long prevID = prevYearID(year);
+            Long prevID = prevYearID(userID, year);
             Long nextID = null;
             if (prevID != null) {
                 nextID = executeAndReturnID("MATCH (p:Year)-[:NEXT]->(n:Year) WHERE ID(p) = {prev_id} RETURN ID(n) as id", "prev_id", prevID);
             } else {
-                nextID = nextYearID(year);
+                nextID = nextYearID(userID, year);
             }
 
             // Delete the existing link
@@ -76,54 +78,43 @@ public class TimelineService extends Service {
         return yearID;
     }
 
-    private Long yearNode(int year) {
-        return executeAndReturnID("MATCH (:TimelineRoot)-[:CHILD]->(y:Year {value: {year}}) RETURN ID(y) as id", "year", year);
+//
+//    private Integer prevYearValue(String userID, int year) {
+//        return executeAndReturnValue("MATCH (:TimelineRoot)-[:CHILD]->(y:Year) WHERE y.value < {year}\n" +
+//                "RETURN y.value as value ORDER BY y.value DESC LIMIT 1", "year", year);
+//    }
+
+    private Long prevYearID(String userID, int year) {
+        return executeAndReturnID("MATCH (:Person {phoneNumber: {phone_number}})-[:TIMELINE]->(:TimelineRoot)-[:CHILD]->(y:Year) WHERE y.value < {year}\n" +
+                "RETURN ID(y) as id ORDER BY y.value DESC LIMIT 1", "phone_number", userID, "year", year);
     }
 
-    private Integer firstYearValue() {
-        return executeAndReturnValue("MATCH (:TimelineRoot)-[:CHILD]->(y:Year) RETURN MIN(y.value) as value");
-    }
+//    private Integer nextYearValue(String userID, int year) {
+//        return executeAndReturnValue("MATCH (:TimelineRoot)-[:CHILD]->(y:Year) WHERE y.value > {year}\n" +
+//                "RETURN y.value as value ORDER BY y.value ASC LIMIT 1", "year", year);
+//    }
 
-    private Integer lastYearValue() {
-        return executeAndReturnValue("MATCH (:TimelineRoot)-[:CHILD]->(y:Year) RETURN MAX(y.value) as value");
-    }
-
-    private Integer prevYearValue(int year) {
-        return executeAndReturnValue("MATCH (:TimelineRoot)-[:CHILD]->(y:Year) WHERE y.value < {year}\n" +
-                "RETURN y.value as value ORDER BY y.value DESC LIMIT 1", "year", year);
-    }
-
-    private Long prevYearID(int year) {
-        return executeAndReturnID("MATCH (:TimelineRoot)-[:CHILD]->(y:Year) WHERE y.value < {year}\n" +
-                "RETURN ID(y) as id ORDER BY y.value DESC LIMIT 1", "year", year);
-    }
-
-    private Integer nextYearValue(int year) {
-        return executeAndReturnValue("MATCH (:TimelineRoot)-[:CHILD]->(y:Year) WHERE y.value > {year}\n" +
-                "RETURN y.value as value ORDER BY y.value ASC LIMIT 1", "year", year);
-    }
-
-    private Long nextYearID(int year) {
-        return executeAndReturnID("MATCH (:TimelineRoot)-[:CHILD]->(y:Year) WHERE y.value > {year}\n" +
-                "RETURN ID(y) as id ORDER BY y.value ASC LIMIT 1", "year", year);
+    private Long nextYearID(String userID, int year) {
+        return executeAndReturnID("MATCH (:Person {phoneNumber: {phone_number}})-[:TIMELINE]->(:TimelineRoot)-[:CHILD]->(y:Year) WHERE y.value > {year}\n" +
+                "RETURN ID(y) as id ORDER BY y.value ASC LIMIT 1", "phone_number", userID, "year", year);
     }
     //////////////////////////////////////////////////////////////////////////////////////////////
 
     /////////////////////////////////// METHODS RELATED TO MONTH ///////////////////////////////////
-    private Long createMonth(int year, int month) {
+    private Long createMonth(String userID, int year, int month) {
         LOGGER.debug("Creating month {}-{}", year, month);
-        Long yearID = createYear(year);
-        Long monthID = executeAndReturnID("MATCH (year)-[:CHILD]->(m:Month {value: {createMonth}}) WHERE ID(year) = {year_id} RETURN ID(m) as id", "year_id", yearID, "createMonth", month);
+        Long yearID = createYear(userID, year);
+        Long monthID = executeAndReturnID("MATCH (y:Year)-[:CHILD]->(m:Month {value: {createMonth}}) WHERE ID(y) = {year_id} RETURN ID(m) as id", "year_id", yearID, "createMonth", month);
         if (monthID == null) {
-            monthID = executeAndReturnID("MATCH (year) WHERE ID(year) = {year_id} CREATE (year)-[:CHILD]->(m:Month { value : {createMonth}}) RETURN ID(m) as id", "year_id", yearID, "createMonth", month);
+            monthID = executeAndReturnID("MATCH (y:Year) WHERE ID(y) = {year_id} CREATE (y)-[:CHILD]->(m:Month { value : {createMonth}}) RETURN ID(m) as id", "year_id", yearID, "createMonth", month);
 
 
-            Long prevID = prevMonthID(year, month);
+            Long prevID = prevMonthID(userID, year, month);
             Long nextID = null;
             if (prevID != null) {
                 nextID = executeAndReturnID("MATCH (p:Month)-[:NEXT]->(n:Month) WHERE ID(p) = {prev_id} RETURN ID(n) as id", "prev_id", prevID);
             } else {
-                nextID = nextMonthID(year, month);
+                nextID = nextMonthID(userID, year, month);
             }
 
             // Delete the existing link
@@ -146,29 +137,22 @@ public class TimelineService extends Service {
         return monthID;
     }
 
-    private Integer firstMonthValue(int year) {
-        return executeAndReturnValue("MATCH (:TimelineRoot)-[:CHILD]->(y:Year {value: {year}})-[:CHILD]->(m:Month) RETURN MIN(m.value) as value", "year", year);
+
+    private Long firstMonthID(Long yearID) {
+        return executeAndReturnID("MATCH (y:Year)-[:CHILD]->(m:Month) WHERE ID(y) = {year_id} WITH MIN(m.value) as min\n" +
+                "MATCH (y:Year)-[:CHILD]->(m:Month) WHERE ID(y) = {year_id} AND m.value = min RETURN ID(m) as id", "year_id", yearID);
     }
 
-    private Long firstMonthID(int year) {
-        return executeAndReturnID("MATCH (:TimelineRoot)-[:CHILD]->(y:Year {value: {year}})-[:CHILD]->(m:Month) WITH MIN(m.value) as min\n" +
-                "MATCH (:TimelineRoot)-[:CHILD]->(y:Year {value: {year}})-[:CHILD]->(m:Month) WHERE m.value = min RETURN ID(m) as id", "year", year);
+    private Long lastMonthID(Long yearID) {
+        return executeAndReturnID("MATCH (y:Year)-[:CHILD]->(m:Month) WHERE ID(y) = {year_id} WITH MAX(m.value) as max\n" +
+                "MATCH (y:Year)-[:CHILD]->(m:Month) WHERE ID(y) = {year_id} AND m.value = max RETURN ID(m) as id", "year_id", yearID);
     }
 
-    private Integer lastMonthValue(int year) {
-        return executeAndReturnValue("MATCH (:TimelineRoot)-[:CHILD]->(y:Year {value: {year}})-[:CHILD]->(m:Month) RETURN MAX(m.value) as value", "year", year);
-    }
-
-    private Long lastMonthID(int year) {
-        return executeAndReturnID("MATCH (:TimelineRoot)-[:CHILD]->(y:Year {value: {year}})-[:CHILD]->(m:Month) WITH MAX(m.value) as max\n" +
-                "MATCH (:TimelineRoot)-[:CHILD]->(y:Year {value: {year}})-[:CHILD]->(m:Month) WHERE m.value = max RETURN ID(m) as id", "year", year);
-    }
-
-    private Long prevMonthID(int year, int month) {
-        Long previousMonth = executeAndReturnID("MATCH (:TimelineRoot)-[:CHILD]->(y:Year {value: {year}})-[:CHILD]->(m:Month) WHERE m.value < {createMonth}\n" +
-                "RETURN ID(m) as id ORDER BY m.value DESC LIMIT 1", "year", year, "createMonth", month);
+    private Long prevMonthID(String userID, int year, int month) {
+        Long previousMonth = executeAndReturnID("MATCH (:Person {phoneNumber: {phone_number}})-[:TIMELINE]->(:TimelineRoot)-[:CHILD]->(:Year {value: {year}})-[:CHILD]->(m:Month) WHERE m.value < {createMonth}\n" +
+                "RETURN ID(m) as id ORDER BY m.value DESC LIMIT 1", "phone_number", userID, "year", year, "createMonth", month);
         if (previousMonth == null) {
-            Integer previousYear = prevYearValue(year);
+            Long previousYear = prevYearID(userID, year);
             if (previousYear != null) {
                 previousMonth = lastMonthID(previousYear);
             }
@@ -176,11 +160,11 @@ public class TimelineService extends Service {
         return previousMonth;
     }
 
-    private Long nextMonthID(int year, int month) {
-        Long nextMonth = executeAndReturnID("MATCH (:TimelineRoot)-[:CHILD]->(y:Year {value: {year}})-[:CHILD]->(m:Month) WHERE m.value > {createMonth}\n" +
-                "RETURN ID(m) as id ORDER BY m.value ASC LIMIT 1", "year", year, "createMonth", month);
+    private Long nextMonthID(String userID, int year, int month) {
+        Long nextMonth = executeAndReturnID("MATCH (:Person {phoneNumber: {phone_number}})-[:TIMELINE]->(:TimelineRoot)-[:CHILD]->(:Year {value: {year}})-[:CHILD]->(m:Month) WHERE m.value > {createMonth}\n" +
+                "RETURN ID(m) as id ORDER BY m.value ASC LIMIT 1", "phone_number", userID, "year", year, "createMonth", month);
         if (nextMonth == null) {
-            Integer nextYear = nextYearValue(year);
+            Long nextYear = nextYearID(userID, year);
             if (nextYear != null) {
                 nextMonth = firstMonthID(nextYear);
             }
@@ -190,25 +174,25 @@ public class TimelineService extends Service {
     //////////////////////////////////////////////////////////////////////////////////////////////
 
     /////////////////////////////////// METHODS RELATED TO DAY ///////////////////////////////////
-    private Long createDay(LocalDate date) {
+    private Long createDay(String userID, LocalDate date) {
         LOGGER.debug("Creating day {}", date);
 
         int year = date.getYear();
         int month = date.getMonthValue();
         int day = date.getDayOfMonth();
 
-        Long monthID = createMonth(year, month);
+        Long monthID = createMonth(userID, year, month);
         Long dayID = executeAndReturnID("MATCH (m:Month)-[:CHILD]->(d:Day {value: {day}}) WHERE ID(m) = {month_id} RETURN ID(d) as id", "month_id", monthID, "day", day);
         if (dayID == null) {
             dayID = executeAndReturnID("MATCH (m:Month) WHERE ID(m) = {month_id} CREATE (m)-[:CHILD]->(d:Day { value : {day}}) RETURN ID(d) as id", "month_id", monthID, "day", day);
 
 
-            Long prevID = prevDayID(year, month, day);
+            Long prevID = prevDayID(userID, year, month, day);
             Long nextID = null;
             if (prevID != null) {
                 nextID = executeAndReturnID("MATCH (p:Day)-[:NEXT]->(n:Day) WHERE ID(p) = {prev_id} RETURN ID(n) as id", "prev_id", prevID);
             } else {
-                nextID = nextDayID(year, month, day);
+                nextID = nextDayID(userID, year, month, day);
             }
 
             // Delete the existing link
@@ -232,9 +216,6 @@ public class TimelineService extends Service {
         return dayID;
     }
 
-    private Integer firstDayValue(int year, int month) {
-        return executeAndReturnValue("MATCH (:TimelineRoot)-[:CHILD]->(y:Year {value: {year}})-[:CHILD]->(m:Month {value: {createMonth})-[:CHILD]->(d:Day) RETURN MIN(d.value) as value", "year", year, "createMonth", month);
-    }
 
     private Long firstDayID(Long monthID) {
         return executeAndReturnID("MATCH (m:Month)-[:CHILD]->(d:Day) WHERE ID(m) = {month_id} WITH MIN(d.value) as min\n" +
@@ -242,20 +223,16 @@ public class TimelineService extends Service {
     }
 
 
-    private Integer lastDayValue(int year, int month) {
-        return executeAndReturnValue("MATCH (:TimelineRoot)-[:CHILD]->(y:Year {value: {year}})-[:CHILD]->(m:Month {value: {createMonth})-[:CHILD]->(d:Day) RETURN MAX(d.value) as value", "year", year, "createMonth", month);
-    }
-
     private Long lastDayID(Long monthID) {
         return executeAndReturnID("MATCH (m:Month)-[:CHILD]->(d:Day) WHERE ID(m) = {month_id} WITH MAX(d.value) as max\n" +
                 "MATCH (m:Month)-[:CHILD]->(d:Day) WHERE ID(m) = {month_id} AND d.value = max RETURN ID(d) as id", "month_id", monthID);
     }
 
-    private Long prevDayID(int year, int month, int day) {
-        Long previousDay = executeAndReturnID("MATCH (:TimelineRoot)-[:CHILD]->(y:Year {value: {year}})-[:CHILD]->(m:Month {value: {createMonth}})-[:CHILD]->(d:Day) WHERE d.value < {day}\n" +
-                "RETURN ID(d) as id ORDER BY d.value DESC LIMIT 1", "year", year, "createMonth", month, "day", day);
+    private Long prevDayID(String userID, int year, int month, int day) {
+        Long previousDay = executeAndReturnID("MATCH (:Person {phoneNumber: {phone_number}})-[:TIMELINE]->(:TimelineRoot)-[:CHILD]->(:Year {value: {year}})-[:CHILD]->(:Month {value: {createMonth}})-[:CHILD]->(d:Day) WHERE d.value < {day}\n" +
+                "RETURN ID(d) as id ORDER BY d.value DESC LIMIT 1", "phone_number", userID, "year", year, "createMonth", month, "day", day);
         if (previousDay == null) {
-            Long previousMonth = prevMonthID(year, month);
+            Long previousMonth = prevMonthID(userID, year, month);
             if (previousMonth != null) {
                 previousDay = lastDayID(previousMonth);
             }
@@ -263,11 +240,11 @@ public class TimelineService extends Service {
         return previousDay;
     }
 
-    private Long nextDayID(int year, int month, int day) {
-        Long nextDay = executeAndReturnID("MATCH (:TimelineRoot)-[:CHILD]->(y:Year {value: {year}})-[:CHILD]->(m:Month {value: {createMonth}})-[:CHILD]->(d:Day) WHERE d.value > {day}\n" +
-                "RETURN ID(d) as id ORDER BY d.value ASC LIMIT 1", "year", year, "createMonth", month, "day", day);
+    private Long nextDayID(String userID, int year, int month, int day) {
+        Long nextDay = executeAndReturnID("MATCH (:Person {phoneNumber: {phone_number}})-[:TIMELINE]->(:TimelineRoot)-[:CHILD]->(:Year {value: {year}})-[:CHILD]->(:Month {value: {createMonth}})-[:CHILD]->(d:Day) WHERE d.value > {day}\n" +
+                "RETURN ID(d) as id ORDER BY d.value ASC LIMIT 1", "phone_number", userID, "year", year, "createMonth", month, "day", day);
         if (nextDay == null) {
-            Long nextMonth = nextMonthID(year, month);
+            Long nextMonth = nextMonthID(userID, year, month);
             if (nextMonth != null) {
                 nextDay = firstDayID(nextMonth);
             }
@@ -275,4 +252,271 @@ public class TimelineService extends Service {
         return nextDay;
     }
     //////////////////////////////////////////////////////////////////////////////////////////////
+
+    /////////////////////////////////// METHODS RELATED TO HOUR ///////////////////////////////////
+    private Long createHour(String userID, LocalDate date, int hour) {
+        LOGGER.debug("Creating hour {}-{}", date, hour);
+
+        int year = date.getYear();
+        int month = date.getMonthValue();
+        int day = date.getDayOfMonth();
+
+        Long dayID = createDay(userID, date);
+        Long hourID = executeAndReturnID("MATCH (d:Day)-[:CHILD]->(h:Hour {value: {hour}}) WHERE ID(d) = {day_id} RETURN ID(h) as id", "day_id", dayID, "hour", hour);
+        if (hourID == null) {
+            hourID = executeAndReturnID("MATCH (d:Day) WHERE ID(d) = {day_id} CREATE (d)-[:CHILD]->(h:Hour { value : {hour}}) RETURN ID(h) as id", "day_id", dayID, "hour", hour);
+
+
+            Long prevID = prevHourID(userID, year, month, day, hour);
+            Long nextID = null;
+            if (prevID != null) {
+                nextID = executeAndReturnID("MATCH (p:Hour)-[:NEXT]->(n:Hour) WHERE ID(p) = {prev_id} RETURN ID(n) as id", "prev_id", prevID);
+            } else {
+                nextID = nextHourID(userID, year, month, day, hour);
+            }
+
+            // Delete the existing link
+            if (prevID != null && nextID != null) {
+                LOGGER.debug("Deleting the existing relationship {} -[NEXT]-> {}", prevID, nextID);
+                databaseService.execute("MATCH (p:Hour)-[next:NEXT]->(n:Hour) WHERE ID(p) = {prev_id} AND ID(n) = {next_id} DELETE next", map("prev_id", prevID, "next_id", nextID));
+            }
+            // Create new links
+            if (prevID != null) {
+                LOGGER.debug("Creating the relationship {} -[NEXT]-> {}", prevID, hourID);
+                databaseService.execute("MATCH (p:Hour), (n:Hour) WHERE ID(p) = {prev_id} AND ID(n) = {next_id} CREATE (p)-[:NEXT]->(n)", map("prev_id", prevID, "next_id", hourID));
+            }
+            if (nextID != null) {
+                LOGGER.debug("Creating the relationship {} -[NEXT]-> {}", hourID, nextID);
+                databaseService.execute("MATCH (p:Hour), (n:Hour) WHERE ID(p) = {prev_id} AND ID(n) = {next_id} CREATE (p)-[:NEXT]->(n)", map("prev_id", hourID, "next_id", nextID));
+            }
+
+            LOGGER.debug("Hour {}-{} is created with the id {}", date, hour, hourID);
+        }
+
+        return hourID;
+    }
+
+
+    private Long firstHourID(Long dayID) {
+        return executeAndReturnID("MATCH (d:Day)-[:CHILD]->(h:Hour) WHERE ID(d) = {day_id} WITH MIN(h.value) as min\n" +
+                "MATCH (d:Day)-[:CHILD]->(h:Hour) WHERE ID(d) = {day_id} AND h.value = min RETURN ID(h) as id", "day_id", dayID);
+    }
+
+
+    private Long lastHourID(Long dayID) {
+        return executeAndReturnID("MATCH (d:Day)-[:CHILD]->(h:Hour) WHERE ID(d) = {day_id} WITH MAX(h.value) as max\n" +
+                "MATCH (d:Day)-[:CHILD]->(h:Hour) WHERE ID(d) = {day_id} AND h.value = max RETURN ID(h) as id", "day_id", dayID);
+    }
+
+    private Long prevHourID(String userID, int year, int month, int day, int hour) {
+        Long previousHour = executeAndReturnID("MATCH (:Person {phoneNumber: {phone_number}})-[:TIMELINE]->(:TimelineRoot)-[:CHILD]->(y:Year {value: {year}})-[:CHILD]->(m:Month {value: {month}})-[:CHILD]->(d:Day {value: {day}})-[:CHILD]->(h:Hour) WHERE h.value < {hour}\n" +
+                "RETURN ID(h) as id ORDER BY h.value DESC LIMIT 1", "phone_number", userID, "year", year, "month", month, "day", day, "hour", hour);
+        if (previousHour == null) {
+            Long previousDay = prevDayID(userID, year, month, day);
+            if (previousDay != null) {
+                previousHour = lastHourID(previousDay);
+            }
+        }
+        return previousHour;
+    }
+
+    private Long nextHourID(String userID, int year, int month, int day, int hour) {
+        Long nextHour = executeAndReturnID("MATCH (:Person {phoneNumber: {phone_number}})-[:TIMELINE]->(:TimelineRoot)-[:CHILD]->(:Year {value: {year}})-[:CHILD]->(:Month {value: {month}})-[:CHILD]->(:Day {value: {day}})-[:CHILD]->(h:Hour) WHERE h.value > {hour}\n" +
+                "RETURN ID(h) as id ORDER BY h.value ASC LIMIT 1", "phone_number", userID, "year", year, "month", month, "day", day, "hour", hour);
+        if (nextHour == null) {
+            Long nextMonth = nextDayID(userID, year, month, day);
+            if (nextMonth != null) {
+                nextHour = firstHourID(nextMonth);
+            }
+        }
+        return nextHour;
+    }
+    //////////////////////////////////////////////////////////////////////////////////////////////
+
+
+    /////////////////////////////////// METHODS RELATED TO MINUTE ///////////////////////////////////
+    private Long createMinute(String userID, LocalDate date, int hour, int minute) {
+        LOGGER.debug("Creating minute {}-{}:{}", date, hour, minute);
+
+        int year = date.getYear();
+        int month = date.getMonthValue();
+        int day = date.getDayOfMonth();
+
+        Long hourID = createHour(userID, date, hour);
+        Long minuteID = executeAndReturnID("MATCH (h:Hour)-[:CHILD]->(m:Minute {value: {minute}}) WHERE ID(h) = {hour_id} RETURN ID(m) as id", "hour_id", hourID, "minute", minute);
+        if (minuteID == null) {
+            minuteID = executeAndReturnID("MATCH (h:Hour) WHERE ID(h) = {hour_id} CREATE (h)-[:CHILD]->(m:Minute { value : {minute}}) RETURN ID(m) as id", "hour_id", hourID, "minute", minute);
+
+
+            Long prevID = prevMinuteID(userID, year, month, day, hour, minute);
+            Long nextID = null;
+            if (prevID != null) {
+                nextID = executeAndReturnID("MATCH (p:Minute)-[:NEXT]->(n:Minute) WHERE ID(p) = {prev_id} RETURN ID(n) as id", "prev_id", prevID);
+            } else {
+                nextID = nextMinuteID(userID, year, month, day, hour, minute);
+            }
+
+            // Delete the existing link
+            if (prevID != null && nextID != null) {
+                LOGGER.debug("Deleting the existing relationship {} -[NEXT]-> {}", prevID, nextID);
+                databaseService.execute("MATCH (p:Minute)-[next:NEXT]->(n:Minute) WHERE ID(p) = {prev_id} AND ID(n) = {next_id} DELETE next", map("prev_id", prevID, "next_id", nextID));
+            }
+            // Create new links
+            if (prevID != null) {
+                LOGGER.debug("Creating the relationship {} -[NEXT]-> {}", prevID, minuteID);
+                databaseService.execute("MATCH (p:Minute), (n:Minute) WHERE ID(p) = {prev_id} AND ID(n) = {next_id} CREATE (p)-[:NEXT]->(n)", map("prev_id", prevID, "next_id", minuteID));
+            }
+            if (nextID != null) {
+                LOGGER.debug("Creating the relationship {} -[NEXT]-> {}", minuteID, nextID);
+                databaseService.execute("MATCH (p:Minute), (n:Minute) WHERE ID(p) = {prev_id} AND ID(n) = {next_id} CREATE (p)-[:NEXT]->(n)", map("prev_id", minuteID, "next_id", nextID));
+            }
+
+            LOGGER.debug("Minute {}-{}:{} is created with the id {}", date, hour, minute, minuteID);
+        }
+
+        return minuteID;
+    }
+
+
+    private Long firstMinuteID(Long hourID) {
+        return executeAndReturnID("MATCH (h:Hour)-[:CHILD]->(m:Minute) WHERE ID(h) = {hour_id} WITH MIN(m.value) as min\n" +
+                "MATCH (h:Hour)-[:CHILD]->(m:Minute) WHERE ID(h) = {hour_id} AND m.value = min RETURN ID(m) as id", "hour_id", hourID);
+    }
+
+
+    private Long lastMinuteID(Long hourID) {
+        return executeAndReturnID("MATCH (h:Hour)-[:CHILD]->(m:Minute) WHERE ID(h) = {hour_id} WITH MAX(h.value) as max\n" +
+                "MATCH (h:Hour)-[:CHILD]->(m:Minute) WHERE ID(h) = {hour_id} AND m.value = max RETURN ID(m) as id", "hour_id", hourID);
+    }
+
+    private Long prevMinuteID(String userID, int year, int month, int day, int hour, int minute) {
+        Long previousMinute = executeAndReturnID("MATCH (:Person {phoneNumber: {phone_number}})-[:TIMELINE]->(:TimelineRoot)-[:CHILD]->(:Year {value: {year}})-[:CHILD]->(:Month {value: {month}})-[:CHILD]->(:Day {value: {day}})-[:CHILD]->(:Hour {value: {hour}})-[:CHILD]->(m:Minute) WHERE m.value < {minute}\n" +
+                "RETURN ID(m) as id ORDER BY m.value DESC LIMIT 1", "phone_number", userID, "year", year, "month", month, "day", day, "hour", hour, "minute", minute);
+        if (previousMinute == null) {
+            Long previousHourID = prevHourID(userID, year, month, day, hour);
+            if (previousHourID != null) {
+                previousMinute = lastMinuteID(previousHourID);
+            }
+        }
+        return previousMinute;
+    }
+
+    private Long nextMinuteID(String userID, int year, int month, int day, int hour, int minute) {
+        Long nextMinute = executeAndReturnID("MATCH (:Person {phoneNumber: {phone_number}})-[:TIMELINE]->(:TimelineRoot)-[:CHILD]->(:Year {value: {year}})-[:CHILD]->(:Month {value: {month}})-[:CHILD]->(:Day {value: {day}})-[:CHILD]->(:Hour {value: {hour}})-[:CHILD]->(m:Minute) WHERE m.value > {minute}\n" +
+                "RETURN ID(m) as id ORDER BY m.value ASC LIMIT 1", "phone_number", userID, "year", year, "month", month, "day", day, "hour", hour, "minute", minute);
+        if (nextMinute == null) {
+            Long nextHour = nextHourID(userID, year, month, day, hour);
+            if (nextHour != null) {
+                nextMinute = firstMinuteID(nextHour);
+            }
+        }
+        return nextMinute;
+    }
+    //////////////////////////////////////////////////////////////////////////////////////////////
+
+
+//    //////////////////////////// METHODS RELATED TO PERSONAL TIMELINE ////////////////////////////
+//    public Long getStartTimeOfTheDay(String phoneNumber, LocalDate date) {
+//        if (isNullOrEmpty(phoneNumber) || date == null) {
+//            LOGGER.debug("Null argument to getPreviousTime method");
+//            return null;
+//        }
+//
+//        LOGGER.debug("Searching for the start time of {} in the timeline of {}", date, phoneNumber);
+//
+//        Long dayID = createDate(date);
+//
+//        Long id = executeAndReturnID("MATCH (:Person {phoneNumber: {person_id}})-[:TIMELINE]->(:Time)-[:NEXT*]-(s:Time)<-[:START]-(d:Day) WHERE ID(d) = {day_id} RETURN ID(s) as id", "person_id", phoneNumber, "day_id", dayID);
+//        return id;
+//    }
+//
+//    public void createStartTime(String phoneNumber, LocalDate date) {
+//        executeAndReturnID("")
+//    }
+//
+//    public Long getEndTimeOfTheDay(String phoneNumber, LocalDate date) {
+//        if (isNullOrEmpty(phoneNumber) || date == null) {
+//            LOGGER.debug("Null argument to getPreviousTime method");
+//            return null;
+//        }
+//        LOGGER.debug("Searching for the end time of {} in the timeline of {}", date, phoneNumber);
+//        Long id = null;
+//        Long dayID = createDate(date);
+//        Long startTimeOfNextDay = getStartTimeOfTheDay(phoneNumber, date.plusDays(1));
+//        if (startTimeOfNextDay == null) {
+//            // This is the last day in the timeline
+//            id = executeAndReturnID("MATCH (:Person {phoneNumber: {person_id}})-[:TIMELINE]->(:Time)-[:NEXT*]-(s:Time)<-[:START]-(d:Day) WHERE ID(d) = {day_id} WITH s MATCH (s)-[:NEXT*]->(e:Time) ORDER BY e.value DESC LIMIT 1 RETURN ID(e) as id", "person_id", phoneNumber, "day_id", dayID);
+//        } else {
+//            id = executeAndReturnID("MATCH (t:Time)-[:NEXT]->(n:Time) WHERE ID(n) = {next_time_id} RETURN ID(t) as id", "next_time_id", startTimeOfNextDay);
+//        }
+//
+//        return id;
+//    }
+//
+//    public Long getTimeAfter(String phoneNumber, LocalDateTime time) {
+//        if (isNullOrEmpty(phoneNumber) || time == null) {
+//            LOGGER.debug("Null argument to getTimeAfter method");
+//            return null;
+//        }
+//        // Truncate the time to minutes. Then seconds and milliseconds become zero.
+//        time = time.truncatedTo(ChronoUnit.MINUTES);
+//        Long value = time.toEpochSecond(ZoneOffset.UTC);
+//
+//        LOGGER.debug("Searching for the time after {} in the timeline of {}", time, phoneNumber);
+//        LocalDate date = time.toLocalDate();
+//
+//        Long startTimeID = getStartTimeOfTheDay(phoneNumber, date);
+//
+//        Long id = executeAndReturnID("MATCH (s:Time)-[:NEXT*]->(t:Time) WHERE ID(s) = {start_time_id} AND t.value > {value} ORDER BY t.value ASC LIMIT 1 RETURN ID(t) as id", "start_time_id", startTimeID, "value", value);
+//        return id;
+//    }
+//
+//
+//    public Long getTimeBefore(String phoneNumber, LocalDateTime time) {
+//        if (isNullOrEmpty(phoneNumber) || time == null) {
+//            LOGGER.debug("Null argument to getTimeBefore method");
+//            return null;
+//        }
+//        // Truncate the time to minutes. Then seconds and milliseconds become zero.
+//        time = time.truncatedTo(ChronoUnit.MINUTES);
+//        Long value = time.toEpochSecond(ZoneOffset.UTC);
+//
+//        LOGGER.debug("Searching for the time before {} in the timeline of {}", time, phoneNumber);
+//        LocalDate date = time.toLocalDate();
+//
+//        Long endTimeID = getEndTimeOfTheDay(phoneNumber, date);
+//
+//        Long id = executeAndReturnID("MATCH (t:Time)-[:NEXT*]->(e:Time) WHERE ID(e) = {end_time_id} AND t.value < {value} ORDER BY e.value DESC LIMIT 1 RETURN ID(e) as id", "end_time_id", endTimeID, "value", value);
+//        return id;
+//    }
+//
+//    public Long createTime(String phoneNumber, LocalDateTime time) {
+//        if (isNullOrEmpty(phoneNumber) || time == null) {
+//            LOGGER.debug("Null argument to createTime method");
+//            return null;
+//        }
+//        // Truncate the time to minutes. Then seconds and milliseconds become zero.
+//        time = time.truncatedTo(ChronoUnit.MINUTES);
+//        Long value = time.toEpochSecond(ZoneOffset.UTC);
+//
+//        LOGGER.debug("Creating time {} in the timeline of {}", time, phoneNumber);
+//
+//        LocalDate date = time.toLocalDate();
+//        createDate(date);
+//        Long prevTimeID = null;
+//        Long nextTimeID = null;
+//
+//        prevTimeID = executeAndReturnID("MATCH (:Person {phoneNumber: {person_id}})-[:TIMELINE]->(:Time)-[:NEXT*]-(s:Time) WHERE s.value < {value} ORDER BY s.value DESC LIMIT 1 RETURN ID(s) as id", "person_id", phoneNumber, "value", value);
+//        if (prevTimeID != null) {
+//            // Insert between
+//            nextTimeID = executeAndReturnID("MATCH (p:Time)-[:NEXT]->(t:Time) WHERE ID(p) = {prev_id} RETURN ID(t) as id", "prev_id", prevTimeID);
+//        } else {
+//            // Last node
+//            nextTimeID = executeAndReturnID("MATCH (:Person {phoneNumber: {person_id}})-[:TIMELINE]->(:Time)<-[:NEXT*]-(s:Time)")
+//        }
+//        Long id = executeAndReturnID("MATCH (t:Time)-[:NEXT*]->(e:Time) WHERE ID(e) = {end_time_id} AND t.value < {value} ORDER BY DESC LIMIT 1 RETURN ID(e) as id", "end_time_id", endTimeID, "value", value);
+//        return id;
+//    }
+//
+//    //////////////////////////////////////////////////////////////////////////////////////////////
 }

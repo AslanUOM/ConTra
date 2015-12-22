@@ -1,6 +1,5 @@
 package com.aslan.contramodel.extension;
 
-import com.aslan.contra.dto.Country;
 import com.aslan.contra.dto.Location;
 import org.codehaus.jackson.map.ObjectMapper;
 import org.neo4j.graphdb.GraphDatabaseService;
@@ -30,28 +29,28 @@ public class LocationResource {
         this.service = new LocationService(databaseService);
     }
 
-    @POST
-    @Path("/create/country")
-    @Consumes(MediaType.APPLICATION_JSON)
-    @Produces(MediaType.APPLICATION_JSON)
-    public Response createCountry(Country country) {
-        LOGGER.debug("Request to create country {} is received", country);
-        service.createCountry(country);
-        return Response.status(HttpURLConnection.HTTP_OK).build();
-    }
+//    @POST
+//    @Path("/create/country")
+//    @Consumes(MediaType.APPLICATION_JSON)
+//    @Produces(MediaType.APPLICATION_JSON)
+//    public Response createCountry(Country country) {
+//        LOGGER.debug("Request to create country {} is received", country);
+//        service.createCountry(country);
+//        return Response.status(HttpURLConnection.HTTP_OK).build();
+//    }
+//
+//    @POST
+//    @Path("/create/region")
+//    @Consumes(MediaType.APPLICATION_JSON)
+//    @Produces(MediaType.APPLICATION_JSON)
+//    public Response createRegion(Location region) {
+//        LOGGER.debug("Request to create region {} is received", region);
+//        service.createRegion(region);
+//        return Response.status(HttpURLConnection.HTTP_OK).build();
+//    }
 
     @POST
-    @Path("/create/region")
-    @Consumes(MediaType.APPLICATION_JSON)
-    @Produces(MediaType.APPLICATION_JSON)
-    public Response createRegion(Location region) {
-        LOGGER.debug("Request to create region {} is received", region);
-        service.createRegion(region);
-        return Response.status(HttpURLConnection.HTTP_OK).build();
-    }
-
-    @POST
-    @Path("/create/location")
+    @Path("/create")
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
     public Response createLocation(Location location) {

@@ -1,5 +1,6 @@
 package com.aslan.contramodel.extension;
 
+import com.aslan.contra.dto.Time;
 import org.codehaus.jackson.map.ObjectMapper;
 import org.neo4j.graphdb.GraphDatabaseService;
 import org.neo4j.shell.util.json.JSONException;
@@ -16,6 +17,7 @@ import java.net.HttpURLConnection;
 import java.text.DateFormat;
 import java.time.DateTimeException;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.format.DateTimeParseException;
 
 import static org.neo4j.helpers.collection.MapUtil.map;
@@ -35,23 +37,18 @@ public class TimelineResource {
     }
 
     @POST
-    @Path("/create/{year}-{month}-{day}")
+    @Path("/create")
     @Produces(MediaType.APPLICATION_JSON)
-    public Response create(@PathParam("year") String year, @PathParam("month") String month, @PathParam("day") String day) throws IOException {
-        String strDate = year + "-" + month + "-" + day;
-        LOGGER.debug("Request to create date {} is received", strDate);
+    public Response create(@QueryParam("phoneNumber") @Encoded  String phoneNumber, Time time) throws IOException {
+        LOGGER.debug("Request to create date {} is received from {}", time, phoneNumber);
 
         Response response = null;
 
-        try {
-            LocalDate date = LocalDate.parse(strDate);
-            Long id = service.createDate(date);
-            response = Response.status(HttpURLConnection.HTTP_OK).entity(map("id", id)).build();
-        } catch (DateTimeParseException e) {
-            LOGGER.error("Exception in parsing tht date " + strDate, e);
+        LocalDateTime dateTime = LocalDateTime.of(time.getYear(), time.getMonth(), time.getDay(), time.getHour(), time.getMinute());
 
-            response = Response.status(HttpURLConnection.HTTP_BAD_REQUEST).entity("Invalid date format: " + strDate).build();
-        }
+        Long id = service.createTime(phoneNumber, dateTime);
+        response = Response.status(HttpURLConnection.HTTP_OK).entity(map("id", id)).build();
+
 
         return response;
     }
