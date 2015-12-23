@@ -18,10 +18,11 @@ import static org.neo4j.helpers.collection.MapUtil.map;
  */
 public class PersonService extends Service {
     private final Logger LOGGER = LoggerFactory.getLogger(PersonService.class);
-
+    private final TimelineService timelineService;
 
     public PersonService(GraphDatabaseService databaseService) {
         super(databaseService);
+        this.timelineService = new TimelineService(databaseService);
     }
 
     public void create(Person person) {
