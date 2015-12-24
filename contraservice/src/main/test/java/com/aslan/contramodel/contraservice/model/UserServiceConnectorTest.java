@@ -16,7 +16,7 @@ public class UserServiceConnectorTest {
         UserServiceConnector connector = new UserServiceConnector();
 
         Person person = new Person();
-        person.setPhoneNumber("+94770780210");
+        person.setUserID("+94770780210");
         person.setEmail("slgobinath@gmail.com");
         person.setName("Gobinath");
 
@@ -30,7 +30,7 @@ public class UserServiceConnectorTest {
         UserServiceConnector connector = new UserServiceConnector();
 
         Person person = new Person();
-        person.setPhoneNumber("+94770780210");
+        person.setUserID("+94770780210");
         person.setEmail("slgobinath@gmail.com");
         person.setName("Gobinath");
 

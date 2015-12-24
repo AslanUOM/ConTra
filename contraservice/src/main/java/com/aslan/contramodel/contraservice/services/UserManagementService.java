@@ -54,8 +54,8 @@ public class UserManagementService {
 
         try {
             // Format the phone number
-            String formattedPhoneNumber = Utility.formatPhoneNumber(country, person.getPhoneNumber());
-            person.setPhoneNumber(formattedPhoneNumber);
+            String formattedPhoneNumber = Utility.formatPhoneNumber(country, person.getUserID());
+            person.setUserID(formattedPhoneNumber);
 
             // Save the Person
 
@@ -68,7 +68,7 @@ public class UserManagementService {
             }
 
         } catch (NumberParseException e) {
-            LOGGER.error("Exception in formatting phone number " + person.getPhoneNumber(), e);
+            LOGGER.error("Exception in formatting phone number " + person.getUserID(), e);
 
             response = Response.status(HttpURLConnection.HTTP_BAD_REQUEST).build();
         }

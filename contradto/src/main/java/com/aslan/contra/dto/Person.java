@@ -9,7 +9,7 @@ import java.io.Serializable;
 @XmlRootElement
 public class Person implements Serializable {
     private String name;
-    private String phoneNumber;
+    private String userID;
     private String email;
 
     public String getName() {
@@ -20,12 +20,12 @@ public class Person implements Serializable {
         this.name = name;
     }
 
-    public String getPhoneNumber() {
-        return phoneNumber;
+    public String getUserID() {
+        return userID;
     }
 
-    public void setPhoneNumber(String phoneNumber) {
-        this.phoneNumber = phoneNumber;
+    public void setUserID(String userID) {
+        this.userID = userID;
     }
 
     public String getEmail() {

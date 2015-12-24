@@ -25,7 +25,7 @@ public class UserManagementServiceTest extends JerseyTest {
     private Person createPerson(String name, String phoneNumber, String email) {
         Person person = new Person();
         person.setName(name);
-        person.setPhoneNumber(phoneNumber);
+        person.setUserID(phoneNumber);
         person.setEmail(email);
 
         return person;
