@@ -119,10 +119,6 @@ public class TimelineService extends Service {
             next = getFirstNode(nextParent);
         }
 
-        LOGGER.debug("Previous of {} is {}", value, previous != null ? previous.getProperty("value") : null);
-        LOGGER.debug("Current of {} is {}", value, current != null ? current.getProperty("value") : null);
-        LOGGER.debug("Next of {} is {}", value, next != null ? next.getProperty("value") : null);
-
         Map<String, Node> map = new HashMap<>();
         map.put("previous", previous);
         map.put("current", current);
