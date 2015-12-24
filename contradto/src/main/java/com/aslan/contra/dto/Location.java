@@ -8,9 +8,17 @@ import java.io.Serializable;
 public class Location implements Serializable {
     private String name;
     private String code;
-    private Location parent;
+    // private Location parent;
+    /**
+     * Northing - Use it as Y.
+     */
     private double latitude;
+    /**
+     * Easting - Use it as X.
+     */
     private double longitude;
+
+    private double accuracy;
 
     public String getName() {
         return name;
@@ -28,14 +36,6 @@ public class Location implements Serializable {
         this.code = code;
     }
 
-    public Location getParent() {
-        return parent;
-    }
-
-    public void setParent(Location parent) {
-        this.parent = parent;
-    }
-
     public double getLatitude() {
         return latitude;
     }
@@ -50,6 +50,14 @@ public class Location implements Serializable {
 
     public void setLongitude(double longitude) {
         this.longitude = longitude;
+    }
+
+    public double getAccuracy() {
+        return accuracy;
+    }
+
+    public void setAccuracy(double accuracy) {
+        this.accuracy = accuracy;
     }
 
     @Override

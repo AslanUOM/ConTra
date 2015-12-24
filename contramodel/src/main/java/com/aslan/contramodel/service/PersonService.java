@@ -3,7 +3,6 @@ package com.aslan.contramodel.service;
 
 import com.aslan.contra.dto.Person;
 import org.neo4j.graphdb.*;
-import org.neo4j.graphdb.schema.IndexDefinition;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -15,22 +14,14 @@ import static com.aslan.contramodel.util.Utility.isNullOrEmpty;
 public class PersonService extends Service {
     private static final Logger LOGGER = LoggerFactory.getLogger(PersonService.class);
     private final TimelineService timelineService;
-    private final Label label;
 
-    /**
-     * Relationships required by person.
-     */
-    private static enum PersonRelationship implements RelationshipType {
-        KNOWS
-    }
 
     public PersonService(GraphDatabaseService databaseService) {
         super(databaseService);
         this.timelineService = new TimelineService(databaseService);
-        this.label = DynamicLabel.label("Person");
 
         // Create the index
-        createIndex(label, "userID");
+        createIndex(Labels.PERSON, "userID");
     }
 
 
@@ -65,7 +56,7 @@ public class PersonService extends Service {
         }
         Person person = null;
         try (Transaction transaction = databaseService.beginTx()) {
-            Node node = databaseService.findNode(label, "userID", userID);
+            Node node = databaseService.findNode(Labels.PERSON, "userID", userID);
 
             // Commit the transaction
             transaction.success();
@@ -84,15 +75,15 @@ public class PersonService extends Service {
         LOGGER.debug("Creating relationship {} -[FRIEND]-> {}", personID, friendID);
 
         try (Transaction transaction = databaseService.beginTx()) {
-            Node person = databaseService.findNode(label, "userID", personID);
+            Node person = databaseService.findNode(Labels.PERSON, "userID", personID);
             if (person == null) {
                 throw new NotFoundException("Person not found with id: " + personID);
             }
-            Node friend = databaseService.findNode(label, "userID", friendID);
+            Node friend = databaseService.findNode(Labels.PERSON, "userID", friendID);
             if (friend == null) {
                 throw new NotFoundException("Person not found with id: " + friendID);
             }
-            person.createRelationshipTo(friend, PersonRelationship.KNOWS);
+            person.createRelationshipTo(friend, RelationshipTypes.KNOWS);
 
             // Commit the transaction
             transaction.success();

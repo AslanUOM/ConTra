@@ -34,14 +34,12 @@ public class TimelineResource {
     @POST
     @Path("/create")
     @Produces(MediaType.APPLICATION_JSON)
-    public Response create(@QueryParam("phoneNumber") @Encoded  String phoneNumber, Time time) throws IOException {
-        LOGGER.debug("Request to create date {} is received from {}", time, phoneNumber);
+    public Response create(@QueryParam("userID") @Encoded String userID, Time time) throws IOException {
+        LOGGER.debug("Request to create date {} is received from {}", time, userID);
 
         Response response = null;
 
-        LocalDateTime dateTime = LocalDateTime.of(time.getYear(), time.getMonth(), time.getDay(), time.getHour(), time.getMinute());
-
-        Long id = service.createTime(phoneNumber, dateTime);
+        long id = service.createTime(userID, time).getId();
         response = Response.status(HttpURLConnection.HTTP_OK).entity(map("id", id)).build();
 
 

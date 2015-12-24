@@ -5,6 +5,11 @@ import org.neo4j.graphdb.schema.IndexDefinition;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.HashMap;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
+
 import static org.neo4j.helpers.collection.MapUtil.map;
 
 /**
@@ -13,6 +18,27 @@ import static org.neo4j.helpers.collection.MapUtil.map;
 public abstract class Service {
     private final static Logger LOGGER = LoggerFactory.getLogger(Service.class);
     protected final GraphDatabaseService databaseService;
+
+
+    public static class Labels {
+        public static final Label LOCATION = DynamicLabel.label("Location");
+        public static final Label PERSON = DynamicLabel.label("Person");
+        public static final Label TIMELINE_ROOT = DynamicLabel.label("TimelineRoot");
+        public static final Label YEAR = DynamicLabel.label("Year");
+        public static final Label MONTH = DynamicLabel.label("Month");
+        public static final Label DAY = DynamicLabel.label("Day");
+        public static final Label HOUR = DynamicLabel.label("Hour");
+        public static final Label MINUTE = DynamicLabel.label("Minute");
+    }
+
+
+    /**
+     * Relationships required by this model.
+     */
+    public static enum RelationshipTypes implements RelationshipType {
+        KNOWS, LOCATION, TIMELINE, CHILD, NEXT
+    }
+
 
     public Service(GraphDatabaseService databaseService) {
         this.databaseService = databaseService;
