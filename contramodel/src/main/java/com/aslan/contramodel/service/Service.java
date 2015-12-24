@@ -21,14 +21,14 @@ public abstract class Service {
 
 
     public static class Labels {
-        public static final Label LOCATION = DynamicLabel.label("Location");
-        public static final Label PERSON = DynamicLabel.label("Person");
-        public static final Label TIMELINE_ROOT = DynamicLabel.label("TimelineRoot");
-        public static final Label YEAR = DynamicLabel.label("Year");
-        public static final Label MONTH = DynamicLabel.label("Month");
-        public static final Label DAY = DynamicLabel.label("Day");
-        public static final Label HOUR = DynamicLabel.label("Hour");
-        public static final Label MINUTE = DynamicLabel.label("Minute");
+        public static final Label Location = DynamicLabel.label("Location");
+        public static final Label Person = DynamicLabel.label("Person");
+        public static final Label TimelineRoot = DynamicLabel.label("TimelineRoot");
+        public static final Label Year = DynamicLabel.label("Year");
+        public static final Label Month = DynamicLabel.label("Month");
+        public static final Label Day = DynamicLabel.label("Day");
+        public static final Label Hour = DynamicLabel.label("Hour");
+        public static final Label Minute = DynamicLabel.label("Minute");
     }
 
 

@@ -1,14 +1,10 @@
 package com.aslan.contramodel.service;
 
 import com.aslan.contra.dto.Time;
-import org.neo4j.cypher.internal.compiler.v1_9.parser.ParserPattern;
 import org.neo4j.graphdb.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.time.temporal.ChronoUnit;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -18,7 +14,7 @@ import static org.neo4j.helpers.collection.MapUtil.map;
  * Created by gobinath on 12/11/15.
  */
 public class TimelineService extends Service {
-    private final Logger LOGGER = LoggerFactory.getLogger(TimelineService.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(TimelineService.class);
 
 
     public TimelineService(GraphDatabaseService databaseService) {
@@ -39,14 +35,14 @@ public class TimelineService extends Service {
 
     private Node createTimelineRoot(String userID) {
         LOGGER.debug("Creating TimelineRoot for {}", userID);
-        Node personNode = databaseService.findNode(Labels.PERSON, "userID", userID);
+        Node personNode = databaseService.findNode(Labels.Person, "userID", userID);
         if (personNode == null) {
             throw new NotFoundException("Person with userId " + userID + " is not found");
         }
         Node rootNode = null;
         Relationship relationship = personNode.getSingleRelationship(RelationshipTypes.TIMELINE, Direction.OUTGOING);
         if (relationship == null) {
-            rootNode = databaseService.createNode(Labels.TIMELINE_ROOT);
+            rootNode = databaseService.createNode(Labels.TimelineRoot);
             personNode.createRelationshipTo(rootNode, RelationshipTypes.TIMELINE);
         } else {
             rootNode = relationship.getEndNode();
@@ -215,23 +211,23 @@ public class TimelineService extends Service {
 
         switch (level) {
             case 1:
-                label = Labels.YEAR;
+                label = Labels.Year;
                 break;
 
             case 2:
-                label = Labels.MONTH;
+                label = Labels.Month;
                 break;
 
             case 3:
-                label = Labels.DAY;
+                label = Labels.Day;
                 break;
 
             case 4:
-                label = Labels.HOUR;
+                label = Labels.Hour;
                 break;
 
             case 5:
-                label = Labels.MINUTE;
+                label = Labels.Minute;
                 break;
         }
 

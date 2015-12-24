@@ -16,6 +16,7 @@ import javax.ws.rs.core.Response;
 import java.net.HttpURLConnection;
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
+import java.util.List;
 
 import static com.aslan.contramodel.util.Utility.isNullOrEmpty;
 
@@ -47,15 +48,21 @@ public class LocationResource {
             return Response.status(HttpURLConnection.HTTP_BAD_REQUEST).entity(message).build();
         }
 
-        LocalDateTime dateTime = LocalDateTime.ofEpochSecond(timeValue, 0, ZoneOffset.UTC);
-        Time time = new Time();
-        time.setYear(dateTime.getYear());
-        time.setMonth(dateTime.getMonthValue());
-        time.setDay(dateTime.getDayOfMonth());
-        time.setHour(dateTime.getHour());
-        time.setMinute(dateTime.getMinute());
+        Time time = Time.valueOf(timeValue);
 
         service.createCurrentLocation(userID, location, time);
         return Response.status(HttpURLConnection.HTTP_OK).build();
+    }
+
+    @GET
+    @Path("/findwithin")
+    @Consumes(MediaType.APPLICATION_JSON)
+    @Produces(MediaType.APPLICATION_JSON)
+    public Response findLocationsWithin(@QueryParam("longitude") double longitude, @QueryParam("latitude") double latitude, @QueryParam("distance") double distance) {
+        LOGGER.debug("Request to find locations within {} km from {}:{}", distance, longitude, latitude);
+
+        List<Location> locations = service.findLocationsWithin(longitude, latitude, distance);
+
+        return Response.status(HttpURLConnection.HTTP_OK).entity(locations).build();
     }
 }

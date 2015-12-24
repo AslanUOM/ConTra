@@ -26,21 +26,7 @@ public class PersonResourceTest {
 
     @BeforeClass
     public static void setUp() throws Exception {
-        server = TestServerBuilders.newInProcessBuilder()
-                .withExtension("/contra", PersonResource.class)
-                .withFixture(new Function<GraphDatabaseService, Void>() {
-                    @Override
-                    public Void apply(GraphDatabaseService graphDatabaseService) throws RuntimeException {
-                        try (Transaction tx = graphDatabaseService.beginTx()) {
-                            final String query = "CREATE (n:Person { name : {name}, email : {email}, userID: {userID}})";
-                            graphDatabaseService.execute(query, map("name", "Alice", "email", "alice@gmail.com", "userID", "+94771234567"));
-                            graphDatabaseService.execute(query, map("name", "John", "email", "john@gmail.com", "userID", "+94770000000"));
-                            tx.success();
-                        }
-                        return null;
-                    }
-                })
-                .newServer();
+        server = TestUtility.createServer(PersonResource.class);
         databaseService = server.graph();
     }
 

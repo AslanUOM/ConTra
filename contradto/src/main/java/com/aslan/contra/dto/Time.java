@@ -1,17 +1,37 @@
 package com.aslan.contra.dto;
 
 import java.io.Serializable;
+import java.util.Calendar;
+import java.util.Date;
 
 /**
  * Created by gobinath on 12/22/15.
  */
 public class Time implements Serializable {
+    private static Calendar calendar = Calendar.getInstance();
     private int year;
     private int month;
     private int day;
     private int hour;
     private int minute;
     private int second;
+
+    public Time() {
+
+    }
+
+    public Time(int year, int month, int day) {
+        this(year, month, day, 0, 0, 0);
+    }
+
+    public Time(int year, int month, int day, int hour, int minute, int second) {
+        this.year = year;
+        this.month = month;
+        this.day = day;
+        this.hour = hour;
+        this.minute = minute;
+        this.second = second;
+    }
 
     public int getYear() {
         return year;
@@ -59,6 +79,28 @@ public class Time implements Serializable {
 
     public void setSecond(int second) {
         this.second = second;
+    }
+
+    public void truncateToMinutes() {
+        this.second = 0;
+    }
+
+    public long value() {
+        calendar.set(year, month - 1, day, hour, minute, second);
+        return calendar.getTime().getTime();
+    }
+
+    public static Time valueOf(long value) {
+        calendar.setTimeInMillis(value);
+        Time time = new Time();
+        time.year = calendar.get(Calendar.YEAR);
+        time.month = calendar.get(Calendar.MONTH) + 1;
+        time.day = calendar.get(Calendar.DATE);
+        time.hour = calendar.get(Calendar.HOUR_OF_DAY);
+        time.minute = calendar.get(Calendar.MINUTE);
+        time.second = calendar.get(Calendar.SECOND);
+
+        return time;
     }
 
     @Override

@@ -1,14 +1,13 @@
 package com.aslan.contramodel.resource;
 
 import com.aslan.contra.dto.Time;
-import com.aslan.contramodel.service.Service;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
-import org.neo4j.function.Function;
-import org.neo4j.graphdb.*;
+import org.neo4j.graphdb.GraphDatabaseService;
+import org.neo4j.graphdb.Result;
+import org.neo4j.graphdb.Transaction;
 import org.neo4j.harness.ServerControls;
-import org.neo4j.harness.TestServerBuilders;
 import org.neo4j.test.server.HTTP;
 
 import java.net.HttpURLConnection;
@@ -32,20 +31,7 @@ public class TimelineResourceTest {
      */
     @BeforeClass
     public static void setUp() throws Exception {
-        server = TestServerBuilders.newInProcessBuilder()
-                .withExtension("/contra", PersonResource.class)
-                .withFixture(new Function<GraphDatabaseService, Void>() {
-                    @Override
-                    public Void apply(GraphDatabaseService graphDatabaseService) throws RuntimeException {
-                        try (Transaction tx = graphDatabaseService.beginTx()) {
-                            graphDatabaseService.execute("CREATE (n:Person { name : {name}, email : {email}, userID: {userID}})", map("name", "Alice", "email", "alice@gmail.com", "userID", "+94771234567"));
-                            graphDatabaseService.execute("CREATE (n:Person { name : {name}, email : {email}, userID: {userID}})", map("name", "BoB", "email", "bob@gmail.com", "userID", "+94775555555"));
-                            tx.success();
-                        }
-                        return null;
-                    }
-                })
-                .newServer();
+        server = TestUtility.createServer(TimelineResource.class);
         databaseService = server.graph();
     }
 

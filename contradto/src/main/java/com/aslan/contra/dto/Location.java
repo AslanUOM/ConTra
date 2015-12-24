@@ -18,8 +18,6 @@ public class Location implements Serializable {
      */
     private double longitude;
 
-    private double accuracy;
-
     public String getName() {
         return name;
     }
@@ -50,14 +48,6 @@ public class Location implements Serializable {
 
     public void setLongitude(double longitude) {
         this.longitude = longitude;
-    }
-
-    public double getAccuracy() {
-        return accuracy;
-    }
-
-    public void setAccuracy(double accuracy) {
-        this.accuracy = accuracy;
     }
 
     @Override

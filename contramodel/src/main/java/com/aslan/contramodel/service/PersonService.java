@@ -21,7 +21,7 @@ public class PersonService extends Service {
         this.timelineService = new TimelineService(databaseService);
 
         // Create the index
-        createIndex(Labels.PERSON, "userID");
+        createIndex(Labels.Person, "userID");
     }
 
 
@@ -56,7 +56,7 @@ public class PersonService extends Service {
         }
         Person person = null;
         try (Transaction transaction = databaseService.beginTx()) {
-            Node node = databaseService.findNode(Labels.PERSON, "userID", userID);
+            Node node = databaseService.findNode(Labels.Person, "userID", userID);
 
             // Commit the transaction
             transaction.success();
@@ -75,11 +75,11 @@ public class PersonService extends Service {
         LOGGER.debug("Creating relationship {} -[FRIEND]-> {}", personID, friendID);
 
         try (Transaction transaction = databaseService.beginTx()) {
-            Node person = databaseService.findNode(Labels.PERSON, "userID", personID);
+            Node person = databaseService.findNode(Labels.Person, "userID", personID);
             if (person == null) {
                 throw new NotFoundException("Person not found with id: " + personID);
             }
-            Node friend = databaseService.findNode(Labels.PERSON, "userID", friendID);
+            Node friend = databaseService.findNode(Labels.Person, "userID", friendID);
             if (friend == null) {
                 throw new NotFoundException("Person not found with id: " + friendID);
             }
