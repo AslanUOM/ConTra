@@ -7,7 +7,9 @@ import com.vividsolutions.jts.geom.Coordinate;
 import org.neo4j.gis.spatial.SimplePointLayer;
 import org.neo4j.gis.spatial.SpatialDatabaseService;
 import org.neo4j.gis.spatial.pipes.GeoPipeFlow;
-import org.neo4j.graphdb.*;
+import org.neo4j.graphdb.GraphDatabaseService;
+import org.neo4j.graphdb.Node;
+import org.neo4j.graphdb.Transaction;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -16,10 +18,11 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import static org.neo4j.helpers.collection.MapUtil.map;
 import static com.aslan.contramodel.util.Utility.isNullOrEmpty;
 
 /**
+ * This class create, update and query the database regarding the entity Location.
+ * <p>
  * Created by gobinath on 12/16/15.
  */
 public class LocationService extends Service {

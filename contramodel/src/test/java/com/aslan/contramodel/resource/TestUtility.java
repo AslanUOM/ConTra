@@ -12,6 +12,9 @@ import org.neo4j.harness.TestServerBuilders;
 import static org.neo4j.helpers.collection.MapUtil.map;
 
 /**
+ * Utility class which provides necessary methods for other Testing classes.
+ * Major purpose of this class is reducing code duplication by sharing the methods.
+ * <p>
  * Created by gobinath on 12/24/15.
  */
 public class TestUtility {
@@ -19,7 +22,7 @@ public class TestUtility {
     }
 
     public static ServerControls createServer(Class<?> cls) {
-        ServerControls server = TestServerBuilders.newInProcessBuilder()
+        return TestServerBuilders.newInProcessBuilder()
                 .withExtension("/contra", cls)
                 .withFixture(new Function<GraphDatabaseService, Void>() {
                     @Override
@@ -30,8 +33,6 @@ public class TestUtility {
                     }
                 })
                 .newServer();
-
-        return server;
     }
 
     public static void savePerson(GraphDatabaseService databaseService, String userID, String name, String email) {

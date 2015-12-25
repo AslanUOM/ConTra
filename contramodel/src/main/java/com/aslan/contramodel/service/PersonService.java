@@ -6,19 +6,22 @@ import org.neo4j.graphdb.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import static com.aslan.contramodel.util.Utility.isNullOrEmpty;
+import static org.neo4j.helpers.collection.MapUtil.map;
 
 /**
+ * This class create, update and query the database regarding the entity Person.
+ * <p>
  * Created by gobinath on 12/8/15.
  */
 public class PersonService extends Service {
     private static final Logger LOGGER = LoggerFactory.getLogger(PersonService.class);
-    private final TimelineService timelineService;
-
 
     public PersonService(GraphDatabaseService databaseService) {
         super(databaseService);
-        this.timelineService = new TimelineService(databaseService);
 
         // Create the index
         createIndex(Labels.Person, "userID");
@@ -72,7 +75,7 @@ public class PersonService extends Service {
     }
 
     public void createKnows(String personID, String friendID) {
-        LOGGER.debug("Creating relationship {} -[FRIEND]-> {}", personID, friendID);
+        LOGGER.debug("Creating relationship {} -[KNOWS]-> {}", personID, friendID);
 
         try (Transaction transaction = databaseService.beginTx()) {
             Node person = databaseService.findNode(Labels.Person, "userID", personID);
@@ -83,11 +86,44 @@ public class PersonService extends Service {
             if (friend == null) {
                 throw new NotFoundException("Person not found with id: " + friendID);
             }
-            person.createRelationshipTo(friend, RelationshipTypes.KNOWS);
-
+            // Avoid duplicate relationships
+            boolean alreadyKnows = false;
+            Iterable<Relationship> relationships = person.getRelationships(Direction.OUTGOING, RelationshipTypes.KNOWS);
+            for (Relationship r : relationships) {
+                if (r.getEndNode().getId() == friend.getId()) {
+                    alreadyKnows = true;
+                    break;
+                }
+            }
+            if (!alreadyKnows) {
+                person.createRelationshipTo(friend, RelationshipTypes.KNOWS);
+            }
             // Commit the transaction
             transaction.success();
         }
+    }
+
+    public List<String> nearByKnownPeople(String userID, long timeOne, long timeTwo, double longitude, double latitude, double distance) {
+        LOGGER.debug("Searching for near by known friends of {} at {}:{}", userID, longitude, latitude);
+        List<String> people = new ArrayList<>();
+        try (Transaction transaction = databaseService.beginTx()) {
+            Node person = databaseService.findNode(Labels.Person, "userID", userID);
+            if (person == null) {
+                throw new NotFoundException("Person not found with id: " + userID);
+            }
+            // Using parameter for latitude, longitude and distance caused to unknown error.
+            // Reason could be a bug in Neo4j spatial plugin
+            final String query = "START n = node:location_layer('withinDistance:[" + latitude + ", " + longitude + ", " + distance + "]') MATCH (n)<-[:LOCATION]-(t:Minute)<-[:CHILD*1..5]-(:TimelineRoot)<-[:TIMELINE]-(f:Person)<-[:KNOWS]-(p:Person) WHERE ID(p) = {user_id} AND t.epoch > {time_one} AND t.epoch < {time_two}  RETURN f.userID as userID";
+            ResourceIterator<String> iterator = databaseService.execute(query, map("user_id", person.getId(), "time_one", timeOne, "time_two", timeTwo)).columnAs("userID");
+            while (iterator.hasNext()) {
+                people.add(iterator.next());
+            }
+            iterator.close();
+            // Commit the transaction
+            transaction.success();
+        }
+
+        return people;
     }
 
 

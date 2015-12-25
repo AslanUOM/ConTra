@@ -4,7 +4,6 @@ package com.aslan.contramodel.resource;
 import com.aslan.contra.dto.Location;
 import com.aslan.contra.dto.Time;
 import com.google.gson.Gson;
-import com.google.gson.JsonArray;
 import com.google.gson.reflect.TypeToken;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
@@ -15,14 +14,15 @@ import org.neo4j.harness.ServerControls;
 import org.neo4j.test.server.HTTP;
 
 import java.net.HttpURLConnection;
-import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
+import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
 
 /**
+ * Test class for the LocationResource service.
+ * <p>
  * Created by gobinath on 12/14/15.
  */
 public class LocationResourceTest {
@@ -93,6 +93,6 @@ public class LocationResourceTest {
 
         String[] expected = {"Majestic City", "Bambalapitiya Police Station"};
         String[] actual = {locations.get(0).getName(), locations.get(1).getName()};
-        assertEquals("Majestic City not found.", expected, actual);
+        assertArrayEquals("Majestic City not found.", expected, actual);
     }
 }

@@ -8,9 +8,9 @@ import org.slf4j.LoggerFactory;
 import java.util.HashMap;
 import java.util.Map;
 
-import static org.neo4j.helpers.collection.MapUtil.map;
-
 /**
+ * This class create the timeline associated with each Person.
+ * <p>
  * Created by gobinath on 12/11/15.
  */
 public class TimelineService extends Service {
@@ -39,7 +39,7 @@ public class TimelineService extends Service {
         if (personNode == null) {
             throw new NotFoundException("Person with userId " + userID + " is not found");
         }
-        Node rootNode = null;
+        Node rootNode;
         Relationship relationship = personNode.getSingleRelationship(RelationshipTypes.TIMELINE, Direction.OUTGOING);
         if (relationship == null) {
             rootNode = databaseService.createNode(Labels.TimelineRoot);
@@ -59,7 +59,7 @@ public class TimelineService extends Service {
         Node nextChild = rootChildren.get("next");
 
         if (currentChild == null) {
-            currentChild = assign(currentParent, getLabel(level), getValue(time, level));
+            currentChild = assign(level, time, currentParent, getLabel(level));
 
             if (preChild != null) {
                 deleteNextRelationship(preChild);
@@ -81,18 +81,18 @@ public class TimelineService extends Service {
 
     }
 
-    private Map<String, Node> getChildren(Node preParent, Node parent, Node nextParent, int value) {
+    private Map<String, Node> getChildren(final Node preParent, final Node parent, final Node nextParent, final int value) {
         Node previous = null;
         Node current = null;
         Node next = null;
         int preValue = Integer.MIN_VALUE;
         int nextValue = Integer.MAX_VALUE;
 
-        Iterable<Relationship> rootChildren = parent.getRelationships(Direction.OUTGOING, RelationshipTypes.CHILD);
+        Iterable<Relationship> relationships = parent.getRelationships(Direction.OUTGOING, RelationshipTypes.CHILD);
 
-        for (Relationship r : rootChildren) {
+        for (Relationship r : relationships) {
             Node node = r.getEndNode();
-            int currentValue = ((Integer) node.getProperty("value")).intValue();
+            int currentValue = (Integer) node.getProperty("value");
             if (currentValue == value) {
                 current = node;
             }
@@ -115,7 +115,7 @@ public class TimelineService extends Service {
             next = getFirstNode(nextParent);
         }
 
-        Map<String, Node> map = new HashMap<>();
+        final Map<String, Node> map = new HashMap<>();
         map.put("previous", previous);
         map.put("current", current);
         map.put("next", next);
@@ -131,7 +131,7 @@ public class TimelineService extends Service {
 
         for (Relationship r : rootChildren) {
             Node node = r.getEndNode();
-            int value = ((Integer) node.getProperty("value")).intValue();
+            int value = (Integer) node.getProperty("value");
 
             if (value > max) {
                 max = value;
@@ -149,7 +149,7 @@ public class TimelineService extends Service {
 
         for (Relationship r : rootChildren) {
             Node node = r.getEndNode();
-            int value = ((Integer) node.getProperty("value")).intValue();
+            int value = (Integer) node.getProperty("value");
 
             if (value < min) {
                 min = value;
@@ -169,10 +169,15 @@ public class TimelineService extends Service {
         }
     }
 
-    private Node assign(Node parent, Label label, int value) {
+    private Node assign(int level, Time time, Node parent, Label label) {
+        int value = getValue(time, level);
         LOGGER.debug("Assigning {} with value {} to {}", label, value, parent.getLabels().iterator().next());
         Node node = databaseService.createNode(label);
         node.setProperty("value", value);
+        // Minute - Assign the time in seconds
+        if (level == 5) {
+            node.setProperty("epoch", time.value());
+        }
         parent.createRelationshipTo(node, RelationshipTypes.CHILD);
 
         return node;

@@ -4,7 +4,6 @@ import com.aslan.contra.dto.ErrorMessage;
 import com.aslan.contra.dto.Location;
 import com.aslan.contra.dto.Time;
 import com.aslan.contramodel.service.LocationService;
-import org.codehaus.jackson.map.ObjectMapper;
 import org.neo4j.graphdb.GraphDatabaseService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -14,20 +13,18 @@ import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import java.net.HttpURLConnection;
-import java.time.LocalDateTime;
-import java.time.ZoneOffset;
 import java.util.List;
 
 import static com.aslan.contramodel.util.Utility.isNullOrEmpty;
 
 /**
+ * JAX-RS webservice for location related operations.
+ * <p>
  * Created by gobinath on 12/17/15.
  */
 @Path("/location")
 public class LocationResource {
     private static final Logger LOGGER = LoggerFactory.getLogger(LocationResource.class);
-
-    private static ObjectMapper OBJECT_MAPPER = new ObjectMapper();
     private LocationService service;
 
     public LocationResource(@Context GraphDatabaseService databaseService) {

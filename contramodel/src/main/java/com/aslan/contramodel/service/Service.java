@@ -5,14 +5,11 @@ import org.neo4j.graphdb.schema.IndexDefinition;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.HashMap;
-import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ConcurrentMap;
-
 import static org.neo4j.helpers.collection.MapUtil.map;
 
 /**
+ * A common super class for all the sub classes and contain common methods required by the sub services.
+ * <p>
  * Created by gobinath on 12/17/15.
  */
 public abstract class Service {
@@ -35,7 +32,7 @@ public abstract class Service {
     /**
      * Relationships required by this model.
      */
-    public static enum RelationshipTypes implements RelationshipType {
+    public enum RelationshipTypes implements RelationshipType {
         KNOWS, LOCATION, TIMELINE, CHILD, NEXT
     }
 
@@ -56,20 +53,6 @@ public abstract class Service {
             id = (Long) result.next().get("id");
         }
         return id;
-    }
-
-    public final Integer executeAndReturnValue(String query, Object... objects) {
-        Integer value = null;
-        Result result;
-        if (objects.length == 0) {
-            result = databaseService.execute(query);
-        } else {
-            result = databaseService.execute(query, map(objects));
-        }
-        if (result.hasNext()) {
-            value = (Integer) result.next().get("value");
-        }
-        return value;
     }
 
     /**

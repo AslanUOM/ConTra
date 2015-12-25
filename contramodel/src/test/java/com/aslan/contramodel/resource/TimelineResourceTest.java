@@ -18,6 +18,8 @@ import static org.junit.Assert.assertTrue;
 import static org.neo4j.helpers.collection.MapUtil.map;
 
 /**
+ * Test class for the TimelineResource service.
+ * <p>
  * Created by gobinath on 12/14/15.
  */
 public class TimelineResourceTest {
@@ -84,7 +86,7 @@ public class TimelineResourceTest {
             Result result = server.graph().execute("MATCH (:Person {userID: {phone_number}})-[:TIMELINE]->(:TimelineRoot)-[:CHILD]->(:Year {value: {year}})-[:CHILD]->(:Month {value: {month}})-[:CHILD]->(d:Day {value: {day}})-[:CHILD]->(:Hour {value: {hour}})-[:CHILD]->(m:Minute {value: {minute}}) RETURN COUNT(m) as count", map("phone_number", "+94771234567", "year", 1991, "month", 4, "day", 20, "hour", 4, "minute", 5));
             transaction.success();
 
-            assertEquals("Person is not created.", Long.valueOf(1), result.next().get("count"));
+            assertEquals("Person is not created.", 1L, result.next().get("count"));
         }
     }
 

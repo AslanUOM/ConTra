@@ -4,7 +4,8 @@ package com.aslan.contramodel.resource;
 import com.aslan.contra.dto.ErrorMessage;
 import com.aslan.contra.dto.Person;
 import com.aslan.contramodel.service.PersonService;
-import org.codehaus.jackson.map.ObjectMapper;
+import com.google.gson.Gson;
+import com.google.gson.reflect.TypeToken;
 import org.neo4j.graphdb.GraphDatabaseService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -15,17 +16,22 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import java.io.IOException;
 import java.net.HttpURLConnection;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 import static com.aslan.contramodel.util.Utility.isNullOrEmpty;
 
 /**
+ * JAX-RS webservice for person related operations.
+ * <p>
  * Created by gobinath on 12/8/15.
  */
 @Path("/person")
 public class PersonResource {
     private static final Logger LOGGER = LoggerFactory.getLogger(PersonResource.class);
 
-    private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
+    private static final Gson gson = new Gson();
     private PersonService service;
 
     public PersonResource(@Context GraphDatabaseService databaseService) {
@@ -108,6 +114,43 @@ public class PersonResource {
 
             response = Response.status(HttpURLConnection.HTTP_NOT_FOUND).entity(message).build();
         }
+        return response;
+    }
+
+    @POST
+    @Path("/nearby")
+    @Produces(MediaType.APPLICATION_JSON)
+    public Response nearByKnown(String raw) throws IOException {
+        Map<String, Object> params = gson.fromJson(raw, new TypeToken<HashMap<String, Object>>() {
+        }.getType());
+
+        String userID = (String) params.get("userID");
+        Double timeOne = (Double) params.get("timeOne");
+        Double timeTwo = (Double) params.get("timeTwo");
+
+        Double longitude = (Double) params.get("longitude");
+        Double latitude = (Double) params.get("latitude");
+        Double distance = (Double) params.get("distance");
+
+        LOGGER.debug("Request to find person with id {} is received", userID);
+        if (isNullOrEmpty(userID) || timeOne == null || timeTwo == null || longitude == null || latitude == null || distance == null) {
+            ErrorMessage message = new ErrorMessage();
+            message.setStatus(HttpURLConnection.HTTP_BAD_REQUEST);
+            message.setMessage("Required parameters are missing. Please make sure that you are passing userID, timeOne, timeTwo, longitude, latitude and distance");
+
+            return Response.status(HttpURLConnection.HTTP_BAD_REQUEST).entity(message).build();
+        }
+
+        Response response;
+        try {
+            List<String> result = service.nearByKnownPeople(userID, timeOne.longValue(), timeTwo.longValue(), longitude, latitude, distance);
+            response = Response.status(HttpURLConnection.HTTP_OK).entity(result).build();
+        } catch (org.neo4j.graphdb.NotFoundException ex) {
+            ErrorMessage message = new ErrorMessage(ex);
+            message.setStatus(HttpURLConnection.HTTP_NOT_FOUND);
+            response = Response.status(HttpURLConnection.HTTP_NOT_FOUND).entity(message).build();
+        }
+
         return response;
     }
 }

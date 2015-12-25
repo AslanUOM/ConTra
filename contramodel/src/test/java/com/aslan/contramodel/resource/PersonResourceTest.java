@@ -1,23 +1,29 @@
 package com.aslan.contramodel.resource;
 
 
+import com.aslan.contra.dto.Location;
 import com.aslan.contra.dto.Person;
+import com.aslan.contra.dto.Time;
+import com.aslan.contramodel.service.Service;
 import com.google.gson.Gson;
+import com.google.gson.reflect.TypeToken;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
-import org.neo4j.function.Function;
 import org.neo4j.graphdb.*;
 import org.neo4j.harness.ServerControls;
-import org.neo4j.harness.TestServerBuilders;
 import org.neo4j.test.server.HTTP;
 
 import java.net.HttpURLConnection;
+import java.util.List;
+import java.util.Map;
 
 import static org.junit.Assert.assertEquals;
 import static org.neo4j.helpers.collection.MapUtil.map;
 
 /**
+ * Testing PersonResource class.
+ * <p>
  * Created by gobinath on 12/9/15.
  */
 public class PersonResourceTest {
@@ -52,10 +58,7 @@ public class PersonResourceTest {
 
     @Test
     public void testCreate() throws Exception {
-        Person person = new Person();
-        person.setName("Carol");
-        person.setEmail("carol@gmail.com");
-        person.setUserID("+94773333333");
+        Person person = TestUtility.createPerson("+94773333333", "Carol", "carol@gmail.com");
 
         HTTP.Response response = HTTP.POST(server.httpURI().resolve("/contra/person/create").toString(), person);
 
@@ -74,10 +77,7 @@ public class PersonResourceTest {
 
     @Test
     public void testUpdate() throws Exception {
-        Person person = new Person();
-        person.setName("Bob");
-        person.setEmail("bob@gmail.com");
-        person.setUserID("+94779999999");
+        Person person = TestUtility.createPerson("+94779999999", "Bob", "bob@gmail.com");
 
         HTTP.POST(server.httpURI().resolve("/contra/person/create").toString(), person);
 
@@ -115,9 +115,55 @@ public class PersonResourceTest {
 
         // Manually retrieve Bob.
         try (Transaction transaction = databaseService.beginTx()) {
-            Result result = databaseService.execute("MATCH (p:Person {userID: '+94771234567'})-[:KNOWS]->(f:Person) RETURN f.userID as userID");
+            Node person = databaseService.findNode(Service.Labels.Person, "userID", "+94771234567");
+            Relationship relationship = person.getSingleRelationship(Service.RelationshipTypes.KNOWS, Direction.OUTGOING);
+            Node friend = relationship.getEndNode();
+            transaction.success();
             // Check the name of the inserted person.
-            assertEquals("Relationship is not created.", "+94770000000", result.next().get("userID"));
+            assertEquals("Relationship is not created.", "+94770000000", friend.getProperty("userID"));
         }
+    }
+
+    @Test
+    public void testNearByKnownPeople() throws Exception {
+        // Create Gobinath
+        TestUtility.savePerson(databaseService, "+94770652425", "Gobinath", "gobinath@gmail.com");
+
+        // Define +94771234567 and +94770000000 are friends
+        HTTP.POST(server.httpURI().resolve("/contra/person/knows?person=+94771234567&friend=+94770000000").toString());
+
+        // Create a location a time
+        Location location = TestUtility.createLocation("Majestic City", 79.8545904, 6.8934421);
+        Time time = TestUtility.createTime(2015, 12, 24, 9, 1, 0);
+
+        // Say +94771234567 is in MC
+        HTTP.POST(server.httpURI().resolve("/contra/location/create/+94771234567?time=" + time.value()).toString(), location);
+        // Say Gobinath also in MC but Gobinath is not a friend of +94771234567
+        HTTP.POST(server.httpURI().resolve("/contra/location/create/+94770652425?time=" + time.value()).toString(), location);
+
+        // Change the location to police station and change the time
+        location = TestUtility.createLocation("Police Station", 79.8551745, 6.8921768);
+        time.setMinute(10);
+
+        // Say +94770000000 is in the police station
+        HTTP.POST(server.httpURI().resolve("/contra/location/create/+94770000000?time=" + time.value()).toString(), location);
+
+        // Search for near by friends of +94771234567
+        Time time1 = TestUtility.createTime(2015, 12, 24, 9, 0, 0);
+        Time time2 = TestUtility.createTime(2015, 12, 24, 10, 0, 0);
+        Map<String, Object> map = map("userID", "+94771234567", "timeOne", time1.value(), "timeTwo", time2.value(), "longitude", 79.8551746, "latitude", 6.8934422, "distance", 100.0);
+        HTTP.Response response = HTTP.POST(server.httpURI().resolve("/contra/person/nearby").toString(), map);
+
+        // Check the status.
+        assertEquals("Error in request.", HttpURLConnection.HTTP_OK, response.status());
+
+        Gson gson = new Gson();
+        List<String> people = gson.fromJson(response.rawContent(), new TypeToken<List<String>>() {
+        }.getType());
+
+        // Exactly one friend should be returned (Not Gobinath)
+        assertEquals("Exact number of friends are not found.", 1, people.size());
+
+        assertEquals("Near by friend is not found.", "+94770000000", people.get(0));
     }
 }
