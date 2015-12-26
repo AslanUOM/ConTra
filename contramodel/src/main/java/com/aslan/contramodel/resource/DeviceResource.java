@@ -1,8 +1,9 @@
 package com.aslan.contramodel.resource;
 
+import com.aslan.contra.dto.Device;
 import com.aslan.contra.dto.ErrorMessage;
-import com.aslan.contra.dto.Location;
 import com.aslan.contra.dto.UserLocation;
+import com.aslan.contramodel.service.DeviceService;
 import com.aslan.contramodel.service.LocationService;
 import org.neo4j.graphdb.GraphDatabaseService;
 import org.slf4j.Logger;
@@ -13,42 +14,45 @@ import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import java.net.HttpURLConnection;
-import java.util.List;
+
+import static com.aslan.contramodel.util.Utility.isNullOrEmpty;
 
 /**
- * JAX-RS webservice for location related operations.
+ * JAX-RS webservice for device related operations.
  * <p>
- * Created by gobinath on 12/17/15.
+ * Created by gobinath on 12/26/15.
  */
-@Path("/location")
-public class LocationResource {
+@Path("/device")
+public class DeviceResource {
     private static final Logger LOGGER = LoggerFactory.getLogger(LocationResource.class);
-    private LocationService service;
+    private DeviceService service;
 
-    public LocationResource(@Context GraphDatabaseService databaseService) {
-        this.service = new LocationService(databaseService);
+    public DeviceResource(@Context GraphDatabaseService databaseService) {
+        this.service = new DeviceService(databaseService);
     }
 
     @POST
-    @Path("/create")
+    @Path("/create/{userID}")
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
-    public Response createLocation(UserLocation location) {
-        LOGGER.debug("Request to create location {}", location);
+    public Response createDevice(@PathParam("userID") String userID, Device device) {
+        LOGGER.debug("Request to create device {} of {}", device, userID);
         Response response;
 
-        if (location == null) {
+        if (isNullOrEmpty(userID) || device == null) {
             ErrorMessage message = new ErrorMessage();
             message.setStatus(HttpURLConnection.HTTP_BAD_REQUEST);
-            message.setMessage("UserLocation is not available");
+            message.setMessage("UserID or device is not available");
 
             response = Response.status(HttpURLConnection.HTTP_BAD_REQUEST).entity(message).build();
         } else {
             try {
-                service.createCurrentLocation(location);
+                service.createDevice(userID, device);
 
                 response = Response.status(HttpURLConnection.HTTP_OK).build();
             } catch (org.neo4j.graphdb.NotFoundException e) {
+                LOGGER.error("Person with userID " + userID + " not found.", e);
+
                 ErrorMessage message = new ErrorMessage(e);
                 message.setStatus(HttpURLConnection.HTTP_NO_CONTENT);
                 response = Response.status(HttpURLConnection.HTTP_NO_CONTENT).entity(message).build();
@@ -57,17 +61,5 @@ public class LocationResource {
         }
 
         return response;
-    }
-
-    @GET
-    @Path("/findwithin")
-    @Consumes(MediaType.APPLICATION_JSON)
-    @Produces(MediaType.APPLICATION_JSON)
-    public Response findLocationsWithin(@QueryParam("longitude") double longitude, @QueryParam("latitude") double latitude, @QueryParam("distance") double distance) {
-        LOGGER.debug("Request to find locations within {} km from {}:{}", distance, longitude, latitude);
-
-        List<Location> locations = service.findLocationsWithin(longitude, latitude, distance);
-
-        return Response.status(HttpURLConnection.HTTP_OK).entity(locations).build();
     }
 }

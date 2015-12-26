@@ -7,7 +7,7 @@ import java.io.Serializable;
  */
 public class Location implements Serializable {
     private String name;
-    private String code;
+    private String locationID;
     // private Location parent;
     /**
      * Northing - Use it as Y.
@@ -26,12 +26,12 @@ public class Location implements Serializable {
         this.name = name;
     }
 
-    public String getCode() {
-        return code;
+    public String getLocationID() {
+        return locationID;
     }
 
-    public void setCode(String code) {
-        this.code = code;
+    public void setLocationID(String locationID) {
+        this.locationID = locationID;
     }
 
     public double getLatitude() {

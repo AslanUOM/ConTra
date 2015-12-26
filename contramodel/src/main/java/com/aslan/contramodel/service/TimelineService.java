@@ -1,6 +1,7 @@
 package com.aslan.contramodel.service;
 
 import com.aslan.contra.dto.Time;
+import com.aslan.contramodel.util.Constant;
 import org.neo4j.graphdb.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -15,7 +16,7 @@ import java.util.Map;
  */
 public class TimelineService extends Service {
     private static final Logger LOGGER = LoggerFactory.getLogger(TimelineService.class);
-
+    private static final int MAX_LEVEL = 5;
 
     public TimelineService(GraphDatabaseService databaseService) {
         super(databaseService);
@@ -33,13 +34,51 @@ public class TimelineService extends Service {
         }
     }
 
+    public Node findPreviousTime(String userID, Time time) {
+        LOGGER.debug("Searching for the time before {} in the timeline of {}", time, userID);
+
+        Node previousTime = null;
+        try (Transaction transaction = databaseService.beginTx()) {
+            Node rootNode = createTimelineRoot(userID);
+            previousTime = findPreviousTime(null, rootNode, null, time, 1);
+
+            transaction.success();
+        }
+
+        return previousTime;
+    }
+
+    private Node findPreviousTime(Node preParent, Node currentParent, Node nextParent, Time time, int level) {
+        Map<String, Node> rootChildren = getChildren(preParent, currentParent, nextParent, getValue(time, level));
+        Node preChild = rootChildren.get("previous");
+        Node currentChild = rootChildren.get("current");
+        Node nextChild = rootChildren.get("next");
+
+        if (level == MAX_LEVEL) {
+            return preChild;
+        } else {
+            return findPreviousTime(preChild, currentChild, nextChild, time, level + 1);
+        }
+    }
+
+    /**
+     * Create and return the unique TimelineRoot node for the person. If the node already exists, returns the existing node.
+     * This method must be called between a Transaction.
+     *
+     * @param userID user id of the Person
+     * @return the TimelineRoot node of the Person
+     */
     private Node createTimelineRoot(String userID) {
         LOGGER.debug("Creating TimelineRoot for {}", userID);
-        Node personNode = databaseService.findNode(Labels.Person, "userID", userID);
+        Node personNode = databaseService.findNode(Labels.Person, Constant.USER_ID, userID);
+
+        // Check the availability of the Person
         if (personNode == null) {
-            throw new NotFoundException("Person with userId " + userID + " is not found");
+            throw new NotFoundException("Person with userID " + userID + " is not found");
         }
+
         Node rootNode;
+        // Search for existing relationship Person -[:TIMELINE]-> TimelineRoot
         Relationship relationship = personNode.getSingleRelationship(RelationshipTypes.TIMELINE, Direction.OUTGOING);
         if (relationship == null) {
             rootNode = databaseService.createNode(Labels.TimelineRoot);
@@ -62,7 +101,7 @@ public class TimelineService extends Service {
             currentChild = assign(level, time, currentParent, getLabel(level));
 
             if (preChild != null) {
-                deleteNextRelationship(preChild);
+                deleteExistingNextRelationship(preChild);
                 // Create next relationship
                 preChild.createRelationshipTo(currentChild, RelationshipTypes.NEXT);
             }
@@ -73,7 +112,7 @@ public class TimelineService extends Service {
             }
 
         }
-        if (level == 5) {
+        if (level == MAX_LEVEL) {
             return currentChild;
         } else {
             return createSub(level + 1, time, preChild, currentChild, nextChild);
@@ -92,7 +131,7 @@ public class TimelineService extends Service {
 
         for (Relationship r : relationships) {
             Node node = r.getEndNode();
-            int currentValue = (Integer) node.getProperty("value");
+            int currentValue = (Integer) node.getProperty(Constant.VALUE);
             if (currentValue == value) {
                 current = node;
             }
@@ -131,7 +170,7 @@ public class TimelineService extends Service {
 
         for (Relationship r : rootChildren) {
             Node node = r.getEndNode();
-            int value = (Integer) node.getProperty("value");
+            int value = (Integer) node.getProperty(Constant.VALUE);
 
             if (value > max) {
                 max = value;
@@ -149,7 +188,7 @@ public class TimelineService extends Service {
 
         for (Relationship r : rootChildren) {
             Node node = r.getEndNode();
-            int value = (Integer) node.getProperty("value");
+            int value = (Integer) node.getProperty(Constant.VALUE);
 
             if (value < min) {
                 min = value;
@@ -160,7 +199,12 @@ public class TimelineService extends Service {
         return first;
     }
 
-    private void deleteNextRelationship(Node node) {
+    /**
+     * Delete the (node) -[NEXT]-> () relationship if exist.
+     *
+     * @param node the current node
+     */
+    private void deleteExistingNextRelationship(Node node) {
         if (node != null) {
             Relationship relationship = node.getSingleRelationship(RelationshipTypes.NEXT, Direction.OUTGOING);
             if (relationship != null) {
@@ -173,10 +217,10 @@ public class TimelineService extends Service {
         int value = getValue(time, level);
         LOGGER.debug("Assigning {} with value {} to {}", label, value, parent.getLabels().iterator().next());
         Node node = databaseService.createNode(label);
-        node.setProperty("value", value);
+        node.setProperty(Constant.VALUE, value);
         // Minute - Assign the time in seconds
-        if (level == 5) {
-            node.setProperty("epoch", time.value());
+        if (level == MAX_LEVEL) {
+            node.setProperty(Constant.EPOCH, time.value());
         }
         parent.createRelationshipTo(node, RelationshipTypes.CHILD);
 
@@ -206,6 +250,9 @@ public class TimelineService extends Service {
             case 5:
                 value = time.getMinute();
                 break;
+
+            default:
+                throw new IllegalArgumentException("Level must be within 1 to 5: " + level);
         }
 
         return value;
@@ -234,6 +281,9 @@ public class TimelineService extends Service {
             case 5:
                 label = Labels.Minute;
                 break;
+
+            default:
+                throw new IllegalArgumentException("Level must be within 1 to 5: " + level);
         }
 
         return label;

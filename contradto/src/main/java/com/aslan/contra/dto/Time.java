@@ -1,14 +1,16 @@
 package com.aslan.contra.dto;
 
 import java.io.Serializable;
+import java.time.Instant;
 import java.util.Calendar;
 import java.util.Date;
 
 /**
+ * A generic representation of YYY-MM-DD:HH.MM
+ * <p>
  * Created by gobinath on 12/22/15.
  */
 public class Time implements Serializable {
-    private static Calendar calendar = Calendar.getInstance();
     private int year;
     private int month;
     private int day;
@@ -86,12 +88,42 @@ public class Time implements Serializable {
     }
 
     public long value() {
+        return toDate().getTime();
+    }
+
+    public Date toDate() {
+        Calendar calendar = Calendar.getInstance();
         calendar.set(year, month - 1, day, hour, minute, second);
-        return calendar.getTime().getTime();
+        return calendar.getTime();
     }
 
     public static Time valueOf(long value) {
+        Calendar calendar = Calendar.getInstance();
         calendar.setTimeInMillis(value);
+        Time time = new Time();
+        time.year = calendar.get(Calendar.YEAR);
+        time.month = calendar.get(Calendar.MONTH) + 1;
+        time.day = calendar.get(Calendar.DATE);
+        time.hour = calendar.get(Calendar.HOUR_OF_DAY);
+        time.minute = calendar.get(Calendar.MINUTE);
+        time.second = calendar.get(Calendar.SECOND);
+
+        return time;
+    }
+
+    public static Time now() {
+        Date date = new Date();
+
+        return fromDate(date);
+    }
+
+    public static Time fromDate(Date date) {
+        Calendar calendar = Calendar.getInstance();
+        calendar.setTime(date);
+        return fromCalendar(calendar);
+    }
+
+    public static Time fromCalendar(Calendar calendar) {
         Time time = new Time();
         time.year = calendar.get(Calendar.YEAR);
         time.month = calendar.get(Calendar.MONTH) + 1;

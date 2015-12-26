@@ -4,6 +4,7 @@ package com.aslan.contramodel.resource;
 import com.aslan.contra.dto.Location;
 import com.aslan.contra.dto.Person;
 import com.aslan.contra.dto.Time;
+import com.aslan.contra.dto.UserLocation;
 import com.aslan.contramodel.service.Service;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
@@ -132,21 +133,24 @@ public class PersonResourceTest {
         // Define +94771234567 and +94770000000 are friends
         HTTP.POST(server.httpURI().resolve("/contra/person/knows?person=+94771234567&friend=+94770000000").toString());
 
-        // Create a location a time
-        Location location = TestUtility.createLocation("Majestic City", 79.8545904, 6.8934421);
+        // Create a location and time
         Time time = TestUtility.createTime(2015, 12, 24, 9, 1, 0);
+        UserLocation location = TestUtility.createUserLocation("+94771234567", "Samsung", 70.0f, "Majestic City", 79.8545904, 6.8934421, time);
+
 
         // Say +94771234567 is in MC
-        HTTP.POST(server.httpURI().resolve("/contra/location/create/+94771234567?time=" + time.value()).toString(), location);
+        HTTP.POST(server.httpURI().resolve("/contra/location/create").toString(), location);
+
+        location.setUserID("+94770652425");
         // Say Gobinath also in MC but Gobinath is not a friend of +94771234567
-        HTTP.POST(server.httpURI().resolve("/contra/location/create/+94770652425?time=" + time.value()).toString(), location);
+        HTTP.POST(server.httpURI().resolve("/contra/location/create").toString(), location);
 
         // Change the location to police station and change the time
-        location = TestUtility.createLocation("Police Station", 79.8551745, 6.8921768);
         time.setMinute(10);
+        location = TestUtility.createUserLocation("+94770000000", "Sony", 70.0f, "Police Station", 79.8551745, 6.8921768, time);
 
         // Say +94770000000 is in the police station
-        HTTP.POST(server.httpURI().resolve("/contra/location/create/+94770000000?time=" + time.value()).toString(), location);
+        HTTP.POST(server.httpURI().resolve("/contra/location/create").toString(), location);
 
         // Search for near by friends of +94771234567
         Time time1 = TestUtility.createTime(2015, 12, 24, 9, 0, 0);

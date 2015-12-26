@@ -2,14 +2,13 @@ package com.aslan.contramodel.service;
 
 
 import com.aslan.contra.dto.Location;
-import com.aslan.contra.dto.Time;
+import com.aslan.contra.dto.UserLocation;
+import com.aslan.contramodel.util.Constant;
 import com.vividsolutions.jts.geom.Coordinate;
 import org.neo4j.gis.spatial.SimplePointLayer;
 import org.neo4j.gis.spatial.SpatialDatabaseService;
 import org.neo4j.gis.spatial.pipes.GeoPipeFlow;
-import org.neo4j.graphdb.GraphDatabaseService;
-import org.neo4j.graphdb.Node;
-import org.neo4j.graphdb.Transaction;
+import org.neo4j.graphdb.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -18,10 +17,11 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import static com.aslan.contramodel.util.Utility.isNullOrEmpty;
-
 /**
  * This class create, update and query the database regarding the entity Location.
+ * <p>
+ *
+ * @see com.aslan.contra.dto.Location
  * <p>
  * Created by gobinath on 12/16/15.
  */
@@ -54,42 +54,64 @@ public class LocationService extends Service {
             transaction.success();
         }
 
-        createIndex(Labels.Location, "code");
+        createIndex(Labels.Location, Constant.LOCATION_ID);
     }
 
-    public void createCurrentLocation(String userID, Location location, Time time) {
-        LOGGER.debug("Creating location {} and adding to {} at {}", location, userID, time);
-        if (isNullOrEmpty(userID) || location == null) {
+    public void createCurrentLocation(UserLocation userLocation) {
+        LOGGER.debug("Creating location {}", userLocation);
+        if (userLocation == null) {
             return;
         }
 
-        Node timeNode = timelineService.createTime(userID, time);
+        final String userID = userLocation.getUserID();
+        final Location location = userLocation.getLocation();
+
+        Node timeNode = timelineService.createTime(userID, userLocation.getTime());
 
         // Begin the transaction
         try (Transaction transaction = databaseService.beginTx()) {
             // Search for existing location
-            Node locationNode = databaseService.findNode(Labels.Location, "code", location.getCode());
+            Node locationNode = databaseService.findNode(Labels.Location, Constant.LOCATION_ID, location.getLocationID());
 
             if (locationNode == null) {
                 // It is a new location
                 locationNode = databaseService.createNode(Labels.Location);
-                locationNode.setProperty("name", location.getName());
-                locationNode.setProperty("code", location.getCode());
-                locationNode.setProperty("latitude", location.getLatitude());
-                locationNode.setProperty("longitude", location.getLongitude());
-                locationNode.setProperty("id", locationNode.getId());
+                locationNode.setProperty(Constant.NAME, location.getName());
+                locationNode.setProperty(Constant.LOCATION_ID, location.getLocationID());
+                locationNode.setProperty(Constant.LATITUDE, location.getLatitude());
+                locationNode.setProperty(Constant.LONGITUDE, location.getLongitude());
+                locationNode.setProperty(Constant.ID, locationNode.getId());
 
-                timeNode.createRelationshipTo(locationNode, RelationshipTypes.LOCATION);
+                Relationship relationship = timeNode.createRelationshipTo(locationNode, RelationshipTypes.LOCATION);
+                relationship.setProperty(Constant.ACCURACY, userLocation.getAccuracy());
+                relationship.setProperty(Constant.DEVICE_ID, userLocation.getDeviceID());
 
                 // Add to the layer
                 layer.add(locationNode);
 
                 LOGGER.debug("New location {} with id {} is created and added to the person {}", location, locationNode.getId(), userID);
             } else {
-                // Location already exists
-                timeNode.createRelationshipTo(locationNode, RelationshipTypes.LOCATION);
+                // Check existing locations
+                boolean locationAlreadyAdded = false;
 
-                LOGGER.debug("Existing location {} with id {} is added to the person {}", location, locationNode.getId(), userID);
+                Iterable<Relationship> relationships = timeNode.getRelationships(RelationshipTypes.LOCATION, Direction.OUTGOING);
+                for (Relationship r : relationships) {
+                    Node node = r.getEndNode();
+                    if (node.getProperty(Constant.LOCATION_ID).equals(location.getLocationID())) {
+                        // This location is added already
+                        locationAlreadyAdded = true;
+                        break;
+                    }
+                }
+
+                if (!locationAlreadyAdded) {
+                    // Location already exists
+                    Relationship relationship = timeNode.createRelationshipTo(locationNode, RelationshipTypes.LOCATION);
+                    relationship.setProperty(Constant.ACCURACY, userLocation.getAccuracy());
+                    relationship.setProperty(Constant.DEVICE_ID, userLocation.getDeviceID());
+
+                    LOGGER.debug("Existing location {} with id {} is added to the person {}", location, locationNode.getId(), userID);
+                }
             }
             transaction.success();
         }
@@ -108,8 +130,8 @@ public class LocationService extends Service {
 
             for (GeoPipeFlow flow : list) {
                 Location loc = new Location();
-                loc.setName((String) flow.getRecord().getProperty("name"));
-                loc.setCode((String) flow.getRecord().getProperty("code"));
+                loc.setName((String) flow.getRecord().getProperty(Constant.NAME));
+                loc.setLocationID((String) flow.getRecord().getProperty(Constant.LOCATION_ID));
                 //flow.getRecord()
                 Coordinate c = flow.getGeometry().getCoordinate();
                 loc.setLatitude(c.y);

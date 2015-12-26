@@ -3,6 +3,7 @@ package com.aslan.contramodel.resource;
 import com.aslan.contra.dto.Location;
 import com.aslan.contra.dto.Person;
 import com.aslan.contra.dto.Time;
+import com.aslan.contra.dto.UserLocation;
 import org.neo4j.function.Function;
 import org.neo4j.graphdb.GraphDatabaseService;
 import org.neo4j.graphdb.Transaction;
@@ -54,10 +55,10 @@ public class TestUtility {
         return person;
     }
 
-    public static Location createLocation(String name, String code, double longitude, double latitude) {
+    public static Location createLocation(String name, String locationID, double longitude, double latitude) {
         Location location = new Location();
         location.setName(name);
-        location.setCode(code);
+        location.setLocationID(locationID);
         location.setLongitude(longitude);
         location.setLatitude(latitude);
 
@@ -65,8 +66,19 @@ public class TestUtility {
     }
 
     public static Location createLocation(String name, double longitude, double latitude) {
-        String code = longitude + ":" + latitude;
-        return createLocation(name, code, longitude, latitude);
+        String locationID = longitude + ":" + latitude;
+        return createLocation(name, locationID, longitude, latitude);
+    }
+
+    public static UserLocation createUserLocation(String userID, String deviceID, float accuracy, String name, double longitude, double latitude, Time time) {
+        UserLocation userLocation = new UserLocation();
+        userLocation.setUserID(userID);
+        userLocation.setDeviceID(deviceID);
+        userLocation.setAccuracy(accuracy);
+        userLocation.setTime(time);
+        userLocation.setLocation(createLocation(name, longitude, latitude));
+
+        return userLocation;
     }
 
     public static Time createTime(int year, int month, int day, int hour, int min, int sec) {

@@ -20,6 +20,9 @@ public abstract class Service {
     public static class Labels {
         public static final Label Location = DynamicLabel.label("Location");
         public static final Label Person = DynamicLabel.label("Person");
+        public static final Label Device = DynamicLabel.label("Device");
+
+        // Following labels are used for the Nodes to represent time
         public static final Label TimelineRoot = DynamicLabel.label("TimelineRoot");
         public static final Label Year = DynamicLabel.label("Year");
         public static final Label Month = DynamicLabel.label("Month");
@@ -30,10 +33,39 @@ public abstract class Service {
 
 
     /**
-     * Relationships required by this model.
+     * Relationships between models in ConTra model.
      */
     public enum RelationshipTypes implements RelationshipType {
-        KNOWS, LOCATION, TIMELINE, CHILD, NEXT
+        /**
+         * Person -[:KNOWS]-> Person
+         */
+        KNOWS,
+
+        /**
+         * Minute -[:LOCATION]-> Location
+         */
+        LOCATION,
+
+        /**
+         * Person -[:TIMELINE]-> TimelineRoot
+         */
+        TIMELINE,
+
+        /**
+         * TimelineRoot -[:CHILD]-> Year -[:CHILD]-> Month -[:CHILD]-> Day -[:CHILD]-> Hour -[:CHILD]-> Minute
+         */
+        CHILD,
+
+        /**
+         * Year -[:NEXT]-> Year, Month -[:NEXT]-> Month, Day -[:NEXT]-> Day,
+         * Hour -[:NEXT]-> Hour, Minute -[:NEXT]-> Minute
+         */
+        NEXT,
+
+        /**
+         * Person -[:HAS]-> Device
+         */
+        HAS
     }
 
 

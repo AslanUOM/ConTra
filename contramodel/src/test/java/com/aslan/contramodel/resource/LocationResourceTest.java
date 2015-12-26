@@ -3,7 +3,11 @@ package com.aslan.contramodel.resource;
 
 import com.aslan.contra.dto.Location;
 import com.aslan.contra.dto.Time;
+import com.aslan.contra.dto.UserLocation;
+import com.aslan.contramodel.util.Constant;
 import com.google.gson.Gson;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
 import com.google.gson.reflect.TypeToken;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
@@ -53,10 +57,11 @@ public class LocationResourceTest {
 
     @Test
     public void testCreateLocation() throws Exception {
-        Location mc = TestUtility.createLocation("Majestic City", 79.8547, 6.8939);
         Time time = TestUtility.createTime(2015, 12, 24, 9, 1, 0);
+        UserLocation mc = TestUtility.createUserLocation("+94771234567", "HTC-ONEM8", 98.0f, "Majestic City", 79.8547, 6.8939, time);
 
-        HTTP.Response response = HTTP.POST(server.httpURI().resolve("/contra/location/create/+94771234567?time=" + time.value()).toString(), mc);
+
+        HTTP.Response response = HTTP.POST(server.httpURI().resolve("/contra/location/create").toString(), mc);
 
         // Check the status.
         assertEquals("Error in request.", HttpURLConnection.HTTP_OK, response.status());
@@ -70,15 +75,20 @@ public class LocationResourceTest {
 
     @Test
     public void testFindWithin() throws Exception {
-        Location location = TestUtility.createLocation("Majestic City", 79.8545904, 6.8934421);
         Time time = TestUtility.createTime(2015, 12, 24, 9, 1, 0);
+        UserLocation userLocation = TestUtility.createUserLocation("+94771234567", "HTC-ONEM8", 70.0f, "Majestic City", 79.8545904, 6.8934421, time);
 
-        HTTP.POST(server.httpURI().resolve("/contra/location/create/+94771234567?time=" + time.value()).toString(), location);
 
-        location = TestUtility.createLocation("Bambalapitiya Police Station", 79.8551745, 6.8921768);
+        HTTP.POST(server.httpURI().resolve("/contra/location/create").toString(), userLocation);
 
-        time.setMinute(30);
-        HTTP.POST(server.httpURI().resolve("/contra/location/create/+94771234567?time=" + time.value()).toString(), location);
+        userLocation.getTime().setMinute(30);
+        Location location = userLocation.getLocation();
+        location.setName("Bambalapitiya Police Station");
+        location.setLocationID("79.8551745:6.8921768");
+        location.setLongitude(79.8551745);
+        location.setLatitude(6.8921768);
+
+        HTTP.POST(server.httpURI().resolve("/contra/location/create").toString(), userLocation);
 
         HTTP.Response response = HTTP.GET(server.httpURI().resolve("/contra/location/findwithin?longitude=79.8547&latitude=6.8939&distance=10").toString());
 
