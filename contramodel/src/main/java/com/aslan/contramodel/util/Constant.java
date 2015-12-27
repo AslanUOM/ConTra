@@ -69,6 +69,8 @@ public class Constant {
      */
     public static final String USER_ID = "userID";
 
+    public static final String EMAIL = "email";
+
 
     /**
      * Related to Time

@@ -1,9 +1,9 @@
 package com.aslan.contramodel.resource;
 
-import com.aslan.contra.dto.Location;
-import com.aslan.contra.dto.Person;
-import com.aslan.contra.dto.Time;
-import com.aslan.contra.dto.UserLocation;
+import com.aslan.contra.dto.common.Location;
+import com.aslan.contra.dto.common.Person;
+import com.aslan.contra.dto.common.Time;
+import com.aslan.contra.dto.ws.UserLocation;
 import org.neo4j.function.Function;
 import org.neo4j.graphdb.GraphDatabaseService;
 import org.neo4j.graphdb.Transaction;

@@ -1,6 +1,6 @@
 package com.aslan.contramodel.service;
 
-import com.aslan.contra.dto.Time;
+import com.aslan.contra.dto.common.Time;
 import com.aslan.contramodel.util.Constant;
 import org.neo4j.graphdb.*;
 import org.slf4j.Logger;

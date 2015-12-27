@@ -1,4 +1,7 @@
-package com.aslan.contra.dto;
+package com.aslan.contra.dto.ws;
+
+import com.aslan.contra.dto.common.Location;
+import com.aslan.contra.dto.common.Time;
 
 import javax.validation.Valid;
 import javax.validation.constraints.NotNull;

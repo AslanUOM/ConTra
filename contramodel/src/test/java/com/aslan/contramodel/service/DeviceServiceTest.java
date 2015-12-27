@@ -1,7 +1,7 @@
 package com.aslan.contramodel.service;
 
-import com.aslan.contra.dto.Device;
-import com.aslan.contra.dto.Time;
+import com.aslan.contra.dto.common.Device;
+import com.aslan.contra.dto.common.Time;
 import com.aslan.contramodel.resource.PersonResource;
 import com.aslan.contramodel.resource.TestUtility;
 import com.aslan.contramodel.util.Constant;

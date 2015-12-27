@@ -1,4 +1,4 @@
-package com.aslan.contra.dto;
+package com.aslan.contra.dto.common;
 
 /**
  * Created by gobinath on 12/16/15.

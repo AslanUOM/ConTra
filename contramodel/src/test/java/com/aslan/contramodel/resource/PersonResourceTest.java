@@ -1,9 +1,11 @@
 package com.aslan.contramodel.resource;
 
 
-import com.aslan.contra.dto.Person;
-import com.aslan.contra.dto.Time;
-import com.aslan.contra.dto.UserLocation;
+import com.aslan.contra.dto.common.Person;
+import com.aslan.contra.dto.common.Time;
+import com.aslan.contra.dto.ws.Message;
+import com.aslan.contra.dto.ws.NearbyKnownPeople;
+import com.aslan.contra.dto.ws.UserLocation;
 import com.aslan.contramodel.service.Service;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
@@ -45,9 +47,14 @@ public class PersonResourceTest {
     @Test
     public void testFind() throws Exception {
         HTTP.Response response = HTTP.GET(server.httpURI().resolve("/contra/person/find/+94771234567").toString());
+
         Gson gson = new Gson();
-        Person person = gson.fromJson(response.rawContent(), Person.class);
-        assertEquals("Failed to find the person", "Alice", person.getName());
+
+        Message<Person> message = gson.fromJson(response.rawContent(), new TypeToken<Message<Person>>() {
+        }.getType());
+
+
+        assertEquals("Failed to find the person", "Alice", message.getEntity().getName());
     }
 
     @Test
@@ -98,7 +105,7 @@ public class PersonResourceTest {
     public void testCreateWithNullProperties() throws Exception {
         Person person = new Person();
         person.setName("Bob");
-        person.setUserID("+94774444444");
+        person.setEmail("bob@gmail.com");
 
         HTTP.Response response = HTTP.POST(server.httpURI().resolve("/contra/person/create").toString(), person);
 
@@ -154,19 +161,28 @@ public class PersonResourceTest {
         // Search for near by friends of +94771234567
         Time time1 = new Time(2015, 12, 24, 9, 0, 0);
         Time time2 = new Time(2015, 12, 24, 10, 0, 0);
-        Map<String, Object> map = map("userID", "+94771234567", "timeOne", time1.value(), "timeTwo", time2.value(), "longitude", 79.8551746, "latitude", 6.8934422, "distance", 100.0);
-        HTTP.Response response = HTTP.POST(server.httpURI().resolve("/contra/person/nearby").toString(), map);
+
+        NearbyKnownPeople param = new NearbyKnownPeople();
+        param.setUserID("+94771234567");
+        param.setStartTime(time1);
+        param.setEndTime(time2);
+        param.setLongitude(79.8551746);
+        param.setLatitude(6.8934422);
+        param.setDistance(100.0);
+
+        HTTP.Response response = HTTP.POST(server.httpURI().resolve("/contra/person/nearby").toString(), param);
 
         // Check the status.
         assertEquals("Error in request.", HttpURLConnection.HTTP_OK, response.status());
 
         Gson gson = new Gson();
-        List<String> people = gson.fromJson(response.rawContent(), new TypeToken<List<String>>() {
+
+        Message<List<String>> message = gson.fromJson(response.rawContent(), new TypeToken<Message<List<String>>>() {
         }.getType());
 
         // Exactly one friend should be returned (Not Gobinath)
-        assertEquals("Exact number of friends are not found.", 1, people.size());
+        assertEquals("Exact number of friends are not found.", 1, message.getEntity().size());
 
-        assertEquals("Near by friend is not found.", "+94770000000", people.get(0));
+        assertEquals("Near by friend is not found.", "+94770000000", message.getEntity().get(0));
     }
 }

@@ -1,7 +1,9 @@
 package com.aslan.contramodel.service;
 
 
-import com.aslan.contra.dto.Person;
+import com.aslan.contra.dto.common.Person;
+import com.aslan.contra.dto.ws.NearbyKnownPeople;
+import com.aslan.contramodel.util.Constant;
 import org.neo4j.graphdb.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -9,11 +11,12 @@ import org.slf4j.LoggerFactory;
 import java.util.ArrayList;
 import java.util.List;
 
-import static com.aslan.contramodel.util.Utility.isNullOrEmpty;
 import static org.neo4j.helpers.collection.MapUtil.map;
 
 /**
  * This class create, update and query the database regarding the entity Person.
+ * Parameters of methods are not validated for performance improvement.
+ * When calling any methods from this class, ensure that you are passing valid arguments.
  * <p>
  * Created by gobinath on 12/8/15.
  */
@@ -37,9 +40,6 @@ public class PersonService extends Service {
      */
     public Long createOrUpdate(Person person) {
         LOGGER.debug("Creating or updating person {}", person);
-        if (person == null) {
-            return null;
-        }
         try (Transaction transaction = databaseService.beginTx()) {
             final String query = "MERGE (n:Person {userID: {userID}}) SET n.name = {name}, n.email = {email} RETURN ID(n) as id";
             Long id = executeAndReturnID(query, "name", person.getName(), "email", person.getEmail(), "userID", person.getUserID());
@@ -49,17 +49,13 @@ public class PersonService extends Service {
 
             return id;
         }
-
     }
 
     public Person find(String userID) {
         LOGGER.debug("Searching for person {}", userID);
-        if (isNullOrEmpty(userID)) {
-            return null;
-        }
         Person person = null;
         try (Transaction transaction = databaseService.beginTx()) {
-            Node node = databaseService.findNode(Labels.Person, "userID", userID);
+            Node node = databaseService.findNode(Labels.Person, Constant.USER_ID, userID);
 
             // Commit the transaction
             transaction.success();
@@ -67,8 +63,8 @@ public class PersonService extends Service {
             if (node != null) {
                 person = new Person();
                 person.setUserID(userID);
-                person.setName((String) node.getProperty("name"));
-                person.setEmail((String) node.getProperty("email"));
+                person.setName((String) node.getProperty(Constant.NAME));
+                person.setEmail((String) node.getProperty(Constant.EMAIL));
             }
         }
         return person;
@@ -78,7 +74,7 @@ public class PersonService extends Service {
         LOGGER.debug("Creating relationship {} -[KNOWS]-> {}", personID, friendID);
 
         try (Transaction transaction = databaseService.beginTx()) {
-            Node person = databaseService.findNode(Labels.Person, "userID", personID);
+            Node person = databaseService.findNode(Labels.Person, Constant.USER_ID, personID);
             if (person == null) {
                 throw new NotFoundException("Person not found with id: " + personID);
             }
@@ -103,18 +99,19 @@ public class PersonService extends Service {
         }
     }
 
-    public List<String> nearByKnownPeople(String userID, long timeOne, long timeTwo, double longitude, double latitude, double distance) {
-        LOGGER.debug("Searching for near by known friends of {} at {}:{}", userID, longitude, latitude);
+    public List<String> nearByKnownPeople(NearbyKnownPeople param) {
+        LOGGER.debug("Searching for near by known friends of ", param);
         List<String> people = new ArrayList<>();
         try (Transaction transaction = databaseService.beginTx()) {
-            Node person = databaseService.findNode(Labels.Person, "userID", userID);
+            String userID = param.getUserID();
+            Node person = databaseService.findNode(Labels.Person, Constant.USER_ID, userID);
             if (person == null) {
                 throw new NotFoundException("Person not found with id: " + userID);
             }
             // Using parameter for latitude, longitude and distance caused to unknown error.
             // Reason could be a bug in Neo4j spatial plugin
-            final String query = "START n = node:location_layer('withinDistance:[" + latitude + ", " + longitude + ", " + distance + "]') MATCH (n)<-[:LOCATION]-(t:Minute)<-[:CHILD*1..5]-(:TimelineRoot)<-[:TIMELINE]-(f:Person)<-[:KNOWS]-(p:Person) WHERE ID(p) = {user_id} AND t.epoch > {time_one} AND t.epoch < {time_two}  RETURN f.userID as userID";
-            ResourceIterator<String> iterator = databaseService.execute(query, map("user_id", person.getId(), "time_one", timeOne, "time_two", timeTwo)).columnAs("userID");
+            final String query = "START n = node:location_layer('withinDistance:[" + param.getLatitude() + ", " + param.getLongitude() + ", " + param.getDistance() + "]') MATCH (n)<-[:LOCATION]-(t:Minute)<-[:CHILD*1..5]-(:TimelineRoot)<-[:TIMELINE]-(f:Person)<-[:KNOWS]-(p:Person) WHERE ID(p) = {user_id} AND t.epoch > {time_one} AND t.epoch < {time_two}  RETURN f.userID as userID";
+            ResourceIterator<String> iterator = databaseService.execute(query, map("user_id", person.getId(), "time_one", param.getStartTime().value(), "time_two", param.getEndTime().value())).columnAs("userID");
             while (iterator.hasNext()) {
                 people.add(iterator.next());
             }

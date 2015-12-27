@@ -1,9 +1,11 @@
 package com.aslan.contramodel.resource;
 
 
-import com.aslan.contra.dto.Location;
-import com.aslan.contra.dto.Time;
-import com.aslan.contra.dto.UserLocation;
+import com.aslan.contra.dto.common.Location;
+import com.aslan.contra.dto.common.Time;
+import com.aslan.contra.dto.ws.Message;
+import com.aslan.contra.dto.ws.Nearby;
+import com.aslan.contra.dto.ws.UserLocation;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 import org.junit.AfterClass;
@@ -87,14 +89,19 @@ public class LocationResourceTest {
 
         HTTP.POST(server.httpURI().resolve("/contra/location/create").toString(), userLocation);
 
-        HTTP.Response response = HTTP.GET(server.httpURI().resolve("/contra/location/findwithin?longitude=79.8547&latitude=6.8939&distance=10").toString());
+        Nearby param = new Nearby();
+        param.setLongitude(79.8547);
+        param.setLatitude(6.8939);
+        param.setDistance(10);
+        HTTP.Response response = HTTP.POST(server.httpURI().resolve("/contra/location/findwithin").toString(), param);
 
         // Check the status.
         assertEquals("Error in request.", HttpURLConnection.HTTP_OK, response.status());
 
         Gson gson = new Gson();
-        List<Location> locations = gson.fromJson(response.rawContent(), new TypeToken<List<Location>>() {
+        Message<List<Location>> message = gson.fromJson(response.rawContent(), new TypeToken<Message<List<Location>>>() {
         }.getType());
+        List<Location> locations = message.getEntity();
         // Check the status.
         assertEquals("Exact locations are not found.", 2, locations.size());
 

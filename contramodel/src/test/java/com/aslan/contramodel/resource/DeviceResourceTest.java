@@ -1,8 +1,8 @@
 package com.aslan.contramodel.resource;
 
 
-import com.aslan.contra.dto.Device;
-import com.aslan.contra.dto.Time;
+import com.aslan.contra.dto.common.Device;
+import com.aslan.contra.dto.common.Time;
 import com.aslan.contramodel.service.Service;
 import com.aslan.contramodel.util.Constant;
 import org.junit.AfterClass;

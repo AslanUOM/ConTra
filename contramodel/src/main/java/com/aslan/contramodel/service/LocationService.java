@@ -1,8 +1,9 @@
 package com.aslan.contramodel.service;
 
 
-import com.aslan.contra.dto.Location;
-import com.aslan.contra.dto.UserLocation;
+import com.aslan.contra.dto.common.Location;
+import com.aslan.contra.dto.ws.Nearby;
+import com.aslan.contra.dto.ws.UserLocation;
 import com.aslan.contramodel.util.Constant;
 import com.vividsolutions.jts.geom.Coordinate;
 import org.neo4j.gis.spatial.SimplePointLayer;
@@ -21,7 +22,7 @@ import java.util.Map;
  * This class create, update and query the database regarding the entity Location.
  * <p>
  *
- * @see com.aslan.contra.dto.Location
+ * @see Location
  * <p>
  * Created by gobinath on 12/16/15.
  */
@@ -117,14 +118,14 @@ public class LocationService extends Service {
         }
     }
 
-    public List<Location> findLocationsWithin(double longitude, double latitude, double distance) {
-        LOGGER.debug("Searching for locations from {}:{} within {} km", longitude, latitude, distance);
+    public List<Location> findLocationsWithin(Nearby param) {
+        LOGGER.debug("Searching for locations from {}", param);
 
         List<Location> locations = new ArrayList<>();
-        Coordinate coordinate = new Coordinate(longitude, latitude);
+        Coordinate coordinate = new Coordinate(param.getLongitude(), param.getLatitude());
         // Begin the transaction
         try (Transaction transaction = databaseService.beginTx()) {
-            List<GeoPipeFlow> list = layer.findClosestPointsTo(coordinate, distance);
+            List<GeoPipeFlow> list = layer.findClosestPointsTo(coordinate, param.getDistance());
 
             transaction.success();
 

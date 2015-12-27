@@ -1,7 +1,7 @@
 package com.aslan.contramodel.service;
 
-import com.aslan.contra.dto.Device;
-import com.aslan.contra.dto.Time;
+import com.aslan.contra.dto.common.Device;
+import com.aslan.contra.dto.common.Time;
 import com.aslan.contramodel.util.Constant;
 import org.neo4j.graphdb.*;
 import org.slf4j.Logger;
@@ -13,7 +13,7 @@ import static com.aslan.contramodel.util.Utility.isNullOrEmpty;
  * This class create, update and query the database regarding the entity Device.
  * <p>
  *
- * @see com.aslan.contra.dto.Device
+ * @see Device
  * <p>
  * Created by gobinath on 12/26/15.
  */

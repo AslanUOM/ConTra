@@ -1,7 +1,7 @@
 package com.aslan.contramodel.resource;
 
-import com.aslan.contra.dto.Device;
-import com.aslan.contra.dto.ErrorMessage;
+import com.aslan.contra.dto.common.Device;
+import com.aslan.contra.dto.ws.Message;
 import com.aslan.contramodel.service.DeviceService;
 import com.aslan.contramodel.util.Utility;
 import org.neo4j.graphdb.GraphDatabaseService;
@@ -42,22 +42,7 @@ public class DeviceResource {
     public Response createDevice(@PathParam("userID") String userID, Device device) {
         LOGGER.debug("Request to create device {} of {}", device, userID);
 
-        // Validate the parameters
-        Response response = validateAndCreateErrorResponse(userID, device);
-
-        if (response == null) {
-            try {
-                service.createDevice(userID, device);
-                response = Response.status(HttpURLConnection.HTTP_OK).build();
-            } catch (org.neo4j.graphdb.NotFoundException e) {
-                LOGGER.error(e.getMessage(), e);
-
-                ErrorMessage message = new ErrorMessage(e);
-                message.setStatus(HttpURLConnection.HTTP_NO_CONTENT);
-                response = Response.status(HttpURLConnection.HTTP_NO_CONTENT).entity(message).build();
-            }
-        }
-        return response;
+        return createOrUpdate(true, userID, device);
     }
 
     @POST
@@ -67,32 +52,43 @@ public class DeviceResource {
     public Response updateDevice(@PathParam("userID") String userID, Device device) {
         LOGGER.debug("Request to update device {} of {}", device, userID);
 
-        // Validate the parameters
-        Response response = validateAndCreateErrorResponse(userID, device);
+        return createOrUpdate(false, userID, device);
+    }
 
-        if (response == null) {
+    private Response createOrUpdate(boolean create, String userID, Device device) {
+        // Validate the parameters
+        Message message = validateAndCreateErrorResponse(userID, device);
+
+        if (message == null) {
             try {
-                service.updateDevice(userID, device);
-                response = Response.status(HttpURLConnection.HTTP_OK).build();
+                if (create) {
+                    service.createDevice(userID, device);
+                } else {
+                    service.updateDevice(userID, device);
+                }
+                message = new Message();
+                message.setMessage("Device is updated successfully");
+                message.setSuccess(true);
+                message.setStatus(HttpURLConnection.HTTP_OK);
             } catch (org.neo4j.graphdb.NotFoundException e) {
                 LOGGER.error(e.getMessage(), e);
 
-                ErrorMessage message = new ErrorMessage(e);
+                message = new Message();
+                message.setEntity(e);
+                message.setMessage(e.getMessage());
                 message.setStatus(HttpURLConnection.HTTP_NO_CONTENT);
-                response = Response.status(HttpURLConnection.HTTP_NO_CONTENT).entity(message).build();
             }
         }
-
-        return response;
+        return Response.status(message.getStatus()).entity(message).build();
     }
 
-    private Response validateAndCreateErrorResponse(String userID, Device device) {
-        Response response = null;
+    private Message validateAndCreateErrorResponse(String userID, Device device) {
+        Message message = null;
         // Validate the parameters
         Set<ConstraintViolation<Device>> violations = VALIDATOR.validate(device);
         boolean nullOrEmptyUserID = isNullOrEmpty(userID);
         if (nullOrEmptyUserID || !violations.isEmpty()) {
-            ErrorMessage message = new ErrorMessage();
+            message = new Message();
             message.setStatus(HttpURLConnection.HTTP_BAD_REQUEST);
 
             StringJoiner joiner = new StringJoiner(", ");
@@ -106,9 +102,8 @@ public class DeviceResource {
 
             message.setMessage(joiner.toString());
             message.setStatus(HttpURLConnection.HTTP_BAD_REQUEST);
-            response = Response.status(HttpURLConnection.HTTP_BAD_REQUEST).entity(message).build();
         }
 
-        return response;
+        return message;
     }
 }
