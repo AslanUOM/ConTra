@@ -1,13 +1,26 @@
 package com.aslan.contra.dto;
 
+import javax.validation.Valid;
+import javax.validation.constraints.NotNull;
+
 /**
  * Created by gobinath on 12/26/15.
  */
 public class UserLocation {
+    @NotNull
     private String userID;
+
+    @NotNull
     private String deviceID;
+
+    @NotNull
+    @Valid
     private Time time;
+
     private float accuracy;
+
+    @NotNull
+    @Valid
     private Location location;
 
 

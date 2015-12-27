@@ -50,7 +50,7 @@ public class UserManagementService {
     @Produces(MediaType.TEXT_PLAIN)
     public Response update(@NotNull @QueryParam("country") String country, @NotNull Person person) {
         LOGGER.debug("Request to create person {} from {}", person, country);
-        Response response = null;
+        Response response;
 
         try {
             // Format the phone number

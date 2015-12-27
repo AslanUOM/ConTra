@@ -1,21 +1,38 @@
 package com.aslan.contra.dto;
 
+import javax.validation.constraints.Max;
+import javax.validation.constraints.Min;
 import java.io.Serializable;
-import java.time.Instant;
 import java.util.Calendar;
 import java.util.Date;
 
 /**
- * A generic representation of YYY-MM-DD:HH.MM
+ * A generic representation of YYY-MM-DD:HH.MM.SS
  * <p>
  * Created by gobinath on 12/22/15.
  */
 public class Time implements Serializable {
+
     private int year;
+
+    @Min(1)
+    @Max(12)
     private int month;
+
+    @Min(1)
+    @Max(31)
     private int day;
+
+    @Min(0)
+    @Max(23)
     private int hour;
+
+    @Min(0)
+    @Max(59)
     private int minute;
+
+    @Min(0)
+    @Max(59)
     private int second;
 
     public Time() {

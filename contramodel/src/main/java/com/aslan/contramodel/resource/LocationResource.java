@@ -4,16 +4,21 @@ import com.aslan.contra.dto.ErrorMessage;
 import com.aslan.contra.dto.Location;
 import com.aslan.contra.dto.UserLocation;
 import com.aslan.contramodel.service.LocationService;
+import com.aslan.contramodel.util.Utility;
 import org.neo4j.graphdb.GraphDatabaseService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import javax.validation.ConstraintViolation;
+import javax.validation.Validator;
 import javax.ws.rs.*;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import java.net.HttpURLConnection;
 import java.util.List;
+import java.util.Set;
+import java.util.StringJoiner;
 
 /**
  * JAX-RS webservice for location related operations.
@@ -23,7 +28,8 @@ import java.util.List;
 @Path("/location")
 public class LocationResource {
     private static final Logger LOGGER = LoggerFactory.getLogger(LocationResource.class);
-    private LocationService service;
+    private static final Validator VALIDATOR = Utility.createValidator();
+    private final LocationService service;
 
     public LocationResource(@Context GraphDatabaseService databaseService) {
         this.service = new LocationService(databaseService);
@@ -35,14 +41,21 @@ public class LocationResource {
     @Produces(MediaType.APPLICATION_JSON)
     public Response createLocation(UserLocation location) {
         LOGGER.debug("Request to create location {}", location);
-        Response response;
 
-        if (location == null) {
+        Response response;
+        Set<ConstraintViolation<UserLocation>> violations = VALIDATOR.validate(location);
+        if (!violations.isEmpty()) {
             ErrorMessage message = new ErrorMessage();
             message.setStatus(HttpURLConnection.HTTP_BAD_REQUEST);
-            message.setMessage("UserLocation is not available");
 
+            StringJoiner joiner = new StringJoiner(", ");
+            for (ConstraintViolation<UserLocation> c : violations) {
+                joiner.add(c.getPropertyPath() + " " + c.getMessage());
+            }
+
+            message.setMessage(joiner.toString());
             response = Response.status(HttpURLConnection.HTTP_BAD_REQUEST).entity(message).build();
+
         } else {
             try {
                 service.createCurrentLocation(location);

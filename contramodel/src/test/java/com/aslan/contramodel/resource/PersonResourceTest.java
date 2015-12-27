@@ -1,7 +1,6 @@
 package com.aslan.contramodel.resource;
 
 
-import com.aslan.contra.dto.Location;
 import com.aslan.contra.dto.Person;
 import com.aslan.contra.dto.Time;
 import com.aslan.contra.dto.UserLocation;
@@ -134,7 +133,7 @@ public class PersonResourceTest {
         HTTP.POST(server.httpURI().resolve("/contra/person/knows?person=+94771234567&friend=+94770000000").toString());
 
         // Create a location and time
-        Time time = TestUtility.createTime(2015, 12, 24, 9, 1, 0);
+        Time time = new Time(2015, 12, 24, 9, 1, 0);
         UserLocation location = TestUtility.createUserLocation("+94771234567", "Samsung", 70.0f, "Majestic City", 79.8545904, 6.8934421, time);
 
 
@@ -153,8 +152,8 @@ public class PersonResourceTest {
         HTTP.POST(server.httpURI().resolve("/contra/location/create").toString(), location);
 
         // Search for near by friends of +94771234567
-        Time time1 = TestUtility.createTime(2015, 12, 24, 9, 0, 0);
-        Time time2 = TestUtility.createTime(2015, 12, 24, 10, 0, 0);
+        Time time1 = new Time(2015, 12, 24, 9, 0, 0);
+        Time time2 = new Time(2015, 12, 24, 10, 0, 0);
         Map<String, Object> map = map("userID", "+94771234567", "timeOne", time1.value(), "timeTwo", time2.value(), "longitude", 79.8551746, "latitude", 6.8934422, "distance", 100.0);
         HTTP.Response response = HTTP.POST(server.httpURI().resolve("/contra/person/nearby").toString(), map);
 

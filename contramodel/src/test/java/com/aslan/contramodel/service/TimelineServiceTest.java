@@ -10,9 +10,7 @@ import org.neo4j.graphdb.GraphDatabaseService;
 import org.neo4j.graphdb.Result;
 import org.neo4j.graphdb.Transaction;
 import org.neo4j.harness.ServerControls;
-import org.neo4j.test.server.HTTP;
 
-import java.net.HttpURLConnection;
 import java.util.Map;
 
 import static org.junit.Assert.assertEquals;
@@ -54,12 +52,7 @@ public class TimelineServiceTest {
 
     @Test
     public void testCreate() throws Exception {
-        Time time = new Time();
-        time.setYear(1991);
-        time.setMonth(4);
-        time.setDay(20);
-        time.setHour(4);
-        time.setMinute(5);
+        Time time = new Time(1991, 4, 20, 4, 5, 0);
 
         timelineService.createTime("+94771234567", time);
 
@@ -73,12 +66,7 @@ public class TimelineServiceTest {
 
     @Test
     public void testDuplicate() throws Exception {
-        Time time = new Time();
-        time.setYear(1991);
-        time.setMonth(4);
-        time.setDay(20);
-        time.setHour(4);
-        time.setMinute(5);
+        Time time = new Time(1991, 4, 20, 4, 5, 0);
 
         timelineService.createTime("+94771234567", time);
         timelineService.createTime("+94771234567", time);
@@ -93,12 +81,7 @@ public class TimelineServiceTest {
 
     @Test
     public void testLinkBetweenMinutes() throws Exception {
-        Time time = new Time();
-        time.setYear(2016);
-        time.setMonth(1);
-        time.setDay(1);
-        time.setHour(1);
-        time.setMinute(10);
+        Time time = new Time(2016, 1, 1, 1, 10, 0);
 
         timelineService.createTime("+94771234567", time);
         time.setMinute(11);
@@ -124,12 +107,7 @@ public class TimelineServiceTest {
 
     @Test
     public void testLinkBetweenDays() throws Exception {
-        Time time = new Time();
-        time.setYear(2015);
-        time.setMonth(12);
-        time.setDay(22);
-        time.setHour(5);
-        time.setMinute(10);
+        Time time = new Time(2015, 12, 22, 5, 10, 0);
 
         timelineService.createTime("+94771234567", time);
 
@@ -159,13 +137,7 @@ public class TimelineServiceTest {
 
     @Test
     public void testLinkBetweenMonths() throws Exception {
-        Time time = new Time();
-        time.setYear(1970);
-        time.setMonth(1);
-        time.setDay(22);
-        time.setHour(5);
-        time.setMinute(10);
-
+        Time time = new Time(1970, 1, 22, 5, 10, 0);
 
         timelineService.createTime("+94771234567", time);
 
@@ -191,12 +163,7 @@ public class TimelineServiceTest {
 
     @Test
     public void testLinkBetweenYears() throws Exception {
-        Time time = new Time();
-        time.setYear(1985);
-        time.setMonth(4);
-        time.setDay(20);
-        time.setHour(5);
-        time.setMinute(10);
+        Time time = new Time(1985, 4, 20, 5, 10, 0);
 
         timelineService.createTime("+94771234567", time);
 

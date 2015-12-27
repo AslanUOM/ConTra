@@ -32,7 +32,7 @@ public class PersonResource {
     private static final Logger LOGGER = LoggerFactory.getLogger(PersonResource.class);
 
     private static final Gson gson = new Gson();
-    private PersonService service;
+    private final PersonService service;
 
     public PersonResource(@Context GraphDatabaseService databaseService) {
         this.service = new PersonService(databaseService);

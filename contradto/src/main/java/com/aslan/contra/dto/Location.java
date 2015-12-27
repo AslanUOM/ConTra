@@ -1,5 +1,6 @@
 package com.aslan.contra.dto;
 
+import javax.validation.constraints.NotNull;
 import java.io.Serializable;
 
 /**
@@ -7,8 +8,10 @@ import java.io.Serializable;
  */
 public class Location implements Serializable {
     private String name;
+
+    @NotNull
     private String locationID;
-    // private Location parent;
+
     /**
      * Northing - Use it as Y.
      */

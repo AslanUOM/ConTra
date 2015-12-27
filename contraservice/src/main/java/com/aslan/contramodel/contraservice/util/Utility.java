@@ -22,8 +22,7 @@ public class Utility {
         country = country.toUpperCase();
         PhoneNumberUtil phoneUtil = PhoneNumberUtil.getInstance();
         PhoneNumber phoneNumber = phoneUtil.parse(number, country);
-        String formattedNumber = phoneUtil.format(phoneNumber, PhoneNumberFormat.E164);
-        return formattedNumber;
+        return phoneUtil.format(phoneNumber, PhoneNumberFormat.E164);
     }
 
     public static boolean isValidUserId(String formattedPhoneNumber) {

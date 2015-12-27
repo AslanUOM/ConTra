@@ -1,9 +1,13 @@
 package com.aslan.contra.dto;
 
+import javax.validation.constraints.Max;
+import javax.validation.constraints.Min;
+import javax.validation.constraints.NotNull;
 import java.io.Serializable;
+import java.util.Arrays;
 
 /**
- * Device entity represents the Android device of the user.
+ * Device entity which represents an Android device of the user.
  * <p>
  * Created by gobinath on 12/24/15.
  */
@@ -16,11 +20,14 @@ public class Device implements Serializable {
     /**
      * API level of the device.
      */
+    @Min(1)
     private int api;
 
     /**
      * Last known battery level.
      */
+    @Min(0)
+    @Max(100)
     private float batteryLevel;
 
     /**
@@ -31,6 +38,7 @@ public class Device implements Serializable {
     /**
      * Unique deviceID number to identify the device.
      */
+    @NotNull
     private String deviceID;
 
     /**
@@ -83,6 +91,15 @@ public class Device implements Serializable {
      */
     private String wifiMAC;
 
+
+    @Override
+    public String toString() {
+        return getDeviceID();
+    }
+
+    /**
+     * Indicates whether the device is with the user or not.
+     */
     public boolean isActive() {
         return active;
     }
@@ -91,6 +108,9 @@ public class Device implements Serializable {
         this.active = active;
     }
 
+    /**
+     * API level of the device.
+     */
     public int getApi() {
         return api;
     }
@@ -99,6 +119,9 @@ public class Device implements Serializable {
         this.api = api;
     }
 
+    /**
+     * Last known battery level.
+     */
     public float getBatteryLevel() {
         return batteryLevel;
     }
@@ -107,6 +130,9 @@ public class Device implements Serializable {
         this.batteryLevel = batteryLevel;
     }
 
+    /**
+     * Bluetooth MAC address.
+     */
     public String getBluetoothMAC() {
         return bluetoothMAC;
     }
@@ -115,30 +141,9 @@ public class Device implements Serializable {
         this.bluetoothMAC = bluetoothMAC;
     }
 
-    public Time getLastSeen() {
-        return lastSeen;
-    }
-
-    public void setLastSeen(Time lastSeen) {
-        this.lastSeen = lastSeen;
-    }
-
-    public String getManufacturer() {
-        return manufacturer;
-    }
-
-    public void setManufacturer(String manufacturer) {
-        this.manufacturer = manufacturer;
-    }
-
-    public String[] getSensors() {
-        return sensors;
-    }
-
-    public void setSensors(String[] sensors) {
-        this.sensors = sensors;
-    }
-
+    /**
+     * Unique deviceID number to identify the device.
+     */
     public String getDeviceID() {
         return deviceID;
     }
@@ -147,6 +152,103 @@ public class Device implements Serializable {
         this.deviceID = deviceID;
     }
 
+    /**
+     * The lat seen time of this device.
+     */
+    public Time getLastSeen() {
+        return lastSeen;
+    }
+
+    public void setLastSeen(Time lastSeen) {
+        this.lastSeen = lastSeen;
+    }
+
+    /**
+     * Manufacturer name of the device.
+     */
+    public String getManufacturer() {
+        return manufacturer;
+    }
+
+    public void setManufacturer(String manufacturer) {
+        this.manufacturer = manufacturer;
+    }
+
+    /**
+     * List of available hardware sensors.
+     */
+    public String[] getSensors() {
+        if (sensors == null) {
+            return null;
+        }
+        return Arrays.copyOf(sensors, sensors.length);
+    }
+
+    public void setSensors(String[] sensors) {
+        if (sensors == null) {
+            return;
+        }
+        this.sensors = Arrays.copyOf(sensors, sensors.length);
+    }
+
+    /**
+     * Temperature of the environment.
+     */
+    public float getAmbientTemperature() {
+        return ambientTemperature;
+    }
+
+    public void setAmbientTemperature(float ambientTemperature) {
+        this.ambientTemperature = ambientTemperature;
+    }
+
+    /**
+     * Humidity of the environment.
+     */
+    public float getHumidity() {
+        return humidity;
+    }
+
+    public void setHumidity(float humidity) {
+        this.humidity = humidity;
+    }
+
+    /**
+     * Illuminance of the environment.
+     */
+    public float getIlluminance() {
+        return illuminance;
+    }
+
+    public void setIlluminance(float illuminance) {
+        this.illuminance = illuminance;
+    }
+
+    /**
+     * Pressure in the environment.
+     */
+    public float getAmbientPressure() {
+        return ambientPressure;
+    }
+
+    public void setAmbientPressure(float ambientPressure) {
+        this.ambientPressure = ambientPressure;
+    }
+
+    /**
+     * Proximity of the device with any objects.
+     */
+    public float getProximity() {
+        return proximity;
+    }
+
+    public void setProximity(float proximity) {
+        this.proximity = proximity;
+    }
+
+    /**
+     * Google push notification token.
+     */
     public String getToken() {
         return token;
     }
@@ -155,16 +257,14 @@ public class Device implements Serializable {
         this.token = token;
     }
 
+    /**
+     * WiFi MAC address.
+     */
     public String getWifiMAC() {
         return wifiMAC;
     }
 
     public void setWifiMAC(String wifiMAC) {
         this.wifiMAC = wifiMAC;
-    }
-
-    @Override
-    public String toString() {
-        return deviceID;
     }
 }

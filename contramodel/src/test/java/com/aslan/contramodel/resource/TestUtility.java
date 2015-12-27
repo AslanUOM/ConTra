@@ -81,7 +81,5 @@ public class TestUtility {
         return userLocation;
     }
 
-    public static Time createTime(int year, int month, int day, int hour, int min, int sec) {
-        return new Time(year, month, day, hour, min, sec);
-    }
+
 }

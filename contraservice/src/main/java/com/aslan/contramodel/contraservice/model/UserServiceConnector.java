@@ -1,14 +1,12 @@
 package com.aslan.contramodel.contraservice.model;
 
 import com.aslan.contra.dto.Person;
-import org.glassfish.jersey.client.ClientConfig;
-import org.glassfish.jersey.client.authentication.HttpAuthenticationFeature;
-import org.json.HTTP;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-
-import javax.ws.rs.client.*;
+import javax.ws.rs.client.Entity;
+import javax.ws.rs.client.Invocation;
+import javax.ws.rs.client.WebTarget;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.UriBuilder;
@@ -46,7 +44,6 @@ public class UserServiceConnector extends ServiceConnector {
         WebTarget target = createWebTarget(UriBuilder.fromPath(url).resolveTemplate("phone_number", phoneNumber).toString());
 
         Invocation.Builder builder = target.request();
-        Person person = builder.get(Person.class);
-        return person;
+        return builder.get(Person.class);
     }
 }

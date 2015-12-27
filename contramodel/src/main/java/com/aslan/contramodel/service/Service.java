@@ -6,6 +6,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import static org.neo4j.helpers.collection.MapUtil.map;
+import static com.aslan.contramodel.util.Utility.isNullOrEmpty;
 
 /**
  * A common super class for all the sub classes and contain common methods required by the sub services.
@@ -93,7 +94,7 @@ public abstract class Service {
      * @param label    the label to which index need to be created
      * @param property property of the label to be used as index
      */
-    public final void createIndex(final Label label, final String property) {
+    public final void createIndex(Label label, String property) {
         if (label == null || property == null) {
             return;
         }
@@ -119,5 +120,12 @@ public abstract class Service {
             // Commit the transaction
             transaction.success();
         }
+    }
+
+    public final void setOnlyIfNotNull(Node node, String property, Object value) {
+        if (isNullOrEmpty(property) || value == null) {
+            return;
+        }
+        node.setProperty(property, value);
     }
 }

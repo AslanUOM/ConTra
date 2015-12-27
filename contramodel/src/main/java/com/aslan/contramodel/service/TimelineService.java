@@ -37,7 +37,7 @@ public class TimelineService extends Service {
     public Node findPreviousTime(String userID, Time time) {
         LOGGER.debug("Searching for the time before {} in the timeline of {}", time, userID);
 
-        Node previousTime = null;
+        Node previousTime;
         try (Transaction transaction = databaseService.beginTx()) {
             Node rootNode = createTimelineRoot(userID);
             previousTime = findPreviousTime(null, rootNode, null, time, 1);
@@ -228,7 +228,7 @@ public class TimelineService extends Service {
     }
 
     private int getValue(Time time, int level) {
-        int value = 0;
+        int value;
 
         switch (level) {
             case 1:
@@ -259,7 +259,7 @@ public class TimelineService extends Service {
     }
 
     private Label getLabel(int level) {
-        Label label = null;
+        Label label;
 
         switch (level) {
             case 1:
