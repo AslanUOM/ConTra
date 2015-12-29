@@ -1,15 +1,23 @@
 package com.aslan.contramodel.contraservice.services;
 
-import com.aslan.contra.dto.Person;
+import com.aslan.contra.dto.common.Device;
+import com.aslan.contra.dto.common.Person;
+import com.aslan.contra.dto.common.Time;
+import com.aslan.contra.dto.ws.Message;
+import com.aslan.contra.dto.ws.UserDevice;
+import com.google.gson.Gson;
 import org.glassfish.jersey.server.ResourceConfig;
 import org.glassfish.jersey.test.JerseyTest;
 import org.junit.Test;
 
 import javax.ws.rs.client.Entity;
 import javax.ws.rs.core.Application;
+import javax.ws.rs.core.GenericType;
+import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import java.net.HttpURLConnection;
 
+import static junit.framework.TestCase.assertTrue;
 import static org.junit.Assert.assertEquals;
 
 /**
@@ -33,47 +41,142 @@ public class UserManagementServiceTest extends JerseyTest {
 
     @Test
     public void testCreateCountryInUpperCase() {
-        Person person = createPerson("Gobinath", "0770780210", "slgobinath@gmail.com");
-        String id = target("user/create").queryParam("country", "LK").request().post(Entity.json(person), String.class);
-        assertEquals("Failed to create person.", "+94770780210", id);
+        Device device = new Device();
+        device.setDeviceID("b195f22d1e65c922");
+        device.setApi(20);
+        device.setBluetoothMAC("125.0.12.2");
+        device.setManufacturer("Lava-X1 Selfie");
+        device.setToken("GCM-123");
+        device.setWifiMAC("127.0.12.2");
+        device.setSensors(new String[]{"Light", "Temperature", "GPS"});
+
+        UserDevice userDevice = new UserDevice();
+        userDevice.setUserID("0773458206");
+        userDevice.setCountry("LK");
+        userDevice.setDevice(device);
+
+        Message<Person> message = target("user/create").request().post(Entity.json(userDevice), new GenericType<Message<Person>>() {
+        });
+
+        assertEquals("Failed to create person.", "+94773458206", message.getEntity().getUserID());
     }
 
     @Test
     public void testCreateCountryInLowerCase() {
-        Person person = createPerson("Alice", "0770780211", "alice@gmail.com");
-        String id = target("user/create").queryParam("country", "lk").request().post(Entity.json(person), String.class);
-        assertEquals("Failed to create person.", "+94770780211", id);
+        Device device = new Device();
+        device.setDeviceID("c195442d1e65c922");
+        device.setApi(20);
+        device.setBluetoothMAC("125.0.12.2");
+        device.setManufacturer("HTC");
+        device.setToken("GCM-124");
+        device.setWifiMAC("127.0.12.2");
+        device.setSensors(new String[]{"Light", "Temperature", "GPS"});
+
+        UserDevice userDevice = new UserDevice();
+        userDevice.setUserID("0770780211");
+        userDevice.setCountry("lk");
+        userDevice.setDevice(device);
+
+        Message<Person> message = target("user/create").request().post(Entity.json(userDevice), new GenericType<Message<Person>>() {
+        });
+
+        assertEquals("Failed to create person.", "+94770780211", message.getEntity().getUserID());
     }
 
     @Test
     public void testCreateWithoutCountry() {
-        Person person = createPerson("Gobinath", "0770780210", "slgobinath@gmail.com");
-        Response response = target("user/create").request().post(Entity.json(person));
+        Device device = new Device();
+        device.setDeviceID("b195942d1e65c922");
+        device.setApi(20);
+        device.setBluetoothMAC("125.0.12.2");
+        device.setManufacturer("HTC");
+        device.setToken("GCM-124");
+        device.setWifiMAC("127.0.12.2");
+        device.setSensors(new String[]{"Light", "Temperature", "GPS"});
+
+        UserDevice userDevice = new UserDevice();
+        userDevice.setUserID("0770780221");
+        userDevice.setDevice(device);
+
+        Response response = target("user/create").request().post(Entity.json(userDevice));
+        assertEquals("Empty country is accepted.", HttpURLConnection.HTTP_BAD_REQUEST, response.getStatus());
+    }
+
+
+    @Test
+    public void testCreateInvalidCountry() {
+        Device device = new Device();
+        device.setDeviceID("b295442d1e65c922");
+        device.setApi(20);
+        device.setBluetoothMAC("125.0.12.2");
+        device.setManufacturer("HTC");
+        device.setToken("GCM-124");
+        device.setWifiMAC("127.0.12.2");
+        device.setSensors(new String[]{"Light", "Temperature", "GPS"});
+
+        UserDevice userDevice = new UserDevice();
+        userDevice.setUserID("0770781221");
+        userDevice.setCountry("XX");
+        userDevice.setDevice(device);
+
+        Response response = target("user/create").request().post(Entity.json(userDevice));
         assertEquals("Empty country is accepted.", HttpURLConnection.HTTP_BAD_REQUEST, response.getStatus());
     }
 
     @Test
-    public void testCreateWithoutPerson() {
-        Response response = target("user/create").queryParam("country", "lk").request().post(null);
-        assertEquals("Null person is accepted.", HttpURLConnection.HTTP_BAD_REQUEST, response.getStatus());
+    public void testUpdate() {
+
+        Device device = new Device();
+        device.setDeviceID("b295442d1e66c922");
+        device.setApi(20);
+        device.setBluetoothMAC("126.40.12.2");
+        device.setManufacturer("HTC");
+        device.setToken("GCM-124");
+        device.setWifiMAC("127.0.12.2");
+        device.setSensors(new String[]{"Light", "Temperature", "GPS"});
+
+        UserDevice userDevice = new UserDevice();
+        userDevice.setUserID("0770781221");
+        userDevice.setCountry("LK");
+        userDevice.setDevice(device);
+
+        target("user/create").request().post(Entity.json(userDevice));
+
+        Person person = new Person();
+        person.setUserID("+94770781221");
+        person.setName("Joh");
+        person.setEmail("john@gmail.com");
+
+        Message<Person> message =target("user/update").request().post(Entity.json(person), new GenericType<Message<Person>>() {
+        });
+        assertTrue("Empty country is accepted.", message.isSuccess());
     }
 
-    @Test
-    public void testCreateInvalidCountry() {
-        Person person = createPerson("Gobinath", "0770780210", "slgobinath@gmail.com");
-        Response response = target("user/create").queryParam("country", "XX").request().post(Entity.json(person));
-        assertEquals("Invalid country is accepted", HttpURLConnection.HTTP_BAD_REQUEST, response.getStatus());
-    }
-
-    @Test
-    public void testFindExistingPerson() {
-        Person person = createPerson("Carol", "0776780124", "carol@gmail.com");
-        String id = target("user/create").queryParam("country", "LK").request().post(Entity.json(person), String.class);
-        assertEquals("Failed to create person.", "+94776780124", id);
-
-        Person receivedPerson = target("user/find/+94776780124").request().get(Person.class);
-        assertEquals("Failed to find the person.", "Carol", receivedPerson.getName());
-    }
+//    @Test
+//    public void testFindExistingPerson() {
+//        Device device = new Device();
+//        device.setDeviceID("b195442d1e65c652");
+//        device.setApi(20);
+//        device.setBluetoothMAC("125.0.12.2");
+//        device.setManufacturer("Samsung");
+//        device.setToken("GCM-124");
+//        device.setWifiMAC("127.0.12.2");
+//        device.setSensors(new String[]{"Light", "Temperature", "GPS"});
+//
+//        UserDevice userDevice = new UserDevice();
+//        userDevice.setUserID("0776780124");
+//        userDevice.setCountry("lk");
+//        userDevice.setDevice(device);
+//
+//        Response response = target("user/create").request().post(Entity.json(userDevice));
+//
+//        Person person = createPerson("Carol", "0776780124", "carol@gmail.com");
+//        String id = target("user/create").queryParam("country", "LK").request().post(Entity.json(person), String.class);
+//        assertEquals("Failed to create person.", "+94776780124", id);
+//
+//        Person receivedPerson = target("user/find/+94776780124").request().get(Person.class);
+//        assertEquals("Failed to find the person.", "Carol", receivedPerson.getName());
+//    }
 
     @Test
     public void testFindInvalidUserId() {

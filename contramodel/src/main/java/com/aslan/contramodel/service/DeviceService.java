@@ -57,16 +57,14 @@ public class DeviceService extends Service {
                 deviceNode = databaseService.createNode(Labels.Device);
 
                 // Update the properties
-                deviceNode.setProperty(Constant.ACTIVE, true);
-                deviceNode.setProperty(Constant.API, device.getApi());
-                // deviceNode.setProperty("batteryLevel", device.getBatteryLevel());
-                deviceNode.setProperty(Constant.BLUETOOTH_MAC, device.getBluetoothMAC());
-                deviceNode.setProperty(Constant.LAST_SEEN, device.getLastSeen().value());
-                deviceNode.setProperty(Constant.MANUFACTURER, device.getManufacturer());
-                deviceNode.setProperty(Constant.SENSORS, device.getSensors());
-                deviceNode.setProperty(Constant.DEVICE_ID, device.getDeviceID());
-                deviceNode.setProperty(Constant.TOKEN, device.getToken());
-                deviceNode.setProperty(Constant.WIFI_MAC, device.getWifiMAC());
+                setOnlyIfNotNull(deviceNode, Constant.API, device.getApi());
+                setOnlyIfNotNull(deviceNode, Constant.BLUETOOTH_MAC, device.getBluetoothMAC());
+                setOnlyIfNotNull(deviceNode, Constant.LAST_SEEN, device.getLastSeen().value());
+                setOnlyIfNotNull(deviceNode, Constant.MANUFACTURER, device.getManufacturer());
+                setOnlyIfNotNull(deviceNode, Constant.SENSORS, device.getSensors());
+                setOnlyIfNotNull(deviceNode, Constant.DEVICE_ID, device.getDeviceID());
+                setOnlyIfNotNull(deviceNode, Constant.TOKEN, device.getToken());
+                setOnlyIfNotNull(deviceNode, Constant.WIFI_MAC, device.getWifiMAC());
 
                 personNode.createRelationshipTo(deviceNode, RelationshipTypes.HAS);
             }

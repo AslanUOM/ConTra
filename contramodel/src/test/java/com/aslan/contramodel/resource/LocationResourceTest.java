@@ -56,7 +56,7 @@ public class LocationResourceTest {
 
     @Test
     public void testCreateLocation() throws Exception {
-        Time time = new Time(2015, 12, 24, 9, 1, 0);
+        Time time = Time.of(2015, 12, 24, 9, 1, 0);
         UserLocation mc = TestUtility.createUserLocation("+94771234567", "HTC-ONEM8", 98.0f, "Majestic City", 79.8547, 6.8939, time);
 
 
@@ -74,7 +74,7 @@ public class LocationResourceTest {
 
     @Test
     public void testFindWithin() throws Exception {
-        Time time = new Time(2015, 12, 24, 9, 1, 0);
+        Time time = Time.of(2015, 12, 24, 9, 1, 0);
         UserLocation userLocation = TestUtility.createUserLocation("+94771234567", "HTC-ONEM8", 70.0f, "Majestic City", 79.8545904, 6.8934421, time);
 
 

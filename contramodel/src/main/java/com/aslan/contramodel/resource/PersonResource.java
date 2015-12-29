@@ -1,13 +1,11 @@
 package com.aslan.contramodel.resource;
 
 
-import com.aslan.contra.dto.ws.Message;
 import com.aslan.contra.dto.common.Person;
+import com.aslan.contra.dto.ws.Message;
 import com.aslan.contra.dto.ws.NearbyKnownPeople;
 import com.aslan.contramodel.service.PersonService;
 import com.aslan.contramodel.util.Utility;
-import com.google.gson.Gson;
-import com.google.gson.reflect.TypeToken;
 import org.neo4j.graphdb.GraphDatabaseService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -19,7 +17,7 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import java.io.IOException;
 import java.net.HttpURLConnection;
-import java.util.*;
+import java.util.List;
 
 import static com.aslan.contramodel.util.Utility.isNullOrEmpty;
 
@@ -32,7 +30,6 @@ import static com.aslan.contramodel.util.Utility.isNullOrEmpty;
 public class PersonResource {
     private static final Logger LOGGER = LoggerFactory.getLogger(PersonResource.class);
     private static final Validator VALIDATOR = Utility.createValidator();
-    private static final Gson gson = new Gson();
     private PersonService service;
 
     public PersonResource(@Context GraphDatabaseService databaseService) {
@@ -45,7 +42,7 @@ public class PersonResource {
     public Response find(@PathParam("userID") String userID) throws IOException {
         LOGGER.debug("Request to find person with id {} is received", userID);
 
-        Message message = new Message();
+        Message<Person> message = new Message<>();
 
         if (isNullOrEmpty(userID)) {
             message.setStatus(HttpURLConnection.HTTP_BAD_REQUEST);
@@ -75,12 +72,12 @@ public class PersonResource {
     public Response create(Person person) {
         LOGGER.debug("Request to create person {} is received", person);
 
-        Message message = Utility.validate(VALIDATOR, person);
+        Message<Person> message = Utility.validate(VALIDATOR, person);
 
         if (message == null) {
             service.createOrUpdate(person);
 
-            message = new Message();
+            message = new Message<>();
             message.setMessage("Person is created successfully");
             message.setSuccess(true);
             message.setStatus(HttpURLConnection.HTTP_OK);
@@ -96,7 +93,7 @@ public class PersonResource {
     public Response create(@Encoded @QueryParam("person") String person, @Encoded @QueryParam("friend") String friend) {
         LOGGER.debug("Request to create {}-[KNOWS]->{} is received", person, friend);
 
-        Message message = new Message();
+        Message<Person> message = new Message<>();
 
         if (isNullOrEmpty(person) || isNullOrEmpty(friend)) {
             message.setStatus(HttpURLConnection.HTTP_BAD_REQUEST);
@@ -112,7 +109,6 @@ public class PersonResource {
 
             } catch (org.neo4j.graphdb.NotFoundException ex) {
                 // Person does not exist
-                message.setEntity(ex);
                 message.setMessage(ex.getMessage());
                 message.setStatus(HttpURLConnection.HTTP_NOT_FOUND);
             }
@@ -126,10 +122,10 @@ public class PersonResource {
     public Response nearByKnown(NearbyKnownPeople param) throws IOException {
         LOGGER.debug("Request to find {}", param);
 
-        Message message = Utility.validate(VALIDATOR, param);
+        Message<List<String>> message = Utility.validate(VALIDATOR, param);
 
         if (message == null) {
-            message = new Message();
+            message = new Message<>();
 
             try {
                 List<String> result = service.nearByKnownPeople(param);
@@ -142,7 +138,6 @@ public class PersonResource {
             } catch (org.neo4j.graphdb.NotFoundException ex) {
                 message.setStatus(HttpURLConnection.HTTP_NOT_FOUND);
                 message.setMessage(ex.getMessage());
-                message.setEntity(ex);
             }
         }
 

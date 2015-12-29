@@ -30,11 +30,11 @@ public class Utility {
         return VALIDATOR_FACTORY.getValidator();
     }
 
-    public static <T> Message validate(Validator validator, T t) {
-        Message message = null;
+    public static <T, M> Message<M> validate(Validator validator, T t) {
+        Message<M> message = null;
         if (t == null) {
             // Create error message
-            message = new Message();
+            message = new Message<>();
             message.setStatus(HttpURLConnection.HTTP_BAD_REQUEST);
             message.setMessage(t.getClass().toString() + " cannot be null.");
         } else {
@@ -47,7 +47,7 @@ public class Utility {
                     joiner.add(c.getPropertyPath() + " " + c.getMessage());
                 }
                 // Create error message
-                message = new Message();
+                message = new Message<>();
                 message.setStatus(HttpURLConnection.HTTP_BAD_REQUEST);
                 message.setMessage(joiner.toString());
             }

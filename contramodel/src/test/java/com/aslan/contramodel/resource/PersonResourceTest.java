@@ -140,7 +140,7 @@ public class PersonResourceTest {
         HTTP.POST(server.httpURI().resolve("/contra/person/knows?person=+94771234567&friend=+94770000000").toString());
 
         // Create a location and time
-        Time time = new Time(2015, 12, 24, 9, 1, 0);
+        Time time = Time.of(2015, 12, 24, 9, 1, 0);
         UserLocation location = TestUtility.createUserLocation("+94771234567", "Samsung", 70.0f, "Majestic City", 79.8545904, 6.8934421, time);
 
 
@@ -159,8 +159,8 @@ public class PersonResourceTest {
         HTTP.POST(server.httpURI().resolve("/contra/location/create").toString(), location);
 
         // Search for near by friends of +94771234567
-        Time time1 = new Time(2015, 12, 24, 9, 0, 0);
-        Time time2 = new Time(2015, 12, 24, 10, 0, 0);
+        Time time1 = Time.of(2015, 12, 24, 9, 0, 0);
+        Time time2 = Time.of(2015, 12, 24, 10, 0, 0);
 
         NearbyKnownPeople param = new NearbyKnownPeople();
         param.setUserID("+94771234567");

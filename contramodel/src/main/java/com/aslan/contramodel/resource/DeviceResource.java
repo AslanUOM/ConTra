@@ -57,7 +57,7 @@ public class DeviceResource {
 
     private Response createOrUpdate(boolean create, String userID, Device device) {
         // Validate the parameters
-        Message message = validateAndCreateErrorResponse(userID, device);
+        Message<Device> message = validateAndCreateErrorResponse(userID, device);
 
         if (message == null) {
             try {
@@ -66,15 +66,14 @@ public class DeviceResource {
                 } else {
                     service.updateDevice(userID, device);
                 }
-                message = new Message();
+                message = new Message<>();
                 message.setMessage("Device is updated successfully");
                 message.setSuccess(true);
                 message.setStatus(HttpURLConnection.HTTP_OK);
             } catch (org.neo4j.graphdb.NotFoundException e) {
                 LOGGER.error(e.getMessage(), e);
 
-                message = new Message();
-                message.setEntity(e);
+                message = new Message<>();
                 message.setMessage(e.getMessage());
                 message.setStatus(HttpURLConnection.HTTP_NO_CONTENT);
             }
@@ -82,13 +81,13 @@ public class DeviceResource {
         return Response.status(message.getStatus()).entity(message).build();
     }
 
-    private Message validateAndCreateErrorResponse(String userID, Device device) {
-        Message message = null;
+    private Message<Device> validateAndCreateErrorResponse(String userID, Device device) {
+        Message<Device> message = null;
         // Validate the parameters
         Set<ConstraintViolation<Device>> violations = VALIDATOR.validate(device);
         boolean nullOrEmptyUserID = isNullOrEmpty(userID);
         if (nullOrEmptyUserID || !violations.isEmpty()) {
-            message = new Message();
+            message = new Message<>();
             message.setStatus(HttpURLConnection.HTTP_BAD_REQUEST);
 
             StringJoiner joiner = new StringJoiner(", ");

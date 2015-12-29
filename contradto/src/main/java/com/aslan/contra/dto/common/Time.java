@@ -39,19 +39,6 @@ public class Time implements Serializable {
 
     }
 
-    public Time(int year, int month, int day) {
-        this(year, month, day, 0, 0, 0);
-    }
-
-    public Time(int year, int month, int day, int hour, int minute, int second) {
-        this.year = year;
-        this.month = month;
-        this.day = day;
-        this.hour = hour;
-        this.minute = minute;
-        this.second = second;
-    }
-
     public int getYear() {
         return year;
     }
@@ -112,6 +99,22 @@ public class Time implements Serializable {
         Calendar calendar = Calendar.getInstance();
         calendar.set(year, month - 1, day, hour, minute, second);
         return calendar.getTime();
+    }
+
+    public static Time of(int year, int month, int day) {
+        return of(year, month, day, 0, 0, 0);
+    }
+
+    public static Time of(int year, int month, int day, int hour, int minute, int second) {
+        Time time = new Time();
+        time.year = year;
+        time.month = month;
+        time.day = day;
+        time.hour = hour;
+        time.minute = minute;
+        time.second = second;
+
+        return time;
     }
 
     public static Time valueOf(long value) {

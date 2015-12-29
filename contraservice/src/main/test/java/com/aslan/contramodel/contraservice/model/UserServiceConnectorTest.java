@@ -1,6 +1,7 @@
 package com.aslan.contramodel.contraservice.model;
 
-import com.aslan.contra.dto.Person;
+import com.aslan.contra.dto.common.Person;
+import com.aslan.contra.dto.ws.Message;
 import org.junit.Test;
 
 import static org.junit.Assert.assertEquals;
@@ -17,12 +18,10 @@ public class UserServiceConnectorTest {
 
         Person person = new Person();
         person.setUserID("+94770780210");
-        person.setEmail("slgobinath@gmail.com");
-        person.setName("Gobinath");
 
-        boolean result = connector.create(person);
+        Message<Person> message = connector.create(person);
 
-        assertEquals("Filed to create the person", true, result);
+        assertEquals("Failed to create the person", true, message.isSuccess());
     }
 
     @Test
@@ -36,7 +35,7 @@ public class UserServiceConnectorTest {
 
         connector.create(person);
 
-        Person receivedPerson = connector.find("+94770780210");
-        assertEquals("Filed to create the person", "Gobinath", receivedPerson.getName());
+        Message<Person> message = connector.find("+94770780210");
+        assertEquals("Filed to create the person", "Gobinath", message.getEntity().getName());
     }
 }

@@ -52,7 +52,7 @@ public class TimelineServiceTest {
 
     @Test
     public void testCreate() throws Exception {
-        Time time = new Time(1991, 4, 20, 4, 5, 0);
+        Time time = Time.of(1991, 4, 20, 4, 5, 0);
 
         timelineService.createTime("+94771234567", time);
 
@@ -66,7 +66,7 @@ public class TimelineServiceTest {
 
     @Test
     public void testDuplicate() throws Exception {
-        Time time = new Time(1991, 4, 20, 4, 5, 0);
+        Time time = Time.of(1991, 4, 20, 4, 5, 0);
 
         timelineService.createTime("+94771234567", time);
         timelineService.createTime("+94771234567", time);
@@ -81,7 +81,7 @@ public class TimelineServiceTest {
 
     @Test
     public void testLinkBetweenMinutes() throws Exception {
-        Time time = new Time(2016, 1, 1, 1, 10, 0);
+        Time time = Time.of(2016, 1, 1, 1, 10, 0);
 
         timelineService.createTime("+94771234567", time);
         time.setMinute(11);
@@ -107,7 +107,7 @@ public class TimelineServiceTest {
 
     @Test
     public void testLinkBetweenDays() throws Exception {
-        Time time = new Time(2015, 12, 22, 5, 10, 0);
+        Time time = Time.of(2015, 12, 22, 5, 10, 0);
 
         timelineService.createTime("+94771234567", time);
 
@@ -137,7 +137,7 @@ public class TimelineServiceTest {
 
     @Test
     public void testLinkBetweenMonths() throws Exception {
-        Time time = new Time(1970, 1, 22, 5, 10, 0);
+        Time time = Time.of(1970, 1, 22, 5, 10, 0);
 
         timelineService.createTime("+94771234567", time);
 
@@ -163,7 +163,7 @@ public class TimelineServiceTest {
 
     @Test
     public void testLinkBetweenYears() throws Exception {
-        Time time = new Time(1985, 4, 20, 5, 10, 0);
+        Time time = Time.of(1985, 4, 20, 5, 10, 0);
 
         timelineService.createTime("+94771234567", time);
 

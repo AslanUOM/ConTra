@@ -1,7 +1,6 @@
 package com.aslan.contra.dto.common;
 
 import javax.validation.constraints.NotNull;
-import javax.xml.bind.annotation.XmlRootElement;
 import java.io.Serializable;
 
 /**
@@ -9,9 +8,7 @@ import java.io.Serializable;
  * <p>
  * Created by gobinath on 12/9/15.
  */
-@XmlRootElement
 public class Person implements Serializable {
-    @NotNull
     private String name;
 
     @NotNull
@@ -45,6 +42,6 @@ public class Person implements Serializable {
 
     @Override
     public String toString() {
-        return name;
+        return userID;
     }
 }

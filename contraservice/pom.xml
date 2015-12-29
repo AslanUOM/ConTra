@@ -8,7 +8,7 @@
     <modelVersion>4.0.0</modelVersion>
     <artifactId>contraservice</artifactId>
     <packaging>war</packaging>
-    <name>contraservice Maven Webapp</name>
+    <name>contraservice</name>
     <url>http://maven.apache.org</url>
 
     <properties>
@@ -60,6 +60,12 @@
         <dependency>
             <groupId>org.glassfish.jersey.test-framework.providers</groupId>
             <artifactId>jersey-test-framework-provider-grizzly2</artifactId>
+            <version>${jersey.version}</version>
+        </dependency>
+
+        <dependency>
+            <groupId>org.glassfish.jersey.ext</groupId>
+            <artifactId>jersey-bean-validation</artifactId>
             <version>${jersey.version}</version>
         </dependency>
 

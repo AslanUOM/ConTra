@@ -101,7 +101,7 @@ public class DeviceServiceTest {
             Node deviceNode = databaseService.findNode(Service.Labels.Device, Constant.DEVICE_ID, "f9e84f7c11368041");
             transaction.success();
 
-            assertEquals("Device is not created.", 50.5f, deviceNode.getProperty(Constant.AMBIENT_TEMPERATURE));
+            assertEquals("Device is not created.", 50.5d, deviceNode.getProperty(Constant.AMBIENT_TEMPERATURE));
         }
     }
 }

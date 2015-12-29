@@ -28,7 +28,7 @@ public class Device implements Serializable {
      */
     @Min(0)
     @Max(100)
-    private float batteryLevel;
+    private double batteryLevel;
 
     /**
      * Bluetooth MAC address.
@@ -59,27 +59,27 @@ public class Device implements Serializable {
     /**
      * Temperature of the environment.
      */
-    private float ambientTemperature;
+    private double ambientTemperature;
 
     /**
      * Humidity of the environment.
      */
-    private float humidity;
+    private double humidity;
 
     /**
      * Illuminance of the environment.
      */
-    private float illuminance;
+    private double illuminance;
 
     /**
      * Pressure in the environment.
      */
-    private float ambientPressure;
+    private double ambientPressure;
 
     /**
      * Proximity of the device with any objects.
      */
-    private float proximity;
+    private double proximity;
 
     /**
      * Google push notification token.
@@ -91,88 +91,6 @@ public class Device implements Serializable {
      */
     private String wifiMAC;
 
-
-    @Override
-    public String toString() {
-        return getDeviceID();
-    }
-
-    /**
-     * Indicates whether the device is with the user or not.
-     */
-    public boolean isActive() {
-        return active;
-    }
-
-    public void setActive(boolean active) {
-        this.active = active;
-    }
-
-    /**
-     * API level of the device.
-     */
-    public int getApi() {
-        return api;
-    }
-
-    public void setApi(int api) {
-        this.api = api;
-    }
-
-    /**
-     * Last known battery level.
-     */
-    public float getBatteryLevel() {
-        return batteryLevel;
-    }
-
-    public void setBatteryLevel(float batteryLevel) {
-        this.batteryLevel = batteryLevel;
-    }
-
-    /**
-     * Bluetooth MAC address.
-     */
-    public String getBluetoothMAC() {
-        return bluetoothMAC;
-    }
-
-    public void setBluetoothMAC(String bluetoothMAC) {
-        this.bluetoothMAC = bluetoothMAC;
-    }
-
-    /**
-     * Unique deviceID number to identify the device.
-     */
-    public String getDeviceID() {
-        return deviceID;
-    }
-
-    public void setDeviceID(String deviceID) {
-        this.deviceID = deviceID;
-    }
-
-    /**
-     * The lat seen time of this device.
-     */
-    public Time getLastSeen() {
-        return lastSeen;
-    }
-
-    public void setLastSeen(Time lastSeen) {
-        this.lastSeen = lastSeen;
-    }
-
-    /**
-     * Manufacturer name of the device.
-     */
-    public String getManufacturer() {
-        return manufacturer;
-    }
-
-    public void setManufacturer(String manufacturer) {
-        this.manufacturer = manufacturer;
-    }
 
     /**
      * List of available hardware sensors.
@@ -191,64 +109,102 @@ public class Device implements Serializable {
         this.sensors = Arrays.copyOf(sensors, sensors.length);
     }
 
-    /**
-     * Temperature of the environment.
-     */
-    public float getAmbientTemperature() {
+    public boolean isActive() {
+        return active;
+    }
+
+    public void setActive(boolean active) {
+        this.active = active;
+    }
+
+    public int getApi() {
+        return api;
+    }
+
+    public void setApi(int api) {
+        this.api = api;
+    }
+
+    public double getBatteryLevel() {
+        return batteryLevel;
+    }
+
+    public void setBatteryLevel(double batteryLevel) {
+        this.batteryLevel = batteryLevel;
+    }
+
+    public String getBluetoothMAC() {
+        return bluetoothMAC;
+    }
+
+    public void setBluetoothMAC(String bluetoothMAC) {
+        this.bluetoothMAC = bluetoothMAC;
+    }
+
+    public String getDeviceID() {
+        return deviceID;
+    }
+
+    public void setDeviceID(String deviceID) {
+        this.deviceID = deviceID;
+    }
+
+    public Time getLastSeen() {
+        return lastSeen;
+    }
+
+    public void setLastSeen(Time lastSeen) {
+        this.lastSeen = lastSeen;
+    }
+
+    public String getManufacturer() {
+        return manufacturer;
+    }
+
+    public void setManufacturer(String manufacturer) {
+        this.manufacturer = manufacturer;
+    }
+
+    public double getAmbientTemperature() {
         return ambientTemperature;
     }
 
-    public void setAmbientTemperature(float ambientTemperature) {
+    public void setAmbientTemperature(double ambientTemperature) {
         this.ambientTemperature = ambientTemperature;
     }
 
-    /**
-     * Humidity of the environment.
-     */
-    public float getHumidity() {
+    public double getHumidity() {
         return humidity;
     }
 
-    public void setHumidity(float humidity) {
+    public void setHumidity(double humidity) {
         this.humidity = humidity;
     }
 
-    /**
-     * Illuminance of the environment.
-     */
-    public float getIlluminance() {
+    public double getIlluminance() {
         return illuminance;
     }
 
-    public void setIlluminance(float illuminance) {
+    public void setIlluminance(double illuminance) {
         this.illuminance = illuminance;
     }
 
-    /**
-     * Pressure in the environment.
-     */
-    public float getAmbientPressure() {
+    public double getAmbientPressure() {
         return ambientPressure;
     }
 
-    public void setAmbientPressure(float ambientPressure) {
+    public void setAmbientPressure(double ambientPressure) {
         this.ambientPressure = ambientPressure;
     }
 
-    /**
-     * Proximity of the device with any objects.
-     */
-    public float getProximity() {
+    public double getProximity() {
         return proximity;
     }
 
-    public void setProximity(float proximity) {
+    public void setProximity(double proximity) {
         this.proximity = proximity;
     }
 
-    /**
-     * Google push notification token.
-     */
     public String getToken() {
         return token;
     }
@@ -257,14 +213,16 @@ public class Device implements Serializable {
         this.token = token;
     }
 
-    /**
-     * WiFi MAC address.
-     */
     public String getWifiMAC() {
         return wifiMAC;
     }
 
     public void setWifiMAC(String wifiMAC) {
         this.wifiMAC = wifiMAC;
+    }
+
+    @Override
+    public String toString() {
+        return deviceID;
     }
 }
