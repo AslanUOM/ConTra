@@ -13,6 +13,7 @@ import javax.ws.rs.client.Invocation;
 import javax.ws.rs.client.WebTarget;
 import javax.ws.rs.core.GenericType;
 import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.UriBuilder;
 
 /**
  * Created by gobinath on 12/28/15.
@@ -25,10 +26,16 @@ public class DeviceServiceConnector extends ServiceConnector {
     public Message<Device> create(String userID, Device device) {
         LOGGER.debug("Creating a new device {} of {}", device, userID);
 
-        WebTarget target = createWebTarget(Constant.DEVICE_MODEL_URL + "/create/{userID}").resolveTemplate("userID", userID);
-        Invocation.Builder builder = target.request(MediaType.APPLICATION_JSON_TYPE);
+        device.setLastSeen(Time.now());
+        String url = UriBuilder.fromPath(Constant.DEVICE_MODEL_URL + "/create/{user_id}").resolveTemplate("user_id", userID).toString();
+        return post(url, device, DEVICE_GENERIC_TYPE);
+    }
+
+    public Message<Device> update(String userID, Device device) {
+        LOGGER.debug("Updating the device {} of {}", device, userID);
 
         device.setLastSeen(Time.now());
-        return builder.post(Entity.json(device), DEVICE_GENERIC_TYPE);
+        String url = UriBuilder.fromPath(Constant.DEVICE_MODEL_URL + "/update/{user_id}").resolveTemplate("user_id", userID).toString();
+        return post(url, device, DEVICE_GENERIC_TYPE);
     }
 }

@@ -6,11 +6,8 @@ import com.aslan.contramodel.contraservice.util.Constant;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.ws.rs.client.Entity;
-import javax.ws.rs.client.Invocation;
-import javax.ws.rs.client.WebTarget;
-import javax.ws.rs.core.*;
-import java.net.HttpURLConnection;
+import javax.ws.rs.core.GenericType;
+import javax.ws.rs.core.UriBuilder;
 
 /**
  * Created by gobinath on 12/17/15.
@@ -21,20 +18,16 @@ public class UserServiceConnector extends ServiceConnector {
     };
 
 
-    public Message<Person> create(Person t) {
-        LOGGER.debug("Creating a new person {}", t);
+    public Message<Person> create(Person person) {
+        LOGGER.debug("Creating a new person {}", person);
 
-        WebTarget target = createWebTarget(Constant.USER_MODEL_URL + "/create");
-        Invocation.Builder builder = target.request(MediaType.APPLICATION_JSON_TYPE);
-        return builder.post(Entity.json(t), PERSON_GENERIC_TYPE);
+        return post(Constant.USER_MODEL_URL + "/create", person, PERSON_GENERIC_TYPE);
     }
 
     public Message<Person> find(String userID) {
         LOGGER.debug("Searching for a person with id {}", userID);
-        String url = Constant.USER_MODEL_URL + "/find/{user_id}";
-        WebTarget target = createWebTarget(UriBuilder.fromPath(url).resolveTemplate("user_id", userID).toString());
 
-        Invocation.Builder builder = target.request(MediaType.APPLICATION_JSON_TYPE);
-        return builder.get(PERSON_GENERIC_TYPE);
+        String url = UriBuilder.fromPath(Constant.USER_MODEL_URL + "/find/{user_id}").resolveTemplate("user_id", userID).toString();
+        return get(url, PERSON_GENERIC_TYPE);
     }
 }

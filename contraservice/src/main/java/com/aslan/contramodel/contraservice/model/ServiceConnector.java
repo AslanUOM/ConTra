@@ -1,6 +1,7 @@
 package com.aslan.contramodel.contraservice.model;
 
 import com.aslan.contra.dto.ws.Message;
+import com.aslan.contramodel.contraservice.util.Constant;
 import org.glassfish.jersey.client.authentication.HttpAuthenticationFeature;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -20,10 +21,20 @@ public abstract class ServiceConnector {
 
     public final WebTarget createWebTarget(String url) {
         HttpAuthenticationFeature feature = HttpAuthenticationFeature.basic(USERNAME, PASSWORD);
-
         Client client = ClientBuilder.newClient();
         client.register(feature);
-
         return client.target(url);
+    }
+
+    public <T> Message<T> post(String url, Object object, GenericType<Message<T>> genericType) {
+        WebTarget target = createWebTarget(url);
+        Invocation.Builder builder = target.request(MediaType.APPLICATION_JSON_TYPE);
+        return builder.post(Entity.json(object), genericType);
+    }
+
+    public <T> Message<T> get(String url, GenericType<Message<T>> genericType) {
+        WebTarget target = createWebTarget(url);
+        Invocation.Builder builder = target.request(MediaType.APPLICATION_JSON_TYPE);
+        return builder.get(genericType);
     }
 }
