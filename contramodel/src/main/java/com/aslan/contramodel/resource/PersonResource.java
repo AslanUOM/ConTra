@@ -4,14 +4,16 @@ package com.aslan.contramodel.resource;
 import com.aslan.contra.dto.common.Person;
 import com.aslan.contra.dto.ws.Message;
 import com.aslan.contra.dto.ws.NearbyKnownPeople;
+import com.aslan.contra.dto.ws.UserDevice;
 import com.aslan.contramodel.service.PersonService;
 import com.aslan.contramodel.util.Utility;
-import org.neo4j.graphdb.GraphDatabaseService;
+import org.neo4j.graphdb.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.validation.Validator;
 import javax.ws.rs.*;
+import javax.ws.rs.Path;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
@@ -39,7 +41,7 @@ public class PersonResource {
     @GET
     @Path("/find/{userID}")
     @Produces(MediaType.APPLICATION_JSON)
-    public Response find(@PathParam("userID") String userID) throws IOException {
+    public Response find(@Encoded @PathParam("userID") String userID) throws IOException {
         LOGGER.debug("Request to find person with id {} is received", userID);
 
         Message<Person> message = new Message<>();
@@ -66,21 +68,51 @@ public class PersonResource {
     }
 
     @POST
-    @Path("/create")
-    @Consumes(MediaType.APPLICATION_JSON)
+    @Path("/update")
     @Produces(MediaType.APPLICATION_JSON)
-    public Response create(Person person) {
-        LOGGER.debug("Request to create person {} is received", person);
+    public Response find(Person person) throws IOException {
+        LOGGER.debug("Request to update the person {} is received", person);
 
         Message<Person> message = Utility.validate(VALIDATOR, person);
 
         if (message == null) {
-            service.createOrUpdate(person);
-
             message = new Message<>();
-            message.setMessage("Person is created successfully");
-            message.setSuccess(true);
-            message.setStatus(HttpURLConnection.HTTP_OK);
+
+            try {
+                service.update(person);
+                message.setMessage("Person is updated successfully");
+                message.setSuccess(true);
+                message.setStatus(HttpURLConnection.HTTP_OK);
+            } catch (org.neo4j.graphdb.NotFoundException ex) {
+                message.setMessage(ex.getMessage());
+                message.setStatus(HttpURLConnection.HTTP_NOT_FOUND);
+            }
+        }
+
+        return Response.status(message.getStatus()).entity(message).build();
+    }
+
+    @POST
+    @Path("/create")
+    @Consumes(MediaType.APPLICATION_JSON)
+    @Produces(MediaType.APPLICATION_JSON)
+    public Response create(UserDevice userDevice) {
+        LOGGER.debug("Request to create person {} is received", userDevice);
+
+        Message<Person> message = Utility.validate(VALIDATOR, userDevice);
+
+        if (message == null) {
+            message = new Message<>();
+
+            try {
+                service.create(userDevice);
+                message.setMessage("Person is created successfully");
+                message.setSuccess(true);
+                message.setStatus(HttpURLConnection.HTTP_OK);
+            } catch (org.neo4j.graphdb.NotFoundException ex) {
+                message.setMessage(ex.getMessage());
+                message.setStatus(HttpURLConnection.HTTP_NOT_FOUND);
+            }
         }
 
         return Response.status(message.getStatus()).entity(message).build();

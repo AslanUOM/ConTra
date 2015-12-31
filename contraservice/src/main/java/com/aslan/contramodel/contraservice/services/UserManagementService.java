@@ -35,12 +35,18 @@ public class UserManagementService {
     private final DeviceServiceConnector deviceServiceConnector = new DeviceServiceConnector();
 
     @GET
-    @Path("/find/{userId}")
+    @Path("/find/{userID}")
     @Produces(MediaType.APPLICATION_JSON)
-    public Response find(@UserID @PathParam("userId") String userId) {
-        LOGGER.debug("Request to get the user {}", userId);
-        Message message = userServiceConnector.find(userId);
-        return Response.status(message.getStatus()).entity(message).build();
+    public Response find(@UserID @PathParam("userID") String userID) {
+        LOGGER.debug("Request to get the user {}", userID);
+        try {
+            Message<Person> message = userServiceConnector.find(userID);
+            return Response.status(message.getStatus()).entity(message).build();
+        } catch (Exception ex) {
+            LOGGER.error(ex.getMessage(), ex);
+            throw ex;
+        }
+
     }
 
     @POST
@@ -55,19 +61,19 @@ public class UserManagementService {
             // Format the phone number
             String formattedPhoneNumber = Utility.formatPhoneNumber(userDevice.getCountry(), userDevice.getUserID());
 
-            // Save the Person
-            Person person = new Person();
-            person.setUserID(formattedPhoneNumber);
-            message = userServiceConnector.create(person);
+            userDevice.setUserID(formattedPhoneNumber);
+            message = userServiceConnector.create(userDevice);
 
             if (message.isSuccess()) {
                 // Person is created successfully
-                message.setEntity(person);
-
                 // Create the device
                 Message<Device> deviceMessage = deviceServiceConnector.create(formattedPhoneNumber, userDevice.getDevice());
                 if (deviceMessage.isSuccess()) {
                     message.setMessage("Person and the device are created successfully");
+                } else {
+                    message.setSuccess(false);
+                    message.setMessage("Person is created but failed to create the device");
+                    message.setStatus(HttpURLConnection.HTTP_PARTIAL);
                 }
             }
         } catch (NumberParseException e) {
@@ -90,7 +96,7 @@ public class UserManagementService {
         LOGGER.debug("Request to update person {}", person);
         Response response;
 
-        Message<Person> message = userServiceConnector.create(person);
+        Message<Person> message = userServiceConnector.update(person);
 
         return Response.status(message.getStatus()).entity(message).build();
     }

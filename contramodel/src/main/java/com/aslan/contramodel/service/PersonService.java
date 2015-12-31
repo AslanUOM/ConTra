@@ -3,6 +3,7 @@ package com.aslan.contramodel.service;
 
 import com.aslan.contra.dto.common.Person;
 import com.aslan.contra.dto.ws.NearbyKnownPeople;
+import com.aslan.contra.dto.ws.UserDevice;
 import com.aslan.contramodel.util.Constant;
 import org.neo4j.graphdb.*;
 import org.slf4j.Logger;
@@ -22,12 +23,15 @@ import static org.neo4j.helpers.collection.MapUtil.map;
  */
 public class PersonService extends Service {
     private static final Logger LOGGER = LoggerFactory.getLogger(PersonService.class);
+    private final DeviceService deviceService;
 
     public PersonService(GraphDatabaseService databaseService) {
         super(databaseService);
 
         // Create the index
         createIndex(Labels.Person, "userID");
+
+        this.deviceService = new DeviceService(databaseService);
     }
 
 
@@ -35,19 +39,35 @@ public class PersonService extends Service {
      * Create or update (if already exists) a unique person using the userID as the constraint.
      * If the person already exists, it will update the name and email address of that person.
      *
-     * @param person the person to be created or updated
+     * @param userDevice the person to be created or updated
      * @return id of the newly created person or the existing person
      */
-    public Long createOrUpdate(Person person) {
-        LOGGER.debug("Creating or updating person {}", person);
+    public void create(UserDevice userDevice) {
+        final String userID = userDevice.getUserID();
+        LOGGER.debug("Creating person {} and the device {}", userID, userDevice.getDevice());
         try (Transaction transaction = databaseService.beginTx()) {
-            final String query = "MERGE (n:Person {userID: {userID}}) SET n.name = {name}, n.email = {email} RETURN ID(n) as id";
-            Long id = executeAndReturnID(query, "name", person.getName(), "email", person.getEmail(), "userID", person.getUserID());
+            final String query = "MERGE (n:Person {userID: {userID}}) RETURN ID(n) as id";
+            Long id = executeAndReturnID(query, "userID", userDevice.getUserID());
+            // Commit the transaction
+            transaction.success();
+        }
+        deviceService.createDevice(userID, userDevice.getDevice());
+    }
+
+    public void update(Person person) {
+        LOGGER.debug("Updating the person {}", person);
+        try (Transaction transaction = databaseService.beginTx()) {
+            Node personNode = databaseService.findNode(Labels.Person, Constant.USER_ID, person.getUserID());
+
+            if (personNode == null) {
+                throw new NotFoundException("Person not found with id: " + person.getUserID());
+            }
+
+            personNode.setProperty(Constant.NAME, person.getName());
+            personNode.setProperty(Constant.EMAIL, person.getEmail());
 
             // Commit the transaction
             transaction.success();
-
-            return id;
         }
     }
 
@@ -63,8 +83,12 @@ public class PersonService extends Service {
             if (node != null) {
                 person = new Person();
                 person.setUserID(userID);
-                person.setName((String) node.getProperty(Constant.NAME));
-                person.setEmail((String) node.getProperty(Constant.EMAIL));
+                if (node.hasProperty(Constant.NAME)) {
+                    person.setName((String) node.getProperty(Constant.NAME));
+                }
+                if (node.hasProperty(Constant.EMAIL)) {
+                    person.setEmail((String) node.getProperty(Constant.EMAIL));
+                }
             }
         }
         return person;

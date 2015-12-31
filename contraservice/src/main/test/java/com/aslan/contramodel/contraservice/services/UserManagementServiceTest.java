@@ -8,6 +8,7 @@ import com.aslan.contra.dto.ws.UserDevice;
 import com.google.gson.Gson;
 import org.glassfish.jersey.server.ResourceConfig;
 import org.glassfish.jersey.test.JerseyTest;
+import org.junit.Assert;
 import org.junit.Test;
 
 import javax.ws.rs.client.Entity;
@@ -58,7 +59,7 @@ public class UserManagementServiceTest extends JerseyTest {
         Message<Person> message = target("user/create").request().post(Entity.json(userDevice), new GenericType<Message<Person>>() {
         });
 
-        assertEquals("Failed to create person.", "+94773458206", message.getEntity().getUserID());
+        Assert.assertTrue("Failed to create person.", message.isSuccess());
     }
 
     @Test
@@ -80,7 +81,7 @@ public class UserManagementServiceTest extends JerseyTest {
         Message<Person> message = target("user/create").request().post(Entity.json(userDevice), new GenericType<Message<Person>>() {
         });
 
-        assertEquals("Failed to create person.", "+94770780211", message.getEntity().getUserID());
+        assertTrue("Failed to create person.", message.isSuccess());
     }
 
     @Test
@@ -147,36 +148,39 @@ public class UserManagementServiceTest extends JerseyTest {
         person.setName("Joh");
         person.setEmail("john@gmail.com");
 
-        Message<Person> message =target("user/update").request().post(Entity.json(person), new GenericType<Message<Person>>() {
+        Message<Person> message = target("user/update").request().post(Entity.json(person), new GenericType<Message<Person>>() {
         });
         assertTrue("Empty country is accepted.", message.isSuccess());
     }
 
-//    @Test
-//    public void testFindExistingPerson() {
-//        Device device = new Device();
-//        device.setDeviceID("b195442d1e65c652");
-//        device.setApi(20);
-//        device.setBluetoothMAC("125.0.12.2");
-//        device.setManufacturer("Samsung");
-//        device.setToken("GCM-124");
-//        device.setWifiMAC("127.0.12.2");
-//        device.setSensors(new String[]{"Light", "Temperature", "GPS"});
-//
-//        UserDevice userDevice = new UserDevice();
-//        userDevice.setUserID("0776780124");
-//        userDevice.setCountry("lk");
-//        userDevice.setDevice(device);
-//
-//        Response response = target("user/create").request().post(Entity.json(userDevice));
-//
-//        Person person = createPerson("Carol", "0776780124", "carol@gmail.com");
-//        String id = target("user/create").queryParam("country", "LK").request().post(Entity.json(person), String.class);
-//        assertEquals("Failed to create person.", "+94776780124", id);
-//
-//        Person receivedPerson = target("user/find/+94776780124").request().get(Person.class);
-//        assertEquals("Failed to find the person.", "Carol", receivedPerson.getName());
-//    }
+    @Test
+    public void testFindExistingPerson() {
+        // Create a new Person
+        Device device = new Device();
+        device.setDeviceID("b195442d1e65c680");
+        device.setApi(20);
+        device.setBluetoothMAC("125.0.12.2");
+        device.setManufacturer("Sony");
+        device.setToken("GCM-124");
+        device.setWifiMAC("127.0.12.2");
+        device.setSensors(new String[]{"Light", "Temperature", "GPS"});
+
+        UserDevice userDevice = new UserDevice();
+        userDevice.setUserID("0776780124");
+        userDevice.setCountry("lk");
+        userDevice.setDevice(device);
+
+        Response response = target("user/create").request().post(Entity.json(userDevice));
+
+        // Update person
+        Person person = createPerson("Carol", "+94776780124", "carol@gmail.com");
+        target("user/update").request().post(Entity.json(person));
+
+
+        Message<Person> message = target("user/find/+94776780124").request().get(new GenericType<Message<Person>>() {
+        });
+        assertEquals("Failed to find the person.", "Carol", message.getEntity().getName());
+    }
 
     @Test
     public void testFindInvalidUserId() {

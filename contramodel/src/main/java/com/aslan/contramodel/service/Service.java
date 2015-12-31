@@ -98,7 +98,7 @@ public abstract class Service {
         if (label == null || property == null) {
             return;
         }
-        LOGGER.debug("Creating index for label {} on {}", label, property);
+        LOGGER.debug("Creating index for {} on {}", label, property);
         boolean indexExist = false;
 
         try (Transaction transaction = databaseService.beginTx()) {

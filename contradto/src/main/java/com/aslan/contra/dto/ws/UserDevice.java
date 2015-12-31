@@ -44,4 +44,9 @@ public class UserDevice implements Serializable {
     public void setDevice(Device device) {
         this.device = device;
     }
+
+    @Override
+    public String toString() {
+        return userID + " with " + device;
+    }
 }

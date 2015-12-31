@@ -1,12 +1,15 @@
 package com.aslan.contramodel.resource;
 
 
+import com.aslan.contra.dto.common.Device;
 import com.aslan.contra.dto.common.Person;
 import com.aslan.contra.dto.common.Time;
 import com.aslan.contra.dto.ws.Message;
 import com.aslan.contra.dto.ws.NearbyKnownPeople;
+import com.aslan.contra.dto.ws.UserDevice;
 import com.aslan.contra.dto.ws.UserLocation;
 import com.aslan.contramodel.service.Service;
+import com.aslan.contramodel.util.Constant;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 import org.junit.AfterClass;
@@ -16,11 +19,13 @@ import org.neo4j.graphdb.*;
 import org.neo4j.harness.ServerControls;
 import org.neo4j.test.server.HTTP;
 
+import javax.ws.rs.core.Response;
 import java.net.HttpURLConnection;
 import java.util.List;
 import java.util.Map;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 import static org.neo4j.helpers.collection.MapUtil.map;
 
 /**
@@ -65,49 +70,87 @@ public class PersonResourceTest {
 
     @Test
     public void testCreate() throws Exception {
-        Person person = TestUtility.createPerson("+94773333333", "Carol", "carol@gmail.com");
+        Device device = new Device();
+        device.setDeviceID("c195442d1e65c922");
+        device.setApi(20);
+        device.setBluetoothMAC("125.0.12.2");
+        device.setManufacturer("HTC");
+        device.setToken("GCM-124");
+        device.setWifiMAC("127.0.12.2");
+        device.setSensors(new String[]{"Light", "Temperature", "GPS"});
 
-        HTTP.Response response = HTTP.POST(server.httpURI().resolve("/contra/person/create").toString(), person);
+        UserDevice userDevice = new UserDevice();
+        userDevice.setUserID("+94770780211");
+        userDevice.setCountry("lk");
+        userDevice.setDevice(device);
+
+        HTTP.Response response = HTTP.POST(server.httpURI().resolve("/contra/person/create").toString(), userDevice);
 
         // Check the status.
         assertEquals("Error in request.", HttpURLConnection.HTTP_OK, response.status());
 
         // Manually retrieve Bob.
         try (Transaction transaction = databaseService.beginTx()) {
-            Node node = databaseService.findNode(DynamicLabel.label("Person"), "userID", "+94773333333");
+            Node node = databaseService.findNode(Service.Labels.Person, Constant.USER_ID, "+94770780211");
 
             transaction.success();
             // Check the name of the inserted person.
-            assertEquals("Person is not created.", "Carol", node.getProperty("name"));
+            assertTrue("Person is not created.", node != null);
         }
     }
 
     @Test
     public void testUpdate() throws Exception {
+        Device device = new Device();
+        device.setDeviceID("c191142d1e65c922");
+        device.setApi(20);
+        device.setBluetoothMAC("125.0.12.2");
+        device.setManufacturer("HTC");
+        device.setToken("GCM-124");
+        device.setWifiMAC("127.0.12.2");
+        device.setSensors(new String[]{"Light", "Temperature", "GPS"});
+
+        UserDevice userDevice = new UserDevice();
+        userDevice.setUserID("+94779999999");
+        userDevice.setCountry("lk");
+        userDevice.setDevice(device);
+
+
+        HTTP.POST(server.httpURI().resolve("/contra/person/create").toString(), userDevice);
+
         Person person = TestUtility.createPerson("+94779999999", "Bob", "bob@gmail.com");
 
-        HTTP.POST(server.httpURI().resolve("/contra/person/create").toString(), person);
+        HTTP.Response response = HTTP.POST(server.httpURI().resolve("/contra/person/update").toString(), person);
 
-        person.setEmail("newbob@yahoo.com");
-        HTTP.POST(server.httpURI().resolve("/contra/person/create").toString(), person);
-
+        assertEquals("Failed to update the person.", HttpURLConnection.HTTP_OK, response.status());
         // Manually retrieve Bob.
         try (Transaction transaction = databaseService.beginTx()) {
-            Node node = databaseService.findNode(DynamicLabel.label("Person"), "userID", "+94779999999");
+            Node node = databaseService.findNode(Service.Labels.Person, Constant.USER_ID, "+94779999999");
 
             transaction.success();
             // Check the name of the inserted person.
-            assertEquals("Person is not updated.", "newbob@yahoo.com", node.getProperty("email"));
+            assertEquals("Person is not updated.", "bob@gmail.com", node.getProperty("email"));
         }
     }
 
     @Test
     public void testCreateWithNullProperties() throws Exception {
-        Person person = new Person();
-        person.setName("Bob");
-        person.setEmail("bob@gmail.com");
+        Device device = new Device();
+        device.setDeviceID("c191142d1e65aa22");
+        device.setApi(20);
+        device.setBluetoothMAC("125.0.12.2");
+        device.setManufacturer("HTC");
+        device.setToken("GCM-124");
+        device.setWifiMAC("127.0.12.2");
+        device.setSensors(new String[]{"Light", "Temperature", "GPS"});
 
-        HTTP.Response response = HTTP.POST(server.httpURI().resolve("/contra/person/create").toString(), person);
+        UserDevice userDevice = new UserDevice();
+        // userID is null
+        userDevice.setCountry("lk");
+        userDevice.setDevice(device);
+
+
+        HTTP.Response response = HTTP.POST(server.httpURI().resolve("/contra/person/create").toString(), userDevice);
 
         // Check the status.
         assertEquals("Accepting null properties.", HttpURLConnection.HTTP_BAD_REQUEST, response.status());

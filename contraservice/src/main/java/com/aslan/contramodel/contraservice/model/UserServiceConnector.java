@@ -2,6 +2,7 @@ package com.aslan.contramodel.contraservice.model;
 
 import com.aslan.contra.dto.common.Person;
 import com.aslan.contra.dto.ws.Message;
+import com.aslan.contra.dto.ws.UserDevice;
 import com.aslan.contramodel.contraservice.util.Constant;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -18,10 +19,16 @@ public class UserServiceConnector extends ServiceConnector {
     };
 
 
-    public Message<Person> create(Person person) {
-        LOGGER.debug("Creating a new person {}", person);
+    public Message<Person> create(UserDevice userDevice) {
+        LOGGER.debug("Creating a new person {}", userDevice);
 
-        return post(Constant.USER_MODEL_URL + "/create", person, PERSON_GENERIC_TYPE);
+        return post(Constant.USER_MODEL_URL + "/create", userDevice, PERSON_GENERIC_TYPE);
+    }
+
+    public Message<Person> update(Person person) {
+        LOGGER.debug("Updating the person {}", person);
+
+        return post(Constant.USER_MODEL_URL + "/update", person, PERSON_GENERIC_TYPE);
     }
 
     public Message<Person> find(String userID) {
