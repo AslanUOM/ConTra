@@ -55,6 +55,7 @@ public class LocationResource {
         } else {
             try {
                 service.createCurrentLocation(location);
+                message.setSuccess(true);
                 message.setStatus(HttpURLConnection.HTTP_OK);
                 message.setMessage("Location is created successfully");
             } catch (org.neo4j.graphdb.NotFoundException e) {

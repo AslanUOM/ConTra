@@ -25,11 +25,11 @@ import java.net.HttpURLConnection;
  * Created by gobinath on 11/27/15.
  */
 @Path("/user")
-public class UserManagementService {
+public class UserService {
     /**
      * Logger to log the events.
      */
-    private static final Logger LOGGER = LoggerFactory.getLogger(UserManagementService.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(UserService.class);
 
     private final UserServiceConnector userServiceConnector = new UserServiceConnector();
     private final DeviceServiceConnector deviceServiceConnector = new DeviceServiceConnector();

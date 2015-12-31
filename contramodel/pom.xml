@@ -49,6 +49,7 @@
             <version>1.0-SNAPSHOT</version>
         </dependency>
 
+        <!-- Neo4j -->
         <dependency>
             <groupId>org.neo4j</groupId>
             <artifactId>neo4j</artifactId>
@@ -56,6 +57,7 @@
             <scope>provided</scope>
         </dependency>
 
+        <!-- Neo4j Server -->
         <dependency>
             <groupId>org.neo4j.app</groupId>
             <artifactId>neo4j-server</artifactId>
@@ -63,10 +65,26 @@
             <scope>provided</scope>
         </dependency>
 
+        <!-- Neo4j Spatial -->
         <dependency>
             <groupId>org.neo4j</groupId>
             <artifactId>neo4j-spatial</artifactId>
             <version>0.15-neo4j-2.3.0</version>
+        </dependency>
+
+        <!-- Neo4j Kernel -->
+        <dependency>
+            <groupId>org.neo4j</groupId>
+            <artifactId>neo4j-kernel</artifactId>
+            <version>${neo4j.version}</version>
+            <type>test-jar</type>
+        </dependency>
+
+        <dependency>
+            <groupId>org.neo4j.test</groupId>
+            <artifactId>neo4j-harness</artifactId>
+            <version>${neo4j.version}</version>
+            <scope>test</scope>
         </dependency>
 
         <dependency>
@@ -80,28 +98,6 @@
             <groupId>org.glassfish.jersey.media</groupId>
             <artifactId>jersey-media-json-jackson</artifactId>
             <version>2.22.1</version>
-        </dependency>
-
-        <dependency>
-            <groupId>org.neo4j</groupId>
-            <artifactId>neo4j-kernel</artifactId>
-            <version>${neo4j.version}</version>
-            <type>test-jar</type>
-        </dependency>
-
-        <dependency>
-            <groupId>org.neo4j.app</groupId>
-            <artifactId>neo4j-server</artifactId>
-            <version>${neo4j.version}</version>
-            <type>test-jar</type>
-            <scope>test</scope>
-        </dependency>
-
-        <dependency>
-            <groupId>org.neo4j.test</groupId>
-            <artifactId>neo4j-harness</artifactId>
-            <version>${neo4j.version}</version>
-            <scope>test</scope>
         </dependency>
 
         <dependency>
@@ -163,8 +159,10 @@
                         <configuration>
                             <artifactSet>
                                 <excludes>
-                                    <exclude>org.neo4j</exclude>
-                                    <exclude>org.neo4j.*</exclude>
+                                    <exclude>org.neo4j.neo4j</exclude>
+                                    <exclude>org.neo4j.neo4j-server</exclude>
+                                    <exclude>org.neo4j.neo4j-kernel</exclude>
+                                    <exclude>org.neo4j.neo4j-harness</exclude>
                                     <exclude>javax.ws.rs-api</exclude>
                                     <exclude>junit</exclude>
                                     <exclude>gson</exclude>

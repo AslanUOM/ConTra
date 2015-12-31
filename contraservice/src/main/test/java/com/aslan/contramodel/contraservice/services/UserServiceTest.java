@@ -2,10 +2,8 @@ package com.aslan.contramodel.contraservice.services;
 
 import com.aslan.contra.dto.common.Device;
 import com.aslan.contra.dto.common.Person;
-import com.aslan.contra.dto.common.Time;
 import com.aslan.contra.dto.ws.Message;
 import com.aslan.contra.dto.ws.UserDevice;
-import com.google.gson.Gson;
 import org.glassfish.jersey.server.ResourceConfig;
 import org.glassfish.jersey.test.JerseyTest;
 import org.junit.Assert;
@@ -14,7 +12,6 @@ import org.junit.Test;
 import javax.ws.rs.client.Entity;
 import javax.ws.rs.core.Application;
 import javax.ws.rs.core.GenericType;
-import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import java.net.HttpURLConnection;
 
@@ -24,11 +21,11 @@ import static org.junit.Assert.assertEquals;
 /**
  * Created by gobinath on 12/18/15.
  */
-public class UserManagementServiceTest extends JerseyTest {
+public class UserServiceTest extends JerseyTest {
 
     @Override
     protected Application configure() {
-        return new ResourceConfig(UserManagementService.class);
+        return new ResourceConfig(UserService.class);
     }
 
     private Person createPerson(String name, String phoneNumber, String email) {
