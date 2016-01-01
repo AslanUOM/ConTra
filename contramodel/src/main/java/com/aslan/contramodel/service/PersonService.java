@@ -1,7 +1,9 @@
 package com.aslan.contramodel.service;
 
 
+import com.aslan.contra.dto.common.Device;
 import com.aslan.contra.dto.common.Person;
+import com.aslan.contra.dto.common.Time;
 import com.aslan.contra.dto.ws.NearbyKnownPeople;
 import com.aslan.contra.dto.ws.UserDevice;
 import com.aslan.contramodel.util.Constant;
@@ -43,15 +45,40 @@ public class PersonService extends Service {
      * @return id of the newly created person or the existing person
      */
     public void create(UserDevice userDevice) {
-        final String userID = userDevice.getUserID();
-        LOGGER.debug("Creating person {} and the device {}", userID, userDevice.getDevice());
+        LOGGER.debug("Creating {}", userDevice);
         try (Transaction transaction = databaseService.beginTx()) {
+            final Device device = userDevice.getDevice();
+
+            if (device.getLastSeen() == null) {
+                device.setLastSeen(Time.now());
+            }
+
             final String query = "MERGE (n:Person {userID: {userID}}) RETURN ID(n) as id";
             Long id = executeAndReturnID(query, "userID", userDevice.getUserID());
+
+            Node personNode = databaseService.getNodeById(id);
+
+            Node deviceNode = deviceService.getDeviceNode(personNode, device.getDeviceID());
+
+            // Create a Device node if not exist
+            if (deviceNode == null) {
+                deviceNode = databaseService.createNode(Labels.Device);
+                personNode.createRelationshipTo(deviceNode, RelationshipTypes.HAS);
+            }
+
+            // Update the properties
+            setOnlyIfNotNull(deviceNode, Constant.API, device.getApi());
+            setOnlyIfNotNull(deviceNode, Constant.BLUETOOTH_MAC, device.getBluetoothMAC());
+            setOnlyIfNotNull(deviceNode, Constant.LAST_SEEN, device.getLastSeen().value());
+            setOnlyIfNotNull(deviceNode, Constant.MANUFACTURER, device.getManufacturer());
+            setOnlyIfNotNull(deviceNode, Constant.SENSORS, device.getSensors());
+            setOnlyIfNotNull(deviceNode, Constant.DEVICE_ID, device.getDeviceID());
+            setOnlyIfNotNull(deviceNode, Constant.TOKEN, device.getToken());
+            setOnlyIfNotNull(deviceNode, Constant.WIFI_MAC, device.getWifiMAC());
+
             // Commit the transaction
             transaction.success();
         }
-        deviceService.createDevice(userID, userDevice.getDevice());
     }
 
     public void update(Person person) {

@@ -50,10 +50,9 @@ public class UserServiceTest extends JerseyTest {
 
         UserDevice userDevice = new UserDevice();
         userDevice.setUserID("0773458206");
-        userDevice.setCountry("LK");
         userDevice.setDevice(device);
 
-        Message<Person> message = target("user/create").request().post(Entity.json(userDevice), new GenericType<Message<Person>>() {
+        Message<Person> message = target("user/create/LK").request().post(Entity.json(userDevice), new GenericType<Message<Person>>() {
         });
 
         Assert.assertTrue("Failed to create person.", message.isSuccess());
@@ -72,10 +71,9 @@ public class UserServiceTest extends JerseyTest {
 
         UserDevice userDevice = new UserDevice();
         userDevice.setUserID("0770780211");
-        userDevice.setCountry("lk");
         userDevice.setDevice(device);
 
-        Message<Person> message = target("user/create").request().post(Entity.json(userDevice), new GenericType<Message<Person>>() {
+        Message<Person> message = target("user/create/lk").request().post(Entity.json(userDevice), new GenericType<Message<Person>>() {
         });
 
         assertTrue("Failed to create person.", message.isSuccess());
@@ -97,7 +95,7 @@ public class UserServiceTest extends JerseyTest {
         userDevice.setDevice(device);
 
         Response response = target("user/create").request().post(Entity.json(userDevice));
-        assertEquals("Empty country is accepted.", HttpURLConnection.HTTP_BAD_REQUEST, response.getStatus());
+        assertEquals("Empty country is accepted.", HttpURLConnection.HTTP_NOT_FOUND, response.getStatus());
     }
 
 
@@ -114,10 +112,9 @@ public class UserServiceTest extends JerseyTest {
 
         UserDevice userDevice = new UserDevice();
         userDevice.setUserID("0770781221");
-        userDevice.setCountry("XX");
         userDevice.setDevice(device);
 
-        Response response = target("user/create").request().post(Entity.json(userDevice));
+        Response response = target("user/create/xx").request().post(Entity.json(userDevice));
         assertEquals("Empty country is accepted.", HttpURLConnection.HTTP_BAD_REQUEST, response.getStatus());
     }
 
@@ -135,10 +132,9 @@ public class UserServiceTest extends JerseyTest {
 
         UserDevice userDevice = new UserDevice();
         userDevice.setUserID("0770781221");
-        userDevice.setCountry("LK");
         userDevice.setDevice(device);
 
-        target("user/create").request().post(Entity.json(userDevice));
+        target("user/create/lk").request().post(Entity.json(userDevice));
 
         Person person = new Person();
         person.setUserID("+94770781221");
@@ -164,10 +160,9 @@ public class UserServiceTest extends JerseyTest {
 
         UserDevice userDevice = new UserDevice();
         userDevice.setUserID("0776780124");
-        userDevice.setCountry("lk");
         userDevice.setDevice(device);
 
-        Response response = target("user/create").request().post(Entity.json(userDevice));
+        Response response = target("user/create/lk").request().post(Entity.json(userDevice));
 
         // Update person
         Person person = createPerson("Carol", "+94776780124", "carol@gmail.com");

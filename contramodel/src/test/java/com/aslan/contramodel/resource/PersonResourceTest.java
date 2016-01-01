@@ -25,6 +25,7 @@ import java.util.List;
 import java.util.Map;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import static org.neo4j.helpers.collection.MapUtil.map;
 
@@ -41,6 +42,7 @@ public class PersonResourceTest {
     public static void setUp() throws Exception {
         server = TestUtility.createServer(PersonResource.class);
         databaseService = server.graph();
+        TestUtility.createCommonEntities(databaseService);
     }
 
     @AfterClass
@@ -51,7 +53,7 @@ public class PersonResourceTest {
 
     @Test
     public void testFind() throws Exception {
-        HTTP.Response response = HTTP.GET(server.httpURI().resolve("/contra/person/find/+94771234567").toString());
+        HTTP.Response response = HTTP.GET(server.httpURI().resolve("/contra/person/find/+94770780210").toString());
 
         Gson gson = new Gson();
 
@@ -59,13 +61,19 @@ public class PersonResourceTest {
         }.getType());
 
 
-        assertEquals("Failed to find the person", "Alice", message.getEntity().getName());
+        assertTrue("Failed to find the person", message.isSuccess());
     }
 
     @Test
     public void testFindNonExistingPerson() throws Exception {
         HTTP.Response response = HTTP.GET(server.httpURI().resolve("/contra/person/find/+94776542583").toString());
-        assertEquals("Failed to identify a non-existing person", HttpURLConnection.HTTP_NOT_FOUND, response.status());
+
+        Gson gson = new Gson();
+
+        Message<Person> message = gson.fromJson(response.rawContent(), new TypeToken<Message<Person>>() {
+        }.getType());
+
+        assertFalse("Failed to identify a non-existing person", message.isSuccess());
     }
 
     @Test
@@ -81,7 +89,6 @@ public class PersonResourceTest {
 
         UserDevice userDevice = new UserDevice();
         userDevice.setUserID("+94770780211");
-        userDevice.setCountry("lk");
         userDevice.setDevice(device);
 
         HTTP.Response response = HTTP.POST(server.httpURI().resolve("/contra/person/create").toString(), userDevice);
@@ -101,35 +108,18 @@ public class PersonResourceTest {
 
     @Test
     public void testUpdate() throws Exception {
-        Device device = new Device();
-        device.setDeviceID("c191142d1e65c922");
-        device.setApi(20);
-        device.setBluetoothMAC("125.0.12.2");
-        device.setManufacturer("HTC");
-        device.setToken("GCM-124");
-        device.setWifiMAC("127.0.12.2");
-        device.setSensors(new String[]{"Light", "Temperature", "GPS"});
-
-        UserDevice userDevice = new UserDevice();
-        userDevice.setUserID("+94779999999");
-        userDevice.setCountry("lk");
-        userDevice.setDevice(device);
-
-
-        HTTP.POST(server.httpURI().resolve("/contra/person/create").toString(), userDevice);
-
-        Person person = TestUtility.createPerson("+94779999999", "Bob", "bob@gmail.com");
+        Person person = TestUtility.createPerson("+94770780210", "Gobinath", "slgobinath@gmail.com");
 
         HTTP.Response response = HTTP.POST(server.httpURI().resolve("/contra/person/update").toString(), person);
 
         assertEquals("Failed to update the person.", HttpURLConnection.HTTP_OK, response.status());
         // Manually retrieve Bob.
         try (Transaction transaction = databaseService.beginTx()) {
-            Node node = databaseService.findNode(Service.Labels.Person, Constant.USER_ID, "+94779999999");
+            Node node = databaseService.findNode(Service.Labels.Person, Constant.USER_ID, "+94770780210");
 
             transaction.success();
             // Check the name of the inserted person.
-            assertEquals("Person is not updated.", "bob@gmail.com", node.getProperty("email"));
+            assertEquals("Person is not updated.", "slgobinath@gmail.com", node.getProperty(Constant.EMAIL));
         }
     }
 
@@ -146,7 +136,6 @@ public class PersonResourceTest {
 
         UserDevice userDevice = new UserDevice();
         // userID is null
-        userDevice.setCountry("lk");
         userDevice.setDevice(device);
 
 
@@ -158,62 +147,42 @@ public class PersonResourceTest {
 
     @Test
     public void testKnows() throws Exception {
-        HTTP.Response response = HTTP.POST(server.httpURI().resolve("/contra/person/knows?person=+94771234567&friend=+94770000000").toString());
+        HTTP.Response response = HTTP.POST(server.httpURI().resolve("/contra/person/knows?person=+94770780210&friend=+94779848507").toString());
 
         // Check the status.
         assertEquals("Error in request.", HttpURLConnection.HTTP_OK, response.status());
 
         // Manually retrieve Bob.
         try (Transaction transaction = databaseService.beginTx()) {
-            Node person = databaseService.findNode(Service.Labels.Person, "userID", "+94771234567");
+            Node person = databaseService.findNode(Service.Labels.Person, "userID", "+94770780210");
             Relationship relationship = person.getSingleRelationship(Service.RelationshipTypes.KNOWS, Direction.OUTGOING);
             Node friend = relationship.getEndNode();
             transaction.success();
             // Check the name of the inserted person.
-            assertEquals("Relationship is not created.", "+94770000000", friend.getProperty("userID"));
+            assertEquals("Relationship is not created.", "+94779848507", friend.getProperty("userID"));
         }
     }
 
     @Test
     public void testNearByKnownPeople() throws Exception {
-        // Create Gobinath
-        TestUtility.savePerson(databaseService, "+94770652425", "Gobinath", "gobinath@gmail.com");
+        HTTP.Response response = HTTP.POST(server.httpURI().resolve("/contra/person/knows?person=+94770780210&friend=+94779848507").toString());
 
-        // Define +94771234567 and +94770000000 are friends
-        HTTP.POST(server.httpURI().resolve("/contra/person/knows?person=+94771234567&friend=+94770000000").toString());
-
-        // Create a location and time
-        Time time = Time.of(2015, 12, 24, 9, 1, 0);
-        UserLocation location = TestUtility.createUserLocation("+94771234567", "Samsung", 70.0f, "Majestic City", 79.8545904, 6.8934421, time);
-
-
-        // Say +94771234567 is in MC
-        HTTP.POST(server.httpURI().resolve("/contra/location/create").toString(), location);
-
-        location.setUserID("+94770652425");
-        // Say Gobinath also in MC but Gobinath is not a friend of +94771234567
-        HTTP.POST(server.httpURI().resolve("/contra/location/create").toString(), location);
-
-        // Change the location to police station and change the time
-        time.setMinute(10);
-        location = TestUtility.createUserLocation("+94770000000", "Sony", 70.0f, "Police Station", 79.8551745, 6.8921768, time);
-
-        // Say +94770000000 is in the police station
-        HTTP.POST(server.httpURI().resolve("/contra/location/create").toString(), location);
+        // Check the status.
+        assertEquals("Error in request.", HttpURLConnection.HTTP_OK, response.status());
 
         // Search for near by friends of +94771234567
-        Time time1 = Time.of(2015, 12, 24, 9, 0, 0);
-        Time time2 = Time.of(2015, 12, 24, 10, 0, 0);
+        Time time1 = Time.of(2016, 1, 1, 10, 5, 0);
+        Time time2 = Time.of(2016, 1, 1, 10, 20, 0);
 
         NearbyKnownPeople param = new NearbyKnownPeople();
-        param.setUserID("+94771234567");
+        param.setUserID("+94770780210");
         param.setStartTime(time1);
         param.setEndTime(time2);
         param.setLongitude(79.8551746);
         param.setLatitude(6.8934422);
         param.setDistance(100.0);
 
-        HTTP.Response response = HTTP.POST(server.httpURI().resolve("/contra/person/nearby").toString(), param);
+        response = HTTP.POST(server.httpURI().resolve("/contra/person/nearby").toString(), param);
 
         // Check the status.
         assertEquals("Error in request.", HttpURLConnection.HTTP_OK, response.status());
@@ -223,9 +192,6 @@ public class PersonResourceTest {
         Message<List<String>> message = gson.fromJson(response.rawContent(), new TypeToken<Message<List<String>>>() {
         }.getType());
 
-        // Exactly one friend should be returned (Not Gobinath)
-        assertEquals("Exact number of friends are not found.", 1, message.getEntity().size());
-
-        assertEquals("Near by friend is not found.", "+94770000000", message.getEntity().get(0));
+        assertEquals("Near by friend is not found.", "+94779848507", message.getEntity().get(0));
     }
 }

@@ -2,13 +2,12 @@ package com.aslan.contramodel.resource;
 
 
 import com.aslan.contra.dto.common.Device;
-import com.aslan.contra.dto.common.Time;
+import com.aslan.contra.dto.ws.UserDevice;
 import com.aslan.contramodel.service.Service;
 import com.aslan.contramodel.util.Constant;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
-import org.neo4j.graphdb.Direction;
 import org.neo4j.graphdb.GraphDatabaseService;
 import org.neo4j.graphdb.Node;
 import org.neo4j.graphdb.Transaction;
@@ -37,6 +36,7 @@ public class DeviceResourceTest {
     public static void setUp() throws Exception {
         server = TestUtility.createServer(DeviceResource.class);
         databaseService = server.graph();
+        TestUtility.createCommonEntities(databaseService);
     }
 
     /**
@@ -51,28 +51,26 @@ public class DeviceResourceTest {
     }
 
     @Test
-    public void testCreateDevice() throws Exception {
+    public void testUpdateDevice() throws Exception {
         Device device = new Device();
-        device.setDeviceID("HTC-OneM8");
-        device.setApi(15);
-        device.setBluetoothMAC("aaaaaaaa");
-        device.setLastSeen(Time.now());
-        device.setManufacturer("HTC");
-        device.setToken("jhhjhjh");
-        device.setWifiMAC("dkdj");
-        device.setSensors(new String[]{"Light", "Temperature", "GPS"});
+        device.setDeviceID("CDC47124648058A");
+        device.setBatteryLevel(56.0);
 
-        HTTP.Response response = HTTP.POST(server.httpURI().resolve("/contra/device/create/+94771234567").toString(), device);
+        UserDevice userDevice = new UserDevice();
+        userDevice.setUserID("+94770780210");
+        userDevice.setDevice(device);
+
+
+        HTTP.Response response = HTTP.POST(server.httpURI().resolve("/contra/device/update").toString(), userDevice);
 
         // Check the status.
         assertEquals("Error in request.", HttpURLConnection.HTTP_OK, response.status());
 
         try (Transaction transaction = databaseService.beginTx()) {
-            Node deviceNode = databaseService.findNode(Service.Labels.Device, Constant.DEVICE_ID, "HTC-OneM8");
-            Node personNode = deviceNode.getSingleRelationship(Service.RelationshipTypes.HAS, Direction.INCOMING).getStartNode();
+            Node deviceNode = databaseService.findNode(Service.Labels.Device, Constant.DEVICE_ID, "CDC47124648058A");
             transaction.success();
 
-            assertEquals("Device is not created.", "+94771234567", personNode.getProperty(Constant.USER_ID));
+            assertEquals("Device is not updated.", 56.0, deviceNode.getProperty(Constant.BATTERY_LEVEL));
         }
 
     }

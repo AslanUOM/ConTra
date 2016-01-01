@@ -15,9 +15,6 @@ public class UserDevice implements Serializable {
     private String userID;
 
     @NotNull
-    private String country;
-
-    @NotNull
     @Valid
     private Device device;
 
@@ -27,14 +24,6 @@ public class UserDevice implements Serializable {
 
     public void setUserID(String userID) {
         this.userID = userID;
-    }
-
-    public String getCountry() {
-        return country;
-    }
-
-    public void setCountry(String country) {
-        this.country = country;
     }
 
     public Device getDevice() {

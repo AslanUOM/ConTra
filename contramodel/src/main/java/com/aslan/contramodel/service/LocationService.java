@@ -31,13 +31,14 @@ public class LocationService extends Service {
     private final SpatialDatabaseService spatialDatabaseService;
     private final SimplePointLayer layer;
     private final TimelineService timelineService;
+    private final DeviceService deviceService;
 
 
     public LocationService(GraphDatabaseService databaseService) {
         super(databaseService);
         this.spatialDatabaseService = new SpatialDatabaseService(databaseService);
         this.timelineService = new TimelineService(databaseService);
-
+        this.deviceService = new DeviceService(databaseService);
 
         try (Transaction transaction = databaseService.beginTx()) {
             SimplePointLayer layer = (SimplePointLayer) spatialDatabaseService.getLayer("location_layer");
@@ -58,14 +59,21 @@ public class LocationService extends Service {
         createIndex(Labels.Location, Constant.LOCATION_ID);
     }
 
-    public void createCurrentLocation(UserLocation userLocation) {
+    public void create(UserLocation userLocation) {
         LOGGER.debug("Creating location {}", userLocation);
         if (userLocation == null) {
             return;
         }
 
         final String userID = userLocation.getUserID();
+        final String deviceID = userLocation.getDeviceID();
         final Location location = userLocation.getLocation();
+
+        // This device is not the active device
+        if (!deviceService.isActiveDevice(userID, deviceID)) {
+            LOGGER.debug("{} is not the active device", deviceID);
+            return;
+        }
 
         Node timeNode = timelineService.createTime(userID, userLocation.getTime());
 
@@ -109,7 +117,7 @@ public class LocationService extends Service {
                     // Location already exists
                     Relationship relationship = timeNode.createRelationshipTo(locationNode, RelationshipTypes.LOCATION);
                     relationship.setProperty(Constant.ACCURACY, userLocation.getAccuracy());
-                    relationship.setProperty(Constant.DEVICE_ID, userLocation.getDeviceID());
+                    relationship.setProperty(Constant.DEVICE_ID, deviceID);
 
                     LOGGER.debug("Existing location {} with id {} is added to the person {}", location, locationNode.getId(), userID);
                 }

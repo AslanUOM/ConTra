@@ -19,8 +19,9 @@ public class Device implements Serializable {
 
     /**
      * API level of the device.
+     * Even though minimum API is 1, 0 is given as minimum value to avoid errors during validation of default value.
      */
-    @Min(1)
+    @Min(0)
     private int api;
 
     /**
@@ -56,25 +57,6 @@ public class Device implements Serializable {
      */
     private String[] sensors;
 
-    /**
-     * Temperature of the environment.
-     */
-    private double ambientTemperature;
-
-    /**
-     * Humidity of the environment.
-     */
-    private double humidity;
-
-    /**
-     * Illuminance of the environment.
-     */
-    private double illuminance;
-
-    /**
-     * Pressure in the environment.
-     */
-    private double ambientPressure;
 
     /**
      * Proximity of the device with any objects.
@@ -163,38 +145,6 @@ public class Device implements Serializable {
 
     public void setManufacturer(String manufacturer) {
         this.manufacturer = manufacturer;
-    }
-
-    public double getAmbientTemperature() {
-        return ambientTemperature;
-    }
-
-    public void setAmbientTemperature(double ambientTemperature) {
-        this.ambientTemperature = ambientTemperature;
-    }
-
-    public double getHumidity() {
-        return humidity;
-    }
-
-    public void setHumidity(double humidity) {
-        this.humidity = humidity;
-    }
-
-    public double getIlluminance() {
-        return illuminance;
-    }
-
-    public void setIlluminance(double illuminance) {
-        this.illuminance = illuminance;
-    }
-
-    public double getAmbientPressure() {
-        return ambientPressure;
-    }
-
-    public void setAmbientPressure(double ambientPressure) {
-        this.ambientPressure = ambientPressure;
     }
 
     public double getProximity() {

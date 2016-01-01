@@ -30,7 +30,6 @@ public class UserServiceConnectorTest {
 
         UserDevice userDevice = new UserDevice();
         userDevice.setUserID("+94779999999");
-        userDevice.setCountry("lk");
         userDevice.setDevice(device);
 
         Message<Person> message = connector.create(userDevice);
@@ -52,7 +51,6 @@ public class UserServiceConnectorTest {
 
         UserDevice userDevice = new UserDevice();
         userDevice.setUserID("+94770780210");
-        userDevice.setCountry("lk");
         userDevice.setDevice(device);
 
 

@@ -2,23 +2,19 @@ package com.aslan.contramodel.resource;
 
 import com.aslan.contra.dto.common.Device;
 import com.aslan.contra.dto.ws.Message;
+import com.aslan.contra.dto.ws.UserDevice;
 import com.aslan.contramodel.service.DeviceService;
 import com.aslan.contramodel.util.Utility;
 import org.neo4j.graphdb.GraphDatabaseService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.validation.ConstraintViolation;
 import javax.validation.Validator;
 import javax.ws.rs.*;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import java.net.HttpURLConnection;
-import java.util.Set;
-import java.util.StringJoiner;
-
-import static com.aslan.contramodel.util.Utility.isNullOrEmpty;
 
 /**
  * JAX-RS webservice for device related operations.
@@ -36,44 +32,24 @@ public class DeviceResource {
     }
 
     @POST
-    @Path("/create/{userID}")
+    @Path("/update")
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
-    public Response createDevice(@PathParam("userID") String userID, Device device) {
-        LOGGER.debug("Request to create device {} of {}", device, userID);
+    public Response updateDevice(UserDevice userDevice) {
+        LOGGER.debug("Request to update {}", userDevice);
 
-        return createOrUpdate(true, userID, device);
-    }
-
-    @POST
-    @Path("/update/{userID}")
-    @Consumes(MediaType.APPLICATION_JSON)
-    @Produces(MediaType.APPLICATION_JSON)
-    public Response updateDevice(@PathParam("userID") String userID, Device device) {
-        LOGGER.debug("Request to update device {} of {}", device, userID);
-
-        return createOrUpdate(false, userID, device);
-    }
-
-    private Response createOrUpdate(boolean create, String userID, Device device) {
         // Validate the parameters
-        Message<Device> message = validateAndCreateErrorResponse(userID, device);
+        Message<Void> message = Utility.validate(VALIDATOR, userDevice);
 
         if (message == null) {
+            message = new Message<>();
             try {
-                if (create) {
-                    service.createDevice(userID, device);
-                } else {
-                    service.updateDevice(userID, device);
-                }
-                message = new Message<>();
+                service.updateDevice(userDevice);
                 message.setMessage("Device is updated successfully");
                 message.setSuccess(true);
                 message.setStatus(HttpURLConnection.HTTP_OK);
             } catch (org.neo4j.graphdb.NotFoundException e) {
                 LOGGER.error(e.getMessage(), e);
-
-                message = new Message<>();
                 message.setMessage(e.getMessage());
                 message.setStatus(HttpURLConnection.HTTP_NO_CONTENT);
             }
@@ -81,28 +57,32 @@ public class DeviceResource {
         return Response.status(message.getStatus()).entity(message).build();
     }
 
-    private Message<Device> validateAndCreateErrorResponse(String userID, Device device) {
-        Message<Device> message = null;
+    @POST
+    @Path("/setactive/{userID}/{deviceID}")
+    @Consumes(MediaType.APPLICATION_JSON)
+    @Produces(MediaType.APPLICATION_JSON)
+    public Response setActive(@PathParam("userID") String userID, @PathParam("deviceID") String deviceID) {
+        LOGGER.debug("Request to set {} as the active device of {}", deviceID, userID);
+
         // Validate the parameters
-        Set<ConstraintViolation<Device>> violations = VALIDATOR.validate(device);
-        boolean nullOrEmptyUserID = isNullOrEmpty(userID);
-        if (nullOrEmptyUserID || !violations.isEmpty()) {
-            message = new Message<>();
+        Message<Void> message = new Message<>();
+
+        if (userID == null || deviceID == null) {
+            message.setMessage("userID and/or deviceID cannot be null");
             message.setStatus(HttpURLConnection.HTTP_BAD_REQUEST);
-
-            StringJoiner joiner = new StringJoiner(", ");
-            if (nullOrEmptyUserID) {
-                joiner.add("userID is null or empty");
+            ;
+        } else {
+            try {
+                service.setActiveDevice(userID, deviceID);
+                message.setMessage("Device is updated as the active device");
+                message.setSuccess(true);
+                message.setStatus(HttpURLConnection.HTTP_OK);
+            } catch (org.neo4j.graphdb.NotFoundException e) {
+                LOGGER.error(e.getMessage(), e);
+                message.setMessage(e.getMessage());
+                message.setStatus(HttpURLConnection.HTTP_NO_CONTENT);
             }
-
-            for (ConstraintViolation<Device> c : violations) {
-                joiner.add(c.getPropertyPath() + " " + c.getMessage());
-            }
-
-            message.setMessage(joiner.toString());
-            message.setStatus(HttpURLConnection.HTTP_BAD_REQUEST);
         }
-
-        return message;
+        return Response.status(message.getStatus()).entity(message).build();
     }
 }

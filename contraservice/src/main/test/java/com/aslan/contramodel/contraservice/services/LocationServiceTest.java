@@ -41,10 +41,9 @@ public class LocationServiceTest extends JerseyTest {
 
         UserDevice userDevice = new UserDevice();
         userDevice.setUserID("0710463254");
-        userDevice.setCountry("LK");
         userDevice.setDevice(device);
 
-        target("user/create").request().post(Entity.json(userDevice), new GenericType<Message<Person>>() {
+        target("user/create/LK").request().post(Entity.json(userDevice), new GenericType<Message<Person>>() {
         });
 
         UserLocation userLocation = new UserLocation();

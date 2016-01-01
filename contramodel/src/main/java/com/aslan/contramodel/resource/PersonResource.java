@@ -7,13 +7,12 @@ import com.aslan.contra.dto.ws.NearbyKnownPeople;
 import com.aslan.contra.dto.ws.UserDevice;
 import com.aslan.contramodel.service.PersonService;
 import com.aslan.contramodel.util.Utility;
-import org.neo4j.graphdb.*;
+import org.neo4j.graphdb.GraphDatabaseService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.validation.Validator;
 import javax.ws.rs.*;
-import javax.ws.rs.Path;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
@@ -50,13 +49,13 @@ public class PersonResource {
             message.setStatus(HttpURLConnection.HTTP_BAD_REQUEST);
             message.setMessage("Path parameter userID cannot be null");
         } else {
-            Person result = service.find(userID);
+            Person person = service.find(userID);
 
-            if (result != null) {
+            if (person != null) {
                 message.setStatus(HttpURLConnection.HTTP_OK);
                 message.setMessage("Successfully found the person");
                 message.setSuccess(true);
-                message.setEntity(result);
+                message.setEntity(person);
             } else {
                 // Person does not exist
                 message.setStatus(HttpURLConnection.HTTP_NOT_FOUND);
@@ -83,8 +82,9 @@ public class PersonResource {
                 message.setMessage("Person is updated successfully");
                 message.setSuccess(true);
                 message.setStatus(HttpURLConnection.HTTP_OK);
-            } catch (org.neo4j.graphdb.NotFoundException ex) {
-                message.setMessage(ex.getMessage());
+            } catch (org.neo4j.graphdb.NotFoundException e) {
+                LOGGER.error(e.getMessage(), e);
+                message.setMessage(e.getMessage());
                 message.setStatus(HttpURLConnection.HTTP_NOT_FOUND);
             }
         }
@@ -109,8 +109,9 @@ public class PersonResource {
                 message.setMessage("Person is created successfully");
                 message.setSuccess(true);
                 message.setStatus(HttpURLConnection.HTTP_OK);
-            } catch (org.neo4j.graphdb.NotFoundException ex) {
-                message.setMessage(ex.getMessage());
+            } catch (org.neo4j.graphdb.NotFoundException e) {
+                LOGGER.error(e.getMessage(), e);
+                message.setMessage(e.getMessage());
                 message.setStatus(HttpURLConnection.HTTP_NOT_FOUND);
             }
         }
@@ -139,9 +140,10 @@ public class PersonResource {
                 message.setMessage("The relationship " + person + " knows " + friend + " is created successfully");
                 message.setSuccess(true);
 
-            } catch (org.neo4j.graphdb.NotFoundException ex) {
+            } catch (org.neo4j.graphdb.NotFoundException e) {
                 // Person does not exist
-                message.setMessage(ex.getMessage());
+                LOGGER.error(e.getMessage(), e);
+                message.setMessage(e.getMessage());
                 message.setStatus(HttpURLConnection.HTTP_NOT_FOUND);
             }
         }
@@ -167,9 +169,10 @@ public class PersonResource {
                 message.setStatus(HttpURLConnection.HTTP_OK);
                 message.setSuccess(true);
 
-            } catch (org.neo4j.graphdb.NotFoundException ex) {
+            } catch (org.neo4j.graphdb.NotFoundException e) {
+                LOGGER.error(e.getMessage(), e);
                 message.setStatus(HttpURLConnection.HTTP_NOT_FOUND);
-                message.setMessage(ex.getMessage());
+                message.setMessage(e.getMessage());
             }
         }
 

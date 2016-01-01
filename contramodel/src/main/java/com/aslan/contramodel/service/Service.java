@@ -19,6 +19,7 @@ public abstract class Service {
 
 
     public static class Labels {
+        public static final Label Environment = DynamicLabel.label("Environment");
         public static final Label Location = DynamicLabel.label("Location");
         public static final Label Person = DynamicLabel.label("Person");
         public static final Label Device = DynamicLabel.label("Device");
@@ -37,6 +38,16 @@ public abstract class Service {
      * Relationships between models in ConTra model.
      */
     public enum RelationshipTypes implements RelationshipType {
+        /**
+         * Person -[:ACTIVE_DEVICE]-> Device
+         */
+        ACTIVE_DEVICE,
+
+        /**
+         * Minute -[:ENVIRONMENT]-> Environment
+         */
+        ENVIRONMENT,
+
         /**
          * Person -[:KNOWS]-> Person
          */
@@ -127,5 +138,13 @@ public abstract class Service {
             return;
         }
         node.setProperty(property, value);
+    }
+
+    public final <T> T getIfAvailable(Node node, String property) {
+        T obj = null;
+        if (node.hasProperty(property)) {
+            obj = (T) node.getProperty(property);
+        }
+        return obj;
     }
 }

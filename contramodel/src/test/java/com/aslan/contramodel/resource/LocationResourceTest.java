@@ -1,11 +1,15 @@
 package com.aslan.contramodel.resource;
 
 
+import com.aslan.contra.dto.common.Device;
 import com.aslan.contra.dto.common.Location;
 import com.aslan.contra.dto.common.Time;
 import com.aslan.contra.dto.ws.Message;
 import com.aslan.contra.dto.ws.Nearby;
+import com.aslan.contra.dto.ws.UserDevice;
 import com.aslan.contra.dto.ws.UserLocation;
+import com.aslan.contramodel.service.LocationService;
+import com.aslan.contramodel.service.PersonService;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 import org.junit.AfterClass;
@@ -41,6 +45,7 @@ public class LocationResourceTest {
     public static void setUp() throws Exception {
         server = TestUtility.createServer(LocationResource.class);
         databaseService = server.graph();
+        TestUtility.createCommonEntities(databaseService);
     }
 
     /**
@@ -54,10 +59,11 @@ public class LocationResourceTest {
         server.close();
     }
 
+
     @Test
     public void testCreateLocation() throws Exception {
         Time time = Time.of(2015, 12, 24, 9, 1, 0);
-        UserLocation mc = TestUtility.createUserLocation("+94771234567", "HTC-ONEM8", 98.0f, "Majestic City", 79.8547, 6.8939, time);
+        UserLocation mc = TestUtility.createUserLocation("+94770780210", "CDC47124648058A", 98.0f, "Home", 79.857488, 6.8781381, time);
 
 
         HTTP.Response response = HTTP.POST(server.httpURI().resolve("/contra/location/create").toString(), mc);
@@ -65,34 +71,21 @@ public class LocationResourceTest {
         // Check the status.
         assertEquals("Error in request.", HttpURLConnection.HTTP_OK, response.status());
 
-        Result result = server.graph().execute("START n = node:location_layer('withinDistance:[6.8939, 79.8547, 100.0]') RETURN n.name as name");
+        // Do not use the exact location for withinDistance
+        Result result = server.graph().execute("START n = node:location_layer('withinDistance:[6.8781381, 79.857487, 0.1]') RETURN n.name as name");
+
 
         Map<String, Object> map = result.next();
 
-        assertEquals("Location is not created.", "Majestic City", map.get("name"));
+        assertEquals("Location is not created.", "Home", map.get("name"));
     }
 
     @Test
     public void testFindWithin() throws Exception {
-        Time time = Time.of(2015, 12, 24, 9, 1, 0);
-        UserLocation userLocation = TestUtility.createUserLocation("+94771234567", "HTC-ONEM8", 70.0f, "Majestic City", 79.8545904, 6.8934421, time);
-
-
-        HTTP.POST(server.httpURI().resolve("/contra/location/create").toString(), userLocation);
-
-        userLocation.getTime().setMinute(30);
-        Location location = userLocation.getLocation();
-        location.setName("Bambalapitiya Police Station");
-        location.setLocationID("79.8551745:6.8921768");
-        location.setLongitude(79.8551745);
-        location.setLatitude(6.8921768);
-
-        HTTP.POST(server.httpURI().resolve("/contra/location/create").toString(), userLocation);
-
         Nearby param = new Nearby();
         param.setLongitude(79.8547);
         param.setLatitude(6.8939);
-        param.setDistance(10);
+        param.setDistance(1);
         HTTP.Response response = HTTP.POST(server.httpURI().resolve("/contra/location/findwithin").toString(), param);
 
         // Check the status.
@@ -105,8 +98,8 @@ public class LocationResourceTest {
         // Check the status.
         assertEquals("Exact locations are not found.", 2, locations.size());
 
-        String[] expected = {"Majestic City", "Bambalapitiya Police Station"};
+        String[] expected = {"Majestic City", "Unity Plaza"};
         String[] actual = {locations.get(0).getName(), locations.get(1).getName()};
-        assertArrayEquals("Majestic City not found.", expected, actual);
+        assertArrayEquals("Expected locations are not found.", expected, actual);
     }
 }

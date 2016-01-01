@@ -23,14 +23,6 @@ public class DeviceServiceConnector extends ServiceConnector {
     private static final GenericType<Message<Device>> DEVICE_GENERIC_TYPE = new GenericType<Message<Device>>() {
     };
 
-    public Message<Device> create(String userID, Device device) {
-        LOGGER.debug("Creating a new device {} of {}", device, userID);
-
-        device.setLastSeen(Time.now());
-        String url = UriBuilder.fromPath(Constant.DEVICE_MODEL_URL + "/create/{user_id}").resolveTemplate("user_id", userID).toString();
-        return post(url, device, DEVICE_GENERIC_TYPE);
-    }
-
     public Message<Device> update(String userID, Device device) {
         LOGGER.debug("Updating the device {} of {}", device, userID);
 

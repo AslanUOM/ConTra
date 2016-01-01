@@ -31,13 +31,6 @@ public class Constant {
 
     public static final String SENSORS = "sensors";
 
-    public static final String AMBIENT_TEMPERATURE = "ambientTemperature";
-
-    public static final String HUMIDITY = "humidity";
-
-    public static final String ILLUMINANCE = "illuminance";
-
-    public static final String AMBIENT_PRESSURE = "ambientPressure";
 
     public static final String PROXIMITY = "proximity";
 
@@ -45,6 +38,17 @@ public class Constant {
 
     public static final String WIFI_MAC = "wifiMAC";
 
+
+    /**
+     * Related to Environment.
+     */
+    public static final String TEMPERATURE = "temperature";
+
+    public static final String HUMIDITY = "humidity";
+
+    public static final String ILLUMINANCE = "illuminance";
+
+    public static final String PRESSURE = "pressure";
 
     /**
      * Related to Location
