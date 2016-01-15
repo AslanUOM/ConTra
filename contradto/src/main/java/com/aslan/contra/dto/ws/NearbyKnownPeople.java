@@ -1,10 +1,9 @@
 package com.aslan.contra.dto.ws;
 
-import com.aslan.contra.dto.common.Time;
+import com.aslan.contra.dto.common.Interval;
 
 import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
-import java.io.Serializable;
 
 /**
  * Created by gobinath on 12/27/15.
@@ -15,11 +14,8 @@ public class NearbyKnownPeople extends Nearby {
 
     @NotNull
     @Valid
-    private Time startTime;
+    private Interval interval;
 
-    @NotNull
-    @Valid
-    private Time endTime;
 
     public String getUserID() {
         return userID;
@@ -29,20 +25,12 @@ public class NearbyKnownPeople extends Nearby {
         this.userID = userID;
     }
 
-    public Time getStartTime() {
-        return startTime;
+    public Interval getInterval() {
+        return interval;
     }
 
-    public void setStartTime(Time startTime) {
-        this.startTime = startTime;
-    }
-
-    public Time getEndTime() {
-        return endTime;
-    }
-
-    public void setEndTime(Time endTime) {
-        this.endTime = endTime;
+    public void setInterval(Interval interval) {
+        this.interval = interval;
     }
 
     @Override

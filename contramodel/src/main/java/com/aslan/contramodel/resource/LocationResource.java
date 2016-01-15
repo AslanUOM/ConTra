@@ -69,7 +69,7 @@ public class LocationResource {
             List<Location> locations = service.findLocationsWithin(param);
 
             message = new Message<>();
-            message.setMessage("Person is created successfully");
+            message.setMessage("Found the locations successfully");
             message.setEntity(locations);
             message.setSuccess(true);
             message.setStatus(HttpURLConnection.HTTP_OK);

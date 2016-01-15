@@ -2,14 +2,16 @@ package com.aslan.contramodel.service;
 
 
 import com.aslan.contra.dto.common.Environment;
+import com.aslan.contra.dto.common.Interval;
 import com.aslan.contra.dto.common.Location;
-import com.aslan.contra.dto.common.Time;
 import com.aslan.contra.dto.ws.UserEnvironment;
 import com.aslan.contramodel.util.Constant;
-import org.neo4j.gis.spatial.SpatialDatabaseService;
 import org.neo4j.graphdb.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * This class create, update and query the database regarding the entity Environment.
@@ -21,14 +23,12 @@ import org.slf4j.LoggerFactory;
  */
 public class EnvironmentService extends Service {
     private final static Logger LOGGER = LoggerFactory.getLogger(EnvironmentService.class);
-    private final SpatialDatabaseService spatialDatabaseService;
     private final TimelineService timelineService;
     private final DeviceService deviceService;
 
 
     public EnvironmentService(GraphDatabaseService databaseService) {
         super(databaseService);
-        this.spatialDatabaseService = new SpatialDatabaseService(databaseService);
         this.timelineService = new TimelineService(databaseService);
         this.deviceService = new DeviceService(databaseService);
     }
@@ -81,27 +81,44 @@ public class EnvironmentService extends Service {
         }
     }
 
-    public Environment find(String userID, Time time) {
-        LOGGER.debug("Searching for the environment of {} at {]", userID, time);
+    public List<Environment> find(String userID, Interval interval) {
+        LOGGER.debug("Searching for the environment of {}", userID);
 
-        Node timeNode = timelineService.createTime(userID, time);
-        Environment environment = null;
+        Node timeNode = timelineService.createTime(userID, interval.getStartTime());
+        long endTime = interval.getEndTime().value();
+
+        List<Environment> environments = new ArrayList<>();
+
         // Begin the transaction
         try (Transaction transaction = databaseService.beginTx()) {
-            Relationship relationship = timeNode.getSingleRelationship(RelationshipTypes.ENVIRONMENT, Direction.OUTGOING);
+            while (true) {
+                Relationship relationship = timeNode.getSingleRelationship(RelationshipTypes.ENVIRONMENT, Direction.OUTGOING);
 
-            if (relationship != null) {
-                Node environmentNode = relationship.getEndNode();
-                environment = new Environment();
-                environment.setHumidity(getIfAvailable(environmentNode, Constant.HUMIDITY, 0.0));
-                environment.setIlluminance(getIfAvailable(environmentNode, Constant.ILLUMINANCE, 0.0));
-                environment.setPressure(getIfAvailable(environmentNode, Constant.PRESSURE, 0.0));
-                environment.setTemperature(getIfAvailable(environmentNode, Constant.TEMPERATURE, 0.0));
+                if (relationship != null) {
+                    Node environmentNode = relationship.getEndNode();
+                    Environment environment = new Environment();
+                    environment.setHumidity(getIfAvailable(environmentNode, Constant.HUMIDITY, 0.0));
+                    environment.setIlluminance(getIfAvailable(environmentNode, Constant.ILLUMINANCE, 0.0));
+                    environment.setPressure(getIfAvailable(environmentNode, Constant.PRESSURE, 0.0));
+                    environment.setTemperature(getIfAvailable(environmentNode, Constant.TEMPERATURE, 0.0));
+
+                    environments.add(environment);
+                }
+
+                if (getIfAvailable(timeNode, Constant.EPOCH, 0L) == endTime) {
+                    break;
+                } else {
+                    Relationship nextRelationship = timeNode.getSingleRelationship(RelationshipTypes.NEXT, Direction.OUTGOING);
+                    if (nextRelationship != null) {
+                        timeNode = nextRelationship.getEndNode();
+                    } else {
+                        break;
+                    }
+                }
             }
-
             transaction.success();
         }
 
-        return environment;
+        return environments;
     }
 }

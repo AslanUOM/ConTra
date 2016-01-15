@@ -1,30 +1,22 @@
 package com.aslan.contramodel.resource;
 
-import com.aslan.contra.dto.common.Location;
+import com.aslan.contra.dto.common.Environment;
+import com.aslan.contra.dto.common.Interval;
 import com.aslan.contra.dto.ws.Message;
-import com.aslan.contra.dto.ws.Nearby;
 import com.aslan.contra.dto.ws.UserEnvironment;
-import com.aslan.contra.dto.ws.UserLocation;
 import com.aslan.contramodel.service.EnvironmentService;
-import com.aslan.contramodel.service.LocationService;
 import com.aslan.contramodel.util.Utility;
 import org.neo4j.graphdb.GraphDatabaseService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.validation.ConstraintViolation;
 import javax.validation.Validator;
-import javax.ws.rs.Consumes;
-import javax.ws.rs.POST;
-import javax.ws.rs.Path;
-import javax.ws.rs.Produces;
+import javax.ws.rs.*;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import java.net.HttpURLConnection;
 import java.util.List;
-import java.util.Set;
-import java.util.StringJoiner;
 
 /**
  * JAX-RS webservice for location related operations.
@@ -55,6 +47,32 @@ public class EnvironmentResource {
             try {
                 service.updateCurrentEnvironment(userEnvironment);
                 message.setSuccess(true);
+                message.setStatus(HttpURLConnection.HTTP_OK);
+                message.setMessage("Environment is created successfully");
+            } catch (org.neo4j.graphdb.NotFoundException e) {
+                LOGGER.error(e.getMessage(), e);
+                message.setMessage(e.getMessage());
+                message.setStatus(HttpURLConnection.HTTP_NO_CONTENT);
+            }
+        }
+        return Response.status(message.getStatus()).entity(message).build();
+    }
+
+    @POST
+    @Path("/find/{userID}")
+    @Consumes(MediaType.APPLICATION_JSON)
+    @Produces(MediaType.APPLICATION_JSON)
+    public Response createLocation(@PathParam("userID") String userID, Interval interval) {
+        LOGGER.debug("Request to find environments of {} within {}", userID, interval);
+
+        Message<List<Environment>> message = Utility.validate(VALIDATOR, interval);
+
+        if (message == null) {
+            message = new Message<>();
+            try {
+                List<Environment> environments = service.find(userID, interval);
+                message.setSuccess(true);
+                message.setEntity(environments);
                 message.setStatus(HttpURLConnection.HTTP_OK);
                 message.setMessage("Environment is created successfully");
             } catch (org.neo4j.graphdb.NotFoundException e) {

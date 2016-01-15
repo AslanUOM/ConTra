@@ -2,6 +2,7 @@ package com.aslan.contramodel.service;
 
 
 import com.aslan.contra.dto.common.Device;
+import com.aslan.contra.dto.common.Interval;
 import com.aslan.contra.dto.common.Person;
 import com.aslan.contra.dto.common.Time;
 import com.aslan.contra.dto.ws.NearbyKnownPeople;
@@ -42,7 +43,6 @@ public class PersonService extends Service {
      * If the person already exists, it will update the name and email address of that person.
      *
      * @param userDevice the person to be created or updated
-     * @return id of the newly created person or the existing person
      */
     public void create(UserDevice userDevice) {
         LOGGER.debug("Creating {}", userDevice);
@@ -159,10 +159,12 @@ public class PersonService extends Service {
             if (person == null) {
                 throw new NotFoundException("Person not found with id: " + userID);
             }
+            Interval interval = param.getInterval();
+
             // Using parameter for latitude, longitude and distance caused to unknown error.
             // Reason could be a bug in Neo4j spatial plugin
             final String query = "START n = node:location_layer('withinDistance:[" + param.getLatitude() + ", " + param.getLongitude() + ", " + param.getDistance() + "]') MATCH (n)<-[:LOCATION]-(t:Minute)<-[:CHILD*1..5]-(:TimelineRoot)<-[:TIMELINE]-(f:Person)<-[:KNOWS]-(p:Person) WHERE ID(p) = {user_id} AND t.epoch > {time_one} AND t.epoch < {time_two}  RETURN f.userID as userID";
-            ResourceIterator<String> iterator = databaseService.execute(query, map("user_id", person.getId(), "time_one", param.getStartTime().value(), "time_two", param.getEndTime().value())).columnAs("userID");
+            ResourceIterator<String> iterator = databaseService.execute(query, map("user_id", person.getId(), "time_one", interval.getStartTime().value(), "time_two", interval.getEndTime().value())).columnAs("userID");
             while (iterator.hasNext()) {
                 people.add(iterator.next());
             }

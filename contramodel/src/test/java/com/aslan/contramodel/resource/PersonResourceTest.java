@@ -2,12 +2,12 @@ package com.aslan.contramodel.resource;
 
 
 import com.aslan.contra.dto.common.Device;
+import com.aslan.contra.dto.common.Interval;
 import com.aslan.contra.dto.common.Person;
 import com.aslan.contra.dto.common.Time;
 import com.aslan.contra.dto.ws.Message;
 import com.aslan.contra.dto.ws.NearbyKnownPeople;
 import com.aslan.contra.dto.ws.UserDevice;
-import com.aslan.contra.dto.ws.UserLocation;
 import com.aslan.contramodel.service.Service;
 import com.aslan.contramodel.util.Constant;
 import com.google.gson.Gson;
@@ -19,10 +19,8 @@ import org.neo4j.graphdb.*;
 import org.neo4j.harness.ServerControls;
 import org.neo4j.test.server.HTTP;
 
-import javax.ws.rs.core.Response;
 import java.net.HttpURLConnection;
 import java.util.List;
-import java.util.Map;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
@@ -174,10 +172,13 @@ public class PersonResourceTest {
         Time time1 = Time.of(2016, 1, 1, 10, 5, 0);
         Time time2 = Time.of(2016, 1, 1, 10, 20, 0);
 
+        Interval interval = new Interval();
+        interval.setStartTime(time1);
+        interval.setEndTime(time2);
+
         NearbyKnownPeople param = new NearbyKnownPeople();
         param.setUserID("+94770780210");
-        param.setStartTime(time1);
-        param.setEndTime(time2);
+        param.setInterval(interval);
         param.setLongitude(79.8551746);
         param.setLatitude(6.8934422);
         param.setDistance(100.0);
