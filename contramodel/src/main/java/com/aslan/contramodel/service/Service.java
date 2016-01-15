@@ -140,10 +140,10 @@ public abstract class Service {
         node.setProperty(property, value);
     }
 
-    public final <T> T getIfAvailable(Node node, String property) {
-        T obj = null;
-        if (node.hasProperty(property)) {
-            obj = (T) node.getProperty(property);
+    public final <T> T getIfAvailable(PropertyContainer container, String property, T defaultValue) {
+        T obj = defaultValue;
+        if (container.hasProperty(property)) {
+            obj = (T) container.getProperty(property);
         }
         return obj;
     }

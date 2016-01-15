@@ -52,22 +52,30 @@ public class EnvironmentService extends Service {
         // Begin the transaction
         try (Transaction transaction = databaseService.beginTx()) {
             Relationship environmentRelationship = timeNode.getSingleRelationship(RelationshipTypes.ENVIRONMENT, Direction.OUTGOING);
-            Node environmentNode;
+            Node environmentNode = null;
 
             if (environmentRelationship != null) {
-                // Node already exists
-                environmentNode = environmentRelationship.getEndNode();
+                if (getIfAvailable(environmentRelationship, Constant.ACCURACY, 0.0f) < userEnvironment.getAccuracy()) {
+                    environmentNode = environmentRelationship.getEndNode();
+                }
             } else {
                 // Create a new node
                 environmentNode = databaseService.createNode(Labels.Environment);
-                timeNode.createRelationshipTo(environmentNode, RelationshipTypes.ENVIRONMENT);
+                environmentRelationship = timeNode.createRelationshipTo(environmentNode, RelationshipTypes.ENVIRONMENT);
+
+
             }
 
-            environmentRelationship.setProperty(Constant.DEVICE_ID, deviceID);
-            setOnlyIfNotNull(environmentNode, Constant.TEMPERATURE, environment.getTemperature());
-            setOnlyIfNotNull(environmentNode, Constant.PRESSURE, environment.getPressure());
-            setOnlyIfNotNull(environmentNode, Constant.HUMIDITY, environment.getHumidity());
-            setOnlyIfNotNull(environmentNode, Constant.ILLUMINANCE, environment.getIlluminance());
+            if (environmentNode != null) {
+                // Set the accuracy and the device
+                environmentRelationship.setProperty(Constant.ACCURACY, userEnvironment.getAccuracy());
+                environmentRelationship.setProperty(Constant.DEVICE_ID, deviceID);
+
+                setOnlyIfNotNull(environmentNode, Constant.TEMPERATURE, environment.getTemperature());
+                setOnlyIfNotNull(environmentNode, Constant.PRESSURE, environment.getPressure());
+                setOnlyIfNotNull(environmentNode, Constant.HUMIDITY, environment.getHumidity());
+                setOnlyIfNotNull(environmentNode, Constant.ILLUMINANCE, environment.getIlluminance());
+            }
 
             transaction.success();
         }
@@ -85,10 +93,10 @@ public class EnvironmentService extends Service {
             if (relationship != null) {
                 Node environmentNode = relationship.getEndNode();
                 environment = new Environment();
-                environment.setHumidity((Double) getIfAvailable(environmentNode, Constant.HUMIDITY));
-                environment.setIlluminance((Double) getIfAvailable(environmentNode, Constant.ILLUMINANCE));
-                environment.setPressure((Double) getIfAvailable(environmentNode, Constant.PRESSURE));
-                environment.setTemperature((Double) getIfAvailable(environmentNode, Constant.TEMPERATURE));
+                environment.setHumidity(getIfAvailable(environmentNode, Constant.HUMIDITY, 0.0));
+                environment.setIlluminance(getIfAvailable(environmentNode, Constant.ILLUMINANCE, 0.0));
+                environment.setPressure(getIfAvailable(environmentNode, Constant.PRESSURE, 0.0));
+                environment.setTemperature(getIfAvailable(environmentNode, Constant.TEMPERATURE, 0.0));
             }
 
             transaction.success();

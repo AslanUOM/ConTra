@@ -9,6 +9,9 @@ public class Constant {
     private Constant() {
     }
 
+    public static final String NOT_AVAILABLE = "NA";
+
+    public static final String[] EMPTY_STRING_ARRAY = new String[0];
 
     /**
      * Related to Device

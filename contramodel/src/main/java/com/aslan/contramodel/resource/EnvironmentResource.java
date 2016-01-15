@@ -56,7 +56,7 @@ public class EnvironmentResource {
                 service.updateCurrentEnvironment(userEnvironment);
                 message.setSuccess(true);
                 message.setStatus(HttpURLConnection.HTTP_OK);
-                message.setMessage("Location is created successfully");
+                message.setMessage("Environment is created successfully");
             } catch (org.neo4j.graphdb.NotFoundException e) {
                 LOGGER.error(e.getMessage(), e);
                 message.setMessage(e.getMessage());

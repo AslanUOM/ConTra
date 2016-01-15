@@ -99,29 +99,29 @@ public class LocationService extends Service {
                 layer.add(locationNode);
 
                 LOGGER.debug("New location {} with id {} is created and added to the person {}", location, locationNode.getId(), userID);
-            } else {
-                // Check existing locations
-                boolean locationAlreadyAdded = false;
+            }
+            // Check existing location relationship
+            Relationship locationRelationship = timeNode.getSingleRelationship(RelationshipTypes.LOCATION, Direction.OUTGOING);
+            boolean create = true;
 
-                Iterable<Relationship> relationships = timeNode.getRelationships(RelationshipTypes.LOCATION, Direction.OUTGOING);
-                for (Relationship r : relationships) {
-                    Node node = r.getEndNode();
-                    if (node.getProperty(Constant.LOCATION_ID).equals(location.getLocationID())) {
-                        // This location is added already
-                        locationAlreadyAdded = true;
-                        break;
-                    }
-                }
-
-                if (!locationAlreadyAdded) {
-                    // Location already exists
-                    Relationship relationship = timeNode.createRelationshipTo(locationNode, RelationshipTypes.LOCATION);
-                    relationship.setProperty(Constant.ACCURACY, userLocation.getAccuracy());
-                    relationship.setProperty(Constant.DEVICE_ID, deviceID);
-
-                    LOGGER.debug("Existing location {} with id {} is added to the person {}", location, locationNode.getId(), userID);
+            if (locationRelationship != null) {
+                if (getIfAvailable(locationRelationship, Constant.ACCURACY, 0.0f) > userLocation.getAccuracy()) {
+                    create = false;
+                } else {
+                    // Delete existing relationship
+                    locationRelationship.delete();
                 }
             }
+
+            if (create) {
+                // Location already exists but not connected
+                locationRelationship = timeNode.createRelationshipTo(locationNode, RelationshipTypes.LOCATION);
+                locationRelationship.setProperty(Constant.ACCURACY, userLocation.getAccuracy());
+                locationRelationship.setProperty(Constant.DEVICE_ID, deviceID);
+
+                LOGGER.debug("Location {} is added to the person {}", location, userID);
+            }
+
             transaction.success();
         }
     }

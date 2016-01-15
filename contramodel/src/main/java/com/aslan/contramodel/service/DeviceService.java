@@ -8,6 +8,9 @@ import org.neo4j.graphdb.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.HashSet;
+import java.util.Set;
+
 /**
  * This class create, update and query the database regarding the entity Device.
  * <p>
@@ -119,6 +122,78 @@ public class DeviceService extends Service {
 
             transaction.success();
         }
+    }
+
+    public Set<String> deviceTokens(String userID) {
+        LOGGER.debug("Retrieving GCM token of all the devices of {}", userID);
+
+        Set<String> tokens = new HashSet<>();
+        // Begin the transaction
+        try (Transaction transaction = databaseService.beginTx()) {
+            // Search for existing location
+            Node personNode = databaseService.findNode(Labels.Person, Constant.USER_ID, userID);
+
+            if (personNode == null) {
+                transaction.failure();
+                throw new NotFoundException("Person with userID " + userID + " is not found");
+            }
+
+            Iterable<Relationship> relationships = personNode.getRelationships(RelationshipTypes.HAS, Direction.OUTGOING);
+            for (Relationship relationship : relationships) {
+                Node node = relationship.getEndNode();
+                tokens.add((String) node.getProperty(Constant.TOKEN));
+            }
+            transaction.success();
+        }
+
+        return tokens;
+    }
+
+    public Device find(String userID, String deviceID) {
+        LOGGER.debug("Searching for {} of {}", deviceID, userID);
+
+        Device device = null;
+        // Begin the transaction
+        try (Transaction transaction = databaseService.beginTx()) {
+            // Search for existing location
+            Node personNode = databaseService.findNode(Labels.Person, Constant.USER_ID, userID);
+
+            if (personNode == null) {
+                transaction.failure();
+                throw new NotFoundException("Person with userID " + userID + " is not found");
+            }
+
+            Node deviceNode = getDeviceNode(personNode, deviceID);
+
+            if (deviceNode != null) {
+                boolean active = false;
+                Iterable<Relationship> relationships = personNode.getRelationships(RelationshipTypes.ACTIVE_DEVICE, Direction.OUTGOING);
+                for (Relationship relationship : relationships) {
+                    if (relationship.getEndNode().getProperty(Constant.DEVICE_ID).equals(deviceID)) {
+                        active = true;
+                        break;
+                    }
+                }
+
+                device = new Device();
+                device.setDeviceID(deviceID);
+                device.setActive(active);
+                device.setApi(getIfAvailable(deviceNode, Constant.API, 0));
+                device.setBatteryLevel(getIfAvailable(deviceNode, Constant.BATTERY_LEVEL, 0.0));
+                device.setBluetoothMAC((String) getIfAvailable(deviceNode, Constant.BLUETOOTH_MAC, null));
+                device.setLastSeen((Time) getIfAvailable(deviceNode, Constant.BATTERY_LEVEL, null));
+                device.setManufacturer(getIfAvailable(deviceNode, Constant.MANUFACTURER, Constant.NOT_AVAILABLE));
+                device.setSensors(getIfAvailable(deviceNode, Constant.SENSORS, Constant.EMPTY_STRING_ARRAY));
+                device.setProximity(getIfAvailable(deviceNode, Constant.PROXIMITY, 0.0));
+                device.setToken((String) getIfAvailable(deviceNode, Constant.TOKEN, null));
+                device.setWifiMAC((String) getIfAvailable(deviceNode, Constant.WIFI_MAC, null));
+
+            }
+
+            transaction.success();
+        }
+
+        return device;
     }
 
     Node getDeviceNode(Node personNode, String deviceID) {
