@@ -4,6 +4,7 @@ package com.aslan.contramodel.service;
 import com.aslan.contra.dto.common.Location;
 import com.aslan.contra.dto.ws.Nearby;
 import com.aslan.contra.dto.ws.UserLocation;
+import com.aslan.contramodel.exception.NotActiveDeviceException;
 import com.aslan.contramodel.util.Constant;
 import com.vividsolutions.jts.geom.Coordinate;
 import org.neo4j.gis.spatial.SimplePointLayer;
@@ -61,9 +62,6 @@ public class LocationService extends Service {
 
     public void create(UserLocation userLocation) {
         LOGGER.debug("Creating location {}", userLocation);
-        if (userLocation == null) {
-            return;
-        }
 
         final String userID = userLocation.getUserID();
         final String deviceID = userLocation.getDeviceID();
@@ -71,8 +69,7 @@ public class LocationService extends Service {
 
         // This device is not the active device
         if (!deviceService.isActiveDevice(userID, deviceID)) {
-            LOGGER.debug("{} is not the active device", deviceID);
-            return;
+            throw new NotActiveDeviceException();
         }
 
         Node timeNode = timelineService.createTime(userID, userLocation.getTime());

@@ -1,4 +1,4 @@
-package com.aslan.contramodel.contraservice.config;
+package com.aslan.contramodel.contraservice.application;
 
 import com.aslan.contramodel.contraservice.util.Constant;
 import org.glassfish.jersey.server.ResourceConfig;

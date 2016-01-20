@@ -90,8 +90,9 @@ public class PersonService extends Service {
                 throw new NotFoundException("Person not found with id: " + person.getUserID());
             }
 
-            personNode.setProperty(Constant.NAME, person.getName());
-            personNode.setProperty(Constant.EMAIL, person.getEmail());
+            setOnlyIfNotNull(personNode, Constant.NAME, person.getName());
+            setOnlyIfNotNull(personNode, Constant.EMAIL, person.getEmail());
+            setOnlyIfNotNull(personNode, Constant.PHONE_NUMBERS, person.getPhoneNumbers());
 
             // Commit the transaction
             transaction.success();
@@ -115,6 +116,9 @@ public class PersonService extends Service {
                 }
                 if (node.hasProperty(Constant.EMAIL)) {
                     person.setEmail((String) node.getProperty(Constant.EMAIL));
+                }
+                if (node.hasProperty(Constant.PHONE_NUMBERS)) {
+                    person.setPhoneNumbers((String[]) node.getProperty(Constant.PHONE_NUMBERS));
                 }
             }
         }

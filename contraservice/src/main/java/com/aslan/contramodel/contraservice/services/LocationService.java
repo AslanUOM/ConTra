@@ -34,7 +34,7 @@ public class LocationService {
     @Path("/create")
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
-    public Response create(@Valid UserLocation userLocation) {
+    public Response create(@NotNull @Valid UserLocation userLocation) {
         LOGGER.debug("Request to create {}", userLocation);
         Response response;
 

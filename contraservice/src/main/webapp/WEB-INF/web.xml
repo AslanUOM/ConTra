@@ -19,7 +19,7 @@
         <!-- Define the ResourceConfig class -->
         <init-param>
             <param-name>javax.ws.rs.Application</param-name>
-            <param-value>com.aslan.contramodel.contraservice.config.WebServiceConfiguration</param-value>
+            <param-value>com.aslan.contramodel.contraservice.application.WebServiceConfiguration</param-value>
         </init-param>
         <init-param>
             <param-name>jersey.config.beanValidation.enableOutputValidationErrorEntity.server</param-name>
@@ -27,6 +27,7 @@
         </init-param>
         <load-on-startup>1</load-on-startup>
     </servlet>
+
 
     <!-- Map all the URLs to the Jersey ServletContainer -->
     <servlet-mapping>

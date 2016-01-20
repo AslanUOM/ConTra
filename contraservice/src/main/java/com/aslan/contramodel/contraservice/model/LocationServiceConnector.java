@@ -2,20 +2,13 @@ package com.aslan.contramodel.contraservice.model;
 
 import com.aslan.contra.dto.common.Location;
 import com.aslan.contra.dto.ws.Message;
-import com.aslan.contra.dto.common.Person;
 import com.aslan.contra.dto.ws.UserLocation;
 import com.aslan.contramodel.contraservice.util.Constant;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.ws.rs.client.Entity;
-import javax.ws.rs.client.Invocation;
-import javax.ws.rs.client.WebTarget;
 import javax.ws.rs.core.GenericType;
-import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.Response;
 import javax.ws.rs.core.UriBuilder;
-import java.net.HttpURLConnection;
 
 /**
  * Created by gobinath on 12/17/15.

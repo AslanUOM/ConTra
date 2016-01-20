@@ -9,6 +9,7 @@ import org.slf4j.LoggerFactory;
 import javax.ws.rs.client.*;
 import javax.ws.rs.core.GenericType;
 import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.Response;
 
 /**
  * Created by gobinath on 12/17/15.
@@ -29,12 +30,14 @@ public abstract class ServiceConnector {
     public <T> Message<T> post(String url, Object object, GenericType<Message<T>> genericType) {
         WebTarget target = createWebTarget(url);
         Invocation.Builder builder = target.request(MediaType.APPLICATION_JSON_TYPE);
-        return builder.post(Entity.json(object), genericType);
+        Response response = builder.post(Entity.json(object));
+        return response.readEntity(genericType);
     }
 
     public <T> Message<T> get(String url, GenericType<Message<T>> genericType) {
         WebTarget target = createWebTarget(url);
         Invocation.Builder builder = target.request(MediaType.APPLICATION_JSON_TYPE);
-        return builder.get(genericType);
+        Response response = builder.get();
+        return response.readEntity(genericType);
     }
 }

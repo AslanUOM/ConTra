@@ -51,7 +51,7 @@ public class DeviceResource {
             } catch (org.neo4j.graphdb.NotFoundException e) {
                 LOGGER.error(e.getMessage(), e);
                 message.setMessage(e.getMessage());
-                message.setStatus(HttpURLConnection.HTTP_NO_CONTENT);
+                message.setStatus(HttpURLConnection.HTTP_NOT_FOUND);
             }
         }
         return Response.status(message.getStatus()).entity(message).build();
@@ -80,7 +80,7 @@ public class DeviceResource {
             } catch (org.neo4j.graphdb.NotFoundException e) {
                 LOGGER.error(e.getMessage(), e);
                 message.setMessage(e.getMessage());
-                message.setStatus(HttpURLConnection.HTTP_NO_CONTENT);
+                message.setStatus(HttpURLConnection.HTTP_NOT_FOUND);
             }
         }
         return Response.status(message.getStatus()).entity(message).build();

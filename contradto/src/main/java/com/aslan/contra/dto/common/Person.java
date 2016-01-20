@@ -16,6 +16,8 @@ public class Person implements Serializable {
 
     private String email;
 
+    private String[] phoneNumbers;
+
     public String getName() {
         return name;
     }
@@ -38,6 +40,14 @@ public class Person implements Serializable {
 
     public void setEmail(String email) {
         this.email = email;
+    }
+
+    public String[] getPhoneNumbers() {
+        return phoneNumbers;
+    }
+
+    public void setPhoneNumbers(String[] phoneNumbers) {
+        this.phoneNumbers = phoneNumbers;
     }
 
     @Override

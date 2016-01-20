@@ -7,16 +7,17 @@ import com.aslan.contra.dto.common.Time;
 import com.aslan.contra.dto.ws.Message;
 import com.aslan.contra.dto.ws.UserDevice;
 import com.aslan.contra.dto.ws.UserLocation;
+import com.google.gson.Gson;
 import org.glassfish.jersey.server.ResourceConfig;
 import org.glassfish.jersey.test.JerseyTest;
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.BeforeClass;
 import org.junit.Test;
 
 import javax.ws.rs.client.Entity;
 import javax.ws.rs.core.Application;
 import javax.ws.rs.core.GenericType;
+
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
 /**
  * Created by gobinath on 12/31/15.
@@ -43,8 +44,14 @@ public class LocationServiceTest extends JerseyTest {
         userDevice.setUserID("0710463254");
         userDevice.setDevice(device);
 
-        target("user/create/LK").request().post(Entity.json(userDevice), new GenericType<Message<Person>>() {
+        Message<Person> msg = target("user/create/LK").request().post(Entity.json(userDevice), new GenericType<Message<Person>>() {
         });
+
+        System.out.println(msg);
+        assertEquals("Failed to create user", 200, msg.getStatus());
+
+        // Set active device
+        TestUtility.setActiveDevice("+94710463254", "aa95f22d1e65c922");
 
         UserLocation userLocation = new UserLocation();
         userLocation.setUserID("+94710463254");
@@ -59,10 +66,12 @@ public class LocationServiceTest extends JerseyTest {
         location.setLocationID("LK-79.8547:6.8939");
 
         userLocation.setLocation(location);
+        Gson gson = new Gson();
+        System.out.println(gson.toJson(userLocation).toString());
 
         Message<Location> message = target("location/create").request().post(Entity.json(userLocation), new GenericType<Message<Location>>() {
         });
 
-        Assert.assertTrue("Failed to create location.", message.isSuccess());
+        assertTrue("Failed to create location.", message.isSuccess());
     }
 }

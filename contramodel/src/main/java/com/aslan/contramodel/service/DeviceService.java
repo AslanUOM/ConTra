@@ -34,20 +34,18 @@ public class DeviceService extends Service {
         if (deviceID != null) {
             // Begin the transaction
             try (Transaction transaction = databaseService.beginTx()) {
-                Node personNode = databaseService.findNode(Labels.Person, Constant.USER_ID, userID);
-
-                if (personNode == null) {
-                    throw new NotFoundException("User not found with the id " + userID);
+                Node deviceNode = databaseService.findNode(Labels.Device, Constant.DEVICE_ID, deviceID);
+                if (deviceNode == null) {
+                    throw new NotFoundException("Device not found with the id " + deviceID);
                 }
+                Relationship activeRelationship = deviceNode.getSingleRelationship(RelationshipTypes.ACTIVE_DEVICE, Direction.INCOMING);
+                if (activeRelationship != null) {
+                    Node personNode = activeRelationship.getStartNode();
 
-                Iterable<Relationship> relationships = personNode.getRelationships(RelationshipTypes.ACTIVE_DEVICE, Direction.OUTGOING);
-                for (Relationship relationship : relationships) {
-                    if (relationship.getEndNode().getProperty(Constant.DEVICE_ID).equals(deviceID)) {
+                    if (getIfAvailable(personNode, Constant.USER_ID, "").equals(userID)) {
                         active = true;
-                        break;
                     }
                 }
-
                 transaction.success();
             }
         }

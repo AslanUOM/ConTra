@@ -5,6 +5,7 @@ import com.aslan.contra.dto.common.Environment;
 import com.aslan.contra.dto.common.Interval;
 import com.aslan.contra.dto.common.Location;
 import com.aslan.contra.dto.ws.UserEnvironment;
+import com.aslan.contramodel.exception.NotActiveDeviceException;
 import com.aslan.contramodel.util.Constant;
 import org.neo4j.graphdb.*;
 import org.slf4j.Logger;
@@ -42,7 +43,7 @@ public class EnvironmentService extends Service {
         // This device is not the active device
         if (!deviceService.isActiveDevice(userID, deviceID)) {
             LOGGER.debug("{} is not the active device", deviceID);
-            return;
+            throw new NotActiveDeviceException();
         }
 
         final Environment environment = userEnvironment.getEnvironment();

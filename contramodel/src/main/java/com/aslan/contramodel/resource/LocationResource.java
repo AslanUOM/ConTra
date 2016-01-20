@@ -1,9 +1,10 @@
 package com.aslan.contramodel.resource;
 
-import com.aslan.contra.dto.ws.Message;
 import com.aslan.contra.dto.common.Location;
+import com.aslan.contra.dto.ws.Message;
 import com.aslan.contra.dto.ws.Nearby;
 import com.aslan.contra.dto.ws.UserLocation;
+import com.aslan.contramodel.exception.NotActiveDeviceException;
 import com.aslan.contramodel.service.LocationService;
 import com.aslan.contramodel.util.Utility;
 import org.neo4j.graphdb.GraphDatabaseService;
@@ -11,7 +12,10 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.validation.Validator;
-import javax.ws.rs.*;
+import javax.ws.rs.Consumes;
+import javax.ws.rs.POST;
+import javax.ws.rs.Path;
+import javax.ws.rs.Produces;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
@@ -47,10 +51,14 @@ public class LocationResource {
                 message.setSuccess(true);
                 message.setStatus(HttpURLConnection.HTTP_OK);
                 message.setMessage("Location is created successfully");
+            } catch (NotActiveDeviceException e) {
+                LOGGER.error("Device is not active", e);
+                message.setMessage("This device is not active. Failed to create the location.");
+                message.setStatus(HttpURLConnection.HTTP_FORBIDDEN);
             } catch (org.neo4j.graphdb.NotFoundException e) {
                 LOGGER.error(e.getMessage(), e);
                 message.setMessage(e.getMessage());
-                message.setStatus(HttpURLConnection.HTTP_NO_CONTENT);
+                message.setStatus(HttpURLConnection.HTTP_NOT_FOUND);
             }
         }
         return Response.status(message.getStatus()).entity(message).build();

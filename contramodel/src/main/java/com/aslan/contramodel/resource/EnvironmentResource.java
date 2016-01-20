@@ -4,6 +4,7 @@ import com.aslan.contra.dto.common.Environment;
 import com.aslan.contra.dto.common.Interval;
 import com.aslan.contra.dto.ws.Message;
 import com.aslan.contra.dto.ws.UserEnvironment;
+import com.aslan.contramodel.exception.NotActiveDeviceException;
 import com.aslan.contramodel.service.EnvironmentService;
 import com.aslan.contramodel.util.Utility;
 import org.neo4j.graphdb.GraphDatabaseService;
@@ -49,10 +50,14 @@ public class EnvironmentResource {
                 message.setSuccess(true);
                 message.setStatus(HttpURLConnection.HTTP_OK);
                 message.setMessage("Environment is created successfully");
+            } catch (NotActiveDeviceException e) {
+                LOGGER.error("Device is not active", e);
+                message.setMessage("This device is not active. Failed to update the environment.");
+                message.setStatus(HttpURLConnection.HTTP_PRECON_FAILED);
             } catch (org.neo4j.graphdb.NotFoundException e) {
                 LOGGER.error(e.getMessage(), e);
                 message.setMessage(e.getMessage());
-                message.setStatus(HttpURLConnection.HTTP_NO_CONTENT);
+                message.setStatus(HttpURLConnection.HTTP_NOT_FOUND);
             }
         }
         return Response.status(message.getStatus()).entity(message).build();
@@ -74,11 +79,11 @@ public class EnvironmentResource {
                 message.setSuccess(true);
                 message.setEntity(environments);
                 message.setStatus(HttpURLConnection.HTTP_OK);
-                message.setMessage("Environment is created successfully");
+                message.setMessage("Success");
             } catch (org.neo4j.graphdb.NotFoundException e) {
                 LOGGER.error(e.getMessage(), e);
                 message.setMessage(e.getMessage());
-                message.setStatus(HttpURLConnection.HTTP_NO_CONTENT);
+                message.setStatus(HttpURLConnection.HTTP_NOT_FOUND);
             }
         }
         return Response.status(message.getStatus()).entity(message).build();
