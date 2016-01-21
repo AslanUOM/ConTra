@@ -12,6 +12,8 @@ import javax.ws.rs.core.GenericType;
 import javax.ws.rs.core.UriBuilder;
 
 /**
+ * Connector class between contraservice and contra model for Device operations.
+ * <p>
  * Created by gobinath on 12/28/15.
  */
 public class DeviceServiceConnector extends ServiceConnector {

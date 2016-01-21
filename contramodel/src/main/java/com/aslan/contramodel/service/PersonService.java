@@ -7,6 +7,7 @@ import com.aslan.contra.dto.common.Person;
 import com.aslan.contra.dto.common.Time;
 import com.aslan.contra.dto.ws.NearbyKnownPeople;
 import com.aslan.contra.dto.ws.UserDevice;
+import com.aslan.contramodel.exception.AlreadyExistsException;
 import com.aslan.contramodel.util.Constant;
 import org.neo4j.graphdb.*;
 import org.slf4j.Logger;
@@ -62,6 +63,14 @@ public class PersonService extends Service {
 
             // Create a Device node if not exist
             if (deviceNode == null) {
+                // Check whether there are any other device with same id
+                deviceNode = databaseService.findNode(Labels.Device, Constant.DEVICE_ID, device.getDeviceID());
+
+                if (deviceNode != null) {
+                    transaction.failure();
+                    throw new AlreadyExistsException("The device " + device.getDeviceID() + " is already registered by some other person.");
+                }
+
                 deviceNode = databaseService.createNode(Labels.Device);
                 personNode.createRelationshipTo(deviceNode, RelationshipTypes.HAS);
             }
@@ -87,6 +96,7 @@ public class PersonService extends Service {
             Node personNode = databaseService.findNode(Labels.Person, Constant.USER_ID, person.getUserID());
 
             if (personNode == null) {
+                transaction.failure();
                 throw new NotFoundException("Person not found with id: " + person.getUserID());
             }
 

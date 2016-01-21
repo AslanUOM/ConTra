@@ -5,6 +5,7 @@ import com.aslan.contra.dto.common.Person;
 import com.aslan.contra.dto.ws.Message;
 import com.aslan.contra.dto.ws.NearbyKnownPeople;
 import com.aslan.contra.dto.ws.UserDevice;
+import com.aslan.contramodel.exception.AlreadyExistsException;
 import com.aslan.contramodel.service.PersonService;
 import com.aslan.contramodel.util.Utility;
 import org.neo4j.graphdb.GraphDatabaseService;
@@ -25,7 +26,8 @@ import static com.aslan.contramodel.util.Utility.isNullOrEmpty;
 /**
  * JAX-RS webservice for person related operations.
  * <p>
- * Created by gobinath on 12/8/15.
+ *
+ * @author gobinath
  */
 @Path("/person")
 public class PersonResource {
@@ -109,6 +111,10 @@ public class PersonResource {
                 message.setMessage("Person is created successfully");
                 message.setSuccess(true);
                 message.setStatus(HttpURLConnection.HTTP_OK);
+            } catch (AlreadyExistsException e) {
+                LOGGER.error(e.getMessage(), e);
+                message.setMessage(e.getMessage());
+                message.setStatus(HttpURLConnection.HTTP_CONFLICT);
             } catch (org.neo4j.graphdb.NotFoundException e) {
                 LOGGER.error(e.getMessage(), e);
                 message.setMessage(e.getMessage());

@@ -1,9 +1,10 @@
 package com.aslan.contramodel.exception;
 
 /**
- * Device is not active.
- * <p>
- * Created by gobinath on 1/19/16.
+ * The device which is trying to update the model is not an active device.
+ *
+ * @author gobinath
+ * @version 1.0
  */
 public class NotActiveDeviceException extends RuntimeException {
     public NotActiveDeviceException(String msg) {

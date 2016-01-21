@@ -140,11 +140,12 @@ public abstract class Service {
         node.setProperty(property, value);
     }
 
+    @SuppressWarnings("unchecked")
     public final <T> T getIfAvailable(PropertyContainer container, String property, T defaultValue) {
-        T obj = defaultValue;
+        T result = defaultValue;
         if (container.hasProperty(property)) {
-            obj = (T) container.getProperty(property);
+            result = (T) container.getProperty(property);
         }
-        return obj;
+        return result;
     }
 }

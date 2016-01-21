@@ -76,15 +76,7 @@ public class PersonResourceTest {
 
     @Test
     public void testCreate() throws Exception {
-        Device device = new Device();
-        device.setDeviceID("c195442d1e65c922");
-        device.setApi(20);
-        device.setBluetoothMAC("125.0.12.2");
-        device.setManufacturer("HTC");
-        device.setToken("GCM-124");
-        device.setWifiMAC("127.0.12.2");
-        device.setSensors(new String[]{"Light", "Temperature", "GPS"});
-
+        Device device = TestUtility.createDevice("c195442d1e65c922", 20, "125.0.12.2", "127.0.12.2", "GCM-123456777", "HTC", "Light", "Temperature");
         UserDevice userDevice = new UserDevice();
         userDevice.setUserID("+94770780211");
         userDevice.setDevice(device);
@@ -102,6 +94,20 @@ public class PersonResourceTest {
             // Check the name of the inserted person.
             assertTrue("Person is not created.", node != null);
         }
+    }
+
+    @Test
+    public void testCreateWithDuplicateDevice() throws Exception {
+        Device device = TestUtility.createDevice("CDC47124648058A", 22, "D4:0B:1A:E4:76:26", "2C:8A:72:BD:7D:9F", "GCM-123456789", "HTC", "Light", "Temperature", "GPS");
+
+        UserDevice userDevice = new UserDevice();
+        userDevice.setUserID("+94753146205");
+        userDevice.setDevice(device);
+
+        HTTP.Response response = HTTP.POST(server.httpURI().resolve("/contra/person/create").toString(), userDevice);
+
+        // Check the status.
+        assertEquals("Error in request.", HttpURLConnection.HTTP_CONFLICT, response.status());
     }
 
     @Test

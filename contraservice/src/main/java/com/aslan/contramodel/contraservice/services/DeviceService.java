@@ -18,6 +18,8 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
 /**
+ * JAX-RS service API for Device related operations.
+ * <p>
  * Created by gobinath on 1/19/16.
  */
 @Path("/device")

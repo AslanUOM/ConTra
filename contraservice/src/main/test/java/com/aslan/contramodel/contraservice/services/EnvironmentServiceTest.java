@@ -6,20 +6,22 @@ import com.aslan.contra.dto.common.Time;
 import com.aslan.contra.dto.ws.Message;
 import com.aslan.contra.dto.ws.UserEnvironment;
 import org.glassfish.jersey.server.ResourceConfig;
-import org.glassfish.jersey.test.JerseyTest;
 import org.junit.Test;
 
 import javax.ws.rs.client.Entity;
 import javax.ws.rs.core.Application;
 import javax.ws.rs.core.GenericType;
-
 import java.util.List;
 
 import static junit.framework.Assert.assertEquals;
 import static junit.framework.TestCase.assertTrue;
 
 /**
- * Created by gobinath on 1/20/16.
+ * Testing class of Environment JAX-RS web service.
+ * <p>
+ *
+ * @author gobinath
+ * @see EnvironmentService
  */
 public class EnvironmentServiceTest extends ServiceTest {
     @Override

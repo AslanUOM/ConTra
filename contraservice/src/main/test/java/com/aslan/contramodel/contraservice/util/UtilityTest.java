@@ -1,6 +1,7 @@
 package com.aslan.contramodel.contraservice.util;
 
 import com.google.i18n.phonenumbers.NumberParseException;
+import org.junit.Assert;
 import org.junit.Test;
 
 import static org.junit.Assert.*;
@@ -53,6 +54,7 @@ public class UtilityTest {
             String formattedPhoneNumber = Utility.formatPhoneNumber("LK", phoneNumber);
             fail("Accept invalid phone number");
         } catch (NumberParseException e) {
+            // Success
         }
     }
 

@@ -26,6 +26,10 @@ public class ServiceTest extends JerseyTest {
     }
 
     public void setup() {
+        Client client = ClientBuilder.newClient();
+        WebTarget target;
+
+        // User 1
         Device device = new Device();
         device.setDeviceID("b195f22d1e65c933");
         device.setApi(20);
@@ -39,9 +43,7 @@ public class ServiceTest extends JerseyTest {
         userDevice.setUserID("+94773458206");
         userDevice.setDevice(device);
 
-
-        Client client = ClientBuilder.newClient();
-        WebTarget target = client.target(Constant.USER_MODEL_URL + "/create");
+        target = client.target(Constant.USER_MODEL_URL + "/create");
         target.request(MediaType.APPLICATION_JSON_TYPE).post(Entity.json(userDevice));
 
         setActiveDevice("+94773458206", "b195f22d1e65c933");
@@ -61,5 +63,26 @@ public class ServiceTest extends JerseyTest {
 
         target = client.target(Constant.ENVIRONMENT_MODEL_URL + "/create");
         target.request(MediaType.APPLICATION_JSON_TYPE).post(Entity.json(userEnvironment));
+
+
+        // User 2
+        device = new Device();
+        device.setDeviceID("aa95f22d1e65c922");
+        device.setApi(20);
+        device.setBluetoothMAC("126.1.12.0");
+        device.setManufacturer("Sony");
+        device.setToken("GCM-125");
+        device.setWifiMAC("126.1.12.1");
+        device.setSensors(new String[]{"Light", "Temperature", "GPS"});
+
+        userDevice = new UserDevice();
+        userDevice.setUserID("+94710463254");
+        userDevice.setDevice(device);
+
+        target = client.target(Constant.USER_MODEL_URL + "/create");
+        target.request(MediaType.APPLICATION_JSON_TYPE).post(Entity.json(userDevice));
+
+        // Set active device
+        setActiveDevice("+94710463254", "aa95f22d1e65c922");
     }
 }
