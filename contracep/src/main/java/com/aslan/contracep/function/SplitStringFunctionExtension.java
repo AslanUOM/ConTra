@@ -34,7 +34,7 @@ public class SplitStringFunctionExtension extends FunctionExecutor {
 	protected Object execute(Object[] data) {
 		String source = String.valueOf(data[0]);
 		String regex = String.valueOf(data[1]);
-		int index = Integer.valueOf(String.valueOf(data[2]));
+		int index = Integer.parseInt(data[2].toString());
 
 		String[] array = source.split(regex);
 		if (index < 0 || index >= array.length) {

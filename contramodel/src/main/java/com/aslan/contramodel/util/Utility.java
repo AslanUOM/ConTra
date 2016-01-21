@@ -36,7 +36,7 @@ public class Utility {
             // Create error message
             message = new Message<>();
             message.setStatus(HttpURLConnection.HTTP_BAD_REQUEST);
-            message.setMessage(t.getClass().toString() + " cannot be null.");
+            message.setMessage("Entity cannot be null.");
         } else {
             Set<ConstraintViolation<T>> violations = validator.validate(t);
             if (!violations.isEmpty()) {
