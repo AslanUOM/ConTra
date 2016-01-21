@@ -23,6 +23,6 @@ public class DeviceServiceConnector extends ServiceConnector {
         LOGGER.debug("Updating the device {}", userDevice);
         userDevice.getDevice().setLastSeen(Time.now());
         String url = UriBuilder.fromPath(Constant.DEVICE_MODEL_URL + "/update").toString();
-        return post(url, userDevice, DEVICE_GENERIC_TYPE);
+        return put(url, userDevice, DEVICE_GENERIC_TYPE);
     }
 }

@@ -34,6 +34,13 @@ public abstract class ServiceConnector {
         return response.readEntity(genericType);
     }
 
+    public <T> Message<T> put(String url, Object object, GenericType<Message<T>> genericType) {
+        WebTarget target = createWebTarget(url);
+        Invocation.Builder builder = target.request(MediaType.APPLICATION_JSON_TYPE);
+        Response response = builder.put(Entity.json(object));
+        return response.readEntity(genericType);
+    }
+
     public <T> Message<T> get(String url, GenericType<Message<T>> genericType) {
         WebTarget target = createWebTarget(url);
         Invocation.Builder builder = target.request(MediaType.APPLICATION_JSON_TYPE);

@@ -43,7 +43,7 @@ public class EnvironmentService extends Service {
         // This device is not the active device
         if (!deviceService.isActiveDevice(userID, deviceID)) {
             LOGGER.debug("{} is not the active device", deviceID);
-            throw new NotActiveDeviceException();
+            throw new NotActiveDeviceException("Device " + deviceID + " is not active.");
         }
 
         final Environment environment = userEnvironment.getEnvironment();

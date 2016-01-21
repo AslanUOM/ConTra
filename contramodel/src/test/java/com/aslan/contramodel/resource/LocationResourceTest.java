@@ -96,7 +96,7 @@ public class LocationResourceTest {
         }.getType());
         List<Location> locations = message.getEntity();
         // Check the status.
-        assertEquals("Exact locations are not found.", 2, locations.size());
+        assertEquals("Exact locations are not found.", 3, locations.size());
 
         String[] expected = {"Majestic City", "Unity Plaza"};
         String[] actual = {locations.get(0).getName(), locations.get(1).getName()};

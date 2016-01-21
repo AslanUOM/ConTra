@@ -21,7 +21,7 @@ import static org.junit.Assert.assertEquals;
 /**
  * Created by gobinath on 12/18/15.
  */
-public class DeviceServiceTest extends JerseyTest {
+public class DeviceServiceTest extends ServiceTest {
 
     @Override
     protected Application configure() {

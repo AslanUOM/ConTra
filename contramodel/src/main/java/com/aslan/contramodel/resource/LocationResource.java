@@ -53,7 +53,7 @@ public class LocationResource {
                 message.setMessage("Location is created successfully");
             } catch (NotActiveDeviceException e) {
                 LOGGER.error("Device is not active", e);
-                message.setMessage("This device is not active. Failed to create the location.");
+                message.setMessage(e.getMessage() + " Failed to create the location.");
                 message.setStatus(HttpURLConnection.HTTP_FORBIDDEN);
             } catch (org.neo4j.graphdb.NotFoundException e) {
                 LOGGER.error(e.getMessage(), e);

@@ -155,7 +155,7 @@ public class PersonService extends Service {
     }
 
     public List<String> nearByKnownPeople(NearbyKnownPeople param) {
-        LOGGER.debug("Searching for near by known friends of ", param);
+        LOGGER.debug("Searching for near by known friends of {}", param.getUserID());
         List<String> people = new ArrayList<>();
         try (Transaction transaction = databaseService.beginTx()) {
             String userID = param.getUserID();

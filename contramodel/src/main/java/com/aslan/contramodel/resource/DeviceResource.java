@@ -31,7 +31,7 @@ public class DeviceResource {
         this.service = new DeviceService(databaseService);
     }
 
-    @POST
+    @PUT
     @Path("/update")
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
@@ -70,7 +70,6 @@ public class DeviceResource {
         if (userID == null || deviceID == null) {
             message.setMessage("userID and/or deviceID cannot be null");
             message.setStatus(HttpURLConnection.HTTP_BAD_REQUEST);
-            ;
         } else {
             try {
                 service.setActiveDevice(userID, deviceID);

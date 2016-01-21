@@ -39,6 +39,7 @@ public class TestUtility {
         DeviceService deviceService = new DeviceService(databaseService);
 
 
+        // User 1
         UserDevice userDeviceGobinath = new UserDevice();
         userDeviceGobinath.setUserID("+94770780210");
         userDeviceGobinath.setDevice(createDevice("CDC47124648058A", 22, "D4:0B:1A:E4:76:26", "2C:8A:72:BD:7D:9F", "GCM-123456789", "HTC", "Light", "Temperature", "GPS"));
@@ -54,6 +55,7 @@ public class TestUtility {
         deviceService.setActiveDevice("+94770780210", "CDC47124648058A");
         locationService.create(userLocationGobinath);
 
+        // User 2
         UserDevice userDeviceVishnu = new UserDevice();
         userDeviceVishnu.setUserID("+94779848507");
         userDeviceVishnu.setDevice(createDevice("BB8751037F2424D", 22, "A5:1B:1B:F4:77:27", "A5:1B:1B:F4:77:27", "GCM-987654321", "Samsung", "Light", "Temperature", "GPS", "Gesture"));
@@ -68,6 +70,22 @@ public class TestUtility {
         personService.create(userDeviceVishnu);
         deviceService.setActiveDevice("+94779848507", "BB8751037F2424D");
         locationService.create(userLocationVishnu);
+
+        // User 3
+        UserDevice userDeviceAnnet = new UserDevice();
+        userDeviceAnnet.setUserID("+94771199331");
+        userDeviceAnnet.setDevice(createDevice("CC96601820A3292", 21, "A6:2D:2B:F2:88:19", "2A:84:36:AC:66:01", "GCM-987654322", "Sony", "Light", "GPS", "Gesture"));
+
+        UserLocation userLocationAnnet = new UserLocation();
+        userLocationAnnet.setUserID("+94771199331");
+        userLocationAnnet.setTime(Time.of(2014, 1, 1, 8, 15, 0));
+        userLocationAnnet.setDeviceID("CC96601820A3292");
+        userLocationAnnet.setAccuracy(88.0f);
+        userLocationAnnet.setLocation(createLocation("Unity Plaza", "6.8933278,79.8554107", 79.8554107, 6.8933278));
+
+        personService.create(userDeviceAnnet);
+        deviceService.setActiveDevice("+94771199331", "CC96601820A3292");
+        locationService.create(userLocationAnnet);
     }
 
     public static Person createPerson(String userID, String name, String email) {

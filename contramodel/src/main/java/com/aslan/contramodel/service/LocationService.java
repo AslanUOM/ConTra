@@ -69,7 +69,7 @@ public class LocationService extends Service {
 
         // This device is not the active device
         if (!deviceService.isActiveDevice(userID, deviceID)) {
-            throw new NotActiveDeviceException();
+            throw new NotActiveDeviceException("Device " + deviceID + " is not active.");
         }
 
         Node timeNode = timelineService.createTime(userID, userLocation.getTime());

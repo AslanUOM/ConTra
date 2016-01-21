@@ -52,8 +52,8 @@ public class EnvironmentResource {
                 message.setMessage("Environment is created successfully");
             } catch (NotActiveDeviceException e) {
                 LOGGER.error("Device is not active", e);
-                message.setMessage("This device is not active. Failed to update the environment.");
-                message.setStatus(HttpURLConnection.HTTP_PRECON_FAILED);
+                message.setMessage(e.getMessage() + " Failed to create the environment.");
+                message.setStatus(HttpURLConnection.HTTP_FORBIDDEN);
             } catch (org.neo4j.graphdb.NotFoundException e) {
                 LOGGER.error(e.getMessage(), e);
                 message.setMessage(e.getMessage());

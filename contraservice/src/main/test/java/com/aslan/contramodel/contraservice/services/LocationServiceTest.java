@@ -9,7 +9,6 @@ import com.aslan.contra.dto.ws.UserDevice;
 import com.aslan.contra.dto.ws.UserLocation;
 import com.google.gson.Gson;
 import org.glassfish.jersey.server.ResourceConfig;
-import org.glassfish.jersey.test.JerseyTest;
 import org.junit.Test;
 
 import javax.ws.rs.client.Entity;
@@ -22,7 +21,7 @@ import static org.junit.Assert.assertTrue;
 /**
  * Created by gobinath on 12/31/15.
  */
-public class LocationServiceTest extends JerseyTest {
+public class LocationServiceTest extends ServiceTest {
     @Override
     protected Application configure() {
         return new ResourceConfig(UserService.class, LocationService.class);
@@ -51,7 +50,7 @@ public class LocationServiceTest extends JerseyTest {
         assertEquals("Failed to create user", 200, msg.getStatus());
 
         // Set active device
-        TestUtility.setActiveDevice("+94710463254", "aa95f22d1e65c922");
+        setActiveDevice("+94710463254", "aa95f22d1e65c922");
 
         UserLocation userLocation = new UserLocation();
         userLocation.setUserID("+94710463254");

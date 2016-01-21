@@ -61,7 +61,7 @@ public class DeviceResourceTest {
         userDevice.setDevice(device);
 
 
-        HTTP.Response response = HTTP.POST(server.httpURI().resolve("/contra/device/update").toString(), userDevice);
+        HTTP.Response response = HTTP.PUT(server.httpURI().resolve("/contra/device/update").toString(), userDevice);
 
         // Check the status.
         assertEquals("Error in request.", HttpURLConnection.HTTP_OK, response.status());
