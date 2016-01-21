@@ -1,4 +1,4 @@
-package com.aslan.contramodel.contraservice.model;
+package com.aslan.contramodel.contraservice.connectors;
 
 import com.aslan.contra.dto.common.Person;
 import com.aslan.contra.dto.ws.Message;

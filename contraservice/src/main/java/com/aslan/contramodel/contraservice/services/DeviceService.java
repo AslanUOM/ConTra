@@ -3,7 +3,7 @@ package com.aslan.contramodel.contraservice.services;
 import com.aslan.contra.dto.common.Device;
 import com.aslan.contra.dto.ws.Message;
 import com.aslan.contra.dto.ws.UserDevice;
-import com.aslan.contramodel.contraservice.model.DeviceServiceConnector;
+import com.aslan.contramodel.contraservice.connectors.DeviceServiceConnector;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

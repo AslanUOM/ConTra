@@ -1,7 +1,6 @@
-package com.aslan.contramodel.contraservice.model;
+package com.aslan.contramodel.contraservice.connectors;
 
 import com.aslan.contra.dto.ws.Message;
-import com.aslan.contramodel.contraservice.util.Constant;
 import org.glassfish.jersey.client.authentication.HttpAuthenticationFeature;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

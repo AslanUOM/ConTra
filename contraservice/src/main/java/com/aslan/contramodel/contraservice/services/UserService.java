@@ -5,7 +5,7 @@ import com.aslan.contra.dto.common.Person;
 import com.aslan.contra.dto.ws.Message;
 import com.aslan.contra.dto.ws.UserDevice;
 import com.aslan.contramodel.contraservice.constraint.UserID;
-import com.aslan.contramodel.contraservice.model.UserServiceConnector;
+import com.aslan.contramodel.contraservice.connectors.UserServiceConnector;
 import com.aslan.contramodel.contraservice.util.Utility;
 import com.google.i18n.phonenumbers.NumberParseException;
 import org.slf4j.Logger;

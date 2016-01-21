@@ -35,7 +35,7 @@ public abstract class Service {
 
 
     /**
-     * Relationships between models in ConTra model.
+     * Relationships between models in ConTra connectors.
      */
     public enum RelationshipTypes implements RelationshipType {
         /**

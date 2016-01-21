@@ -1,4 +1,4 @@
-package com.aslan.contramodel.contraservice.model;
+package com.aslan.contramodel.contraservice.connectors;
 
 import com.aslan.contra.dto.common.Device;
 import com.aslan.contra.dto.common.Time;

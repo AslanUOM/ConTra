@@ -1,4 +1,4 @@
-package com.aslan.contramodel.contraservice.model;
+package com.aslan.contramodel.contraservice.connectors;
 
 import com.aslan.contra.dto.common.Environment;
 import com.aslan.contra.dto.common.Interval;
