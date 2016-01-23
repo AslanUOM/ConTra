@@ -5,6 +5,7 @@ import com.aslan.contra.dto.common.Time;
 import com.aslan.contra.dto.ws.Message;
 import com.aslan.contra.dto.ws.UserLocation;
 import org.glassfish.jersey.server.ResourceConfig;
+import org.glassfish.jersey.test.JerseyTest;
 import org.junit.Test;
 
 import javax.ws.rs.client.Entity;
@@ -20,7 +21,7 @@ import static org.junit.Assert.assertTrue;
  * @author gobinath
  * @see LocationService
  */
-public class LocationServiceTest extends ServiceTest {
+public class LocationServiceTest extends JerseyTest {
     @Override
     protected Application configure() {
         return new ResourceConfig(UserService.class, LocationService.class);

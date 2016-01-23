@@ -6,6 +6,7 @@ import com.aslan.contra.dto.common.Time;
 import com.aslan.contra.dto.ws.Message;
 import com.aslan.contra.dto.ws.UserEnvironment;
 import org.glassfish.jersey.server.ResourceConfig;
+import org.glassfish.jersey.test.JerseyTest;
 import org.junit.Test;
 
 import javax.ws.rs.client.Entity;
@@ -13,8 +14,8 @@ import javax.ws.rs.core.Application;
 import javax.ws.rs.core.GenericType;
 import java.util.List;
 
-import static junit.framework.Assert.assertEquals;
 import static junit.framework.TestCase.assertTrue;
+import static junit.framework.TestCase.assertEquals;
 
 /**
  * Testing class of Environment JAX-RS web service.
@@ -23,7 +24,7 @@ import static junit.framework.TestCase.assertTrue;
  * @author gobinath
  * @see EnvironmentService
  */
-public class EnvironmentServiceTest extends ServiceTest {
+public class EnvironmentServiceTest extends JerseyTest {
     @Override
     protected Application configure() {
         return new ResourceConfig(EnvironmentService.class);
@@ -31,7 +32,7 @@ public class EnvironmentServiceTest extends ServiceTest {
 
     @Test
     public void testCreate() {
-        setup();
+        TestUtility.setup();
 
         Environment environment = new Environment();
         environment.setTemperature(23.5);
@@ -53,7 +54,7 @@ public class EnvironmentServiceTest extends ServiceTest {
 
     @Test
     public void testFind() {
-        setup();
+        TestUtility.setup();
 
         Interval interval = new Interval();
         interval.setStartTime(Time.of(2015, 12, 1, 2, 10, 0));

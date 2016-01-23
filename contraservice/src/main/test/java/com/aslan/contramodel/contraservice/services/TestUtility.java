@@ -6,8 +6,6 @@ import com.aslan.contra.dto.common.Time;
 import com.aslan.contra.dto.ws.UserDevice;
 import com.aslan.contra.dto.ws.UserEnvironment;
 import com.aslan.contramodel.contraservice.util.Constant;
-import org.glassfish.jersey.test.JerseyTest;
-import org.junit.Before;
 
 import javax.ws.rs.client.*;
 import javax.ws.rs.core.MediaType;
@@ -15,9 +13,12 @@ import javax.ws.rs.core.MediaType;
 /**
  * Created by gobinath on 1/20/16.
  */
-public class ServiceTest extends JerseyTest {
+public class TestUtility {
 
-    public void setActiveDevice(String userID, String deviceID) {
+    private TestUtility() {
+    }
+
+    public static void setActiveDevice(String userID, String deviceID) {
         Client client = ClientBuilder.newClient();
         String url = String.format("http://localhost:7474/contra/device/setactive/%s/%s", userID, deviceID);
         WebTarget target = client.target(url);
@@ -25,7 +26,7 @@ public class ServiceTest extends JerseyTest {
         builder.post(null);
     }
 
-    public void setup() {
+    public static void setup() {
         Client client = ClientBuilder.newClient();
         WebTarget target;
 

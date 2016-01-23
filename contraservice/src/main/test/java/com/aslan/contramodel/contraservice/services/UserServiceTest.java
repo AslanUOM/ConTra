@@ -16,7 +16,7 @@ import javax.ws.rs.core.Response;
 import java.net.HttpURLConnection;
 
 import static junit.framework.TestCase.assertTrue;
-import static org.junit.Assert.assertEquals;
+import static junit.framework.TestCase.assertEquals;
 
 /**
  * Created by gobinath on 12/18/15.
