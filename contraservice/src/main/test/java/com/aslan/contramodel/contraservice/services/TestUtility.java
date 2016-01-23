@@ -6,9 +6,11 @@ import com.aslan.contra.dto.common.Time;
 import com.aslan.contra.dto.ws.UserDevice;
 import com.aslan.contra.dto.ws.UserEnvironment;
 import com.aslan.contramodel.contraservice.util.Constant;
+import org.glassfish.jersey.client.authentication.HttpAuthenticationFeature;
 
 import javax.ws.rs.client.*;
 import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.Response;
 
 /**
  * Created by gobinath on 1/20/16.
@@ -19,7 +21,9 @@ public class TestUtility {
     }
 
     public static void setActiveDevice(String userID, String deviceID) {
+        HttpAuthenticationFeature feature = HttpAuthenticationFeature.basic("neo4j", "admin");
         Client client = ClientBuilder.newClient();
+        client.register(feature);
         String url = String.format("http://localhost:7474/contra/device/setactive/%s/%s", userID, deviceID);
         WebTarget target = client.target(url);
         Invocation.Builder builder = target.request(MediaType.APPLICATION_JSON_TYPE);
@@ -28,7 +32,9 @@ public class TestUtility {
 
 
     public static void setup() {
+        HttpAuthenticationFeature feature = HttpAuthenticationFeature.basic("neo4j", "admin");
         Client client = ClientBuilder.newClient();
+        client.register(feature);
         WebTarget target;
 
         // User 1
@@ -46,7 +52,7 @@ public class TestUtility {
         userDevice.setDevice(device);
 
         target = client.target(Constant.USER_MODEL_URL + "/create");
-        target.request(MediaType.APPLICATION_JSON_TYPE).post(Entity.json(userDevice));
+        Response response = target.request(MediaType.APPLICATION_JSON_TYPE).post(Entity.json(userDevice));
 
         setActiveDevice("+94773458206", "b195f22d1e65c933");
 
