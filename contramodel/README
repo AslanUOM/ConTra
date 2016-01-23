@@ -19,7 +19,7 @@
 
         mvn -pl contramodel -am package
 
-  2. Copy the contramodel/targets/contramodel-1.0-SNAPSHOT.jar file to {NEO4J_HOME}/plugins
+  2. Copy the contramodel/target/contramodel-1.0-SNAPSHOT.jar file to {NEO4J_HOME}/plugins
 
   3. Append the following line to {NEO4J_HOME}/conf/neo4j-server.properties
 
