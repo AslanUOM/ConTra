@@ -104,7 +104,7 @@
 
     <build>
         <finalName>contra</finalName>
-        <testSourceDirectory>${basedir}/src/main/test/</testSourceDirectory>
+        <testSourceDirectory>${basedir}/src/main/test/java</testSourceDirectory>
         <plugins>
             <plugin>
                 <artifactId>maven-compiler-plugin</artifactId>

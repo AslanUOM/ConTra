@@ -19,6 +19,13 @@
 
         mvn -pl contraservice -am package
 
+  Testing in server will create dummy nodes in the real database.
+  To skip testing, append -Dmaven.test.skip=true parameter at the end.
+
+        mvn package -Dmaven.test.skip=true
+
+        mvn -pl contraservice -am package -Dmaven.test.skip=true
+
   2. Copy the contraservice/targets/contra.war file to {CATALINA_HOME}/webapps
 
   3. Start the Apache Tomcat

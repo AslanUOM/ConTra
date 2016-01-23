@@ -6,6 +6,7 @@ import com.aslan.contra.dto.ws.Message;
 import com.aslan.contra.dto.ws.UserLocation;
 import org.glassfish.jersey.server.ResourceConfig;
 import org.glassfish.jersey.test.JerseyTest;
+import org.junit.BeforeClass;
 import org.junit.Test;
 
 import javax.ws.rs.client.Entity;
@@ -27,6 +28,10 @@ public class LocationServiceTest extends JerseyTest {
         return new ResourceConfig(UserService.class, LocationService.class);
     }
 
+    @BeforeClass
+    public static void setup() {
+        TestUtility.setup();
+    }
 
     @Test
     public void testCreate() {

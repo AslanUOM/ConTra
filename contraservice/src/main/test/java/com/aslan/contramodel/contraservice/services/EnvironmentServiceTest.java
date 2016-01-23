@@ -7,6 +7,7 @@ import com.aslan.contra.dto.ws.Message;
 import com.aslan.contra.dto.ws.UserEnvironment;
 import org.glassfish.jersey.server.ResourceConfig;
 import org.glassfish.jersey.test.JerseyTest;
+import org.junit.BeforeClass;
 import org.junit.Test;
 
 import javax.ws.rs.client.Entity;
@@ -14,8 +15,8 @@ import javax.ws.rs.core.Application;
 import javax.ws.rs.core.GenericType;
 import java.util.List;
 
-import static junit.framework.TestCase.assertTrue;
 import static junit.framework.TestCase.assertEquals;
+import static junit.framework.TestCase.assertTrue;
 
 /**
  * Testing class of Environment JAX-RS web service.
@@ -30,10 +31,13 @@ public class EnvironmentServiceTest extends JerseyTest {
         return new ResourceConfig(EnvironmentService.class);
     }
 
+    @BeforeClass
+    public static void setup() {
+        TestUtility.setup();
+    }
+
     @Test
     public void testCreate() {
-        TestUtility.setup();
-
         Environment environment = new Environment();
         environment.setTemperature(23.5);
         environment.setPressure(21);
@@ -54,8 +58,6 @@ public class EnvironmentServiceTest extends JerseyTest {
 
     @Test
     public void testFind() {
-        TestUtility.setup();
-
         Interval interval = new Interval();
         interval.setStartTime(Time.of(2015, 12, 1, 2, 10, 0));
         interval.setEndTime(Time.of(2015, 12, 1, 2, 20, 0));
