@@ -28,13 +28,10 @@ public class LocationServiceTest extends JerseyTest {
         return new ResourceConfig(UserService.class, LocationService.class);
     }
 
-    @BeforeClass
-    public static void setup() {
-        TestUtility.setup();
-    }
-
     @Test
     public void testCreate() {
+        TestUtility.setup();
+
         UserLocation userLocation = new UserLocation();
         userLocation.setUserID("+94710463254");
         userLocation.setDeviceID("aa95f22d1e65c922");

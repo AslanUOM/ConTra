@@ -26,6 +26,7 @@ public class TestUtility {
         builder.post(null);
     }
 
+
     public static void setup() {
         Client client = ClientBuilder.newClient();
         WebTarget target;
