@@ -101,7 +101,7 @@ public class PersonResource {
     public Response create(UserDevice userDevice) {
         LOGGER.debug("Request to create person {} is received", userDevice);
 
-        Message<Person> message = Utility.validate(VALIDATOR, userDevice);
+        Message<String> message = Utility.validate(VALIDATOR, userDevice);
 
         if (message == null) {
             message = new Message<>();
@@ -109,8 +109,9 @@ public class PersonResource {
             try {
                 service.create(userDevice);
                 message.setMessage("Person is created successfully");
+                message.setEntity(userDevice.getUserID());
                 message.setSuccess(true);
-                message.setStatus(HttpURLConnection.HTTP_OK);
+                message.setStatus(HttpURLConnection.HTTP_CREATED);
             } catch (AlreadyExistsException e) {
                 LOGGER.error(e.getMessage(), e);
                 message.setMessage(e.getMessage());
