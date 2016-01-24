@@ -54,7 +54,7 @@ public class UserService {
     public Response create(@NotNull @PathParam("country") String country, @Valid UserDevice userDevice) {
         LOGGER.debug("Request to create person {}", userDevice);
 
-        Message<Person> message;
+        Message<String> message;
         try {
             // Format the phone number
             String formattedPhoneNumber = Utility.formatPhoneNumber(country, userDevice.getUserID());

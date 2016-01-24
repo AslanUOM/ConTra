@@ -17,12 +17,14 @@ public class UserServiceConnector extends ServiceConnector {
     private static final Logger LOGGER = LoggerFactory.getLogger(UserServiceConnector.class);
     private static final GenericType<Message<Person>> PERSON_GENERIC_TYPE = new GenericType<Message<Person>>() {
     };
+    private static final GenericType<Message<String>> STRING_GENERIC_TYPE = new GenericType<Message<String>>() {
+    };
 
 
-    public Message<Person> create(UserDevice userDevice) {
+    public Message<String> create(UserDevice userDevice) {
         LOGGER.debug("Creating a new person {}", userDevice);
 
-        return post(Constant.USER_MODEL_URL + "/create", userDevice, PERSON_GENERIC_TYPE);
+        return post(Constant.USER_MODEL_URL + "/create", userDevice, STRING_GENERIC_TYPE);
     }
 
     public Message<Person> update(Person person) {

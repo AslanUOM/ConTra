@@ -84,7 +84,7 @@ public class PersonResourceTest {
         HTTP.Response response = HTTP.POST(server.httpURI().resolve("/contra/person/create").toString(), userDevice);
 
         // Check the status.
-        assertEquals("Error in request.", HttpURLConnection.HTTP_OK, response.status());
+        assertEquals("Error in request.", HttpURLConnection.HTTP_CREATED, response.status());
 
         // Manually retrieve Bob.
         try (Transaction transaction = databaseService.beginTx()) {
