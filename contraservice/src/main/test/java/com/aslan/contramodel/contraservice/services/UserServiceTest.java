@@ -52,7 +52,7 @@ public class UserServiceTest extends JerseyTest {
         userDevice.setUserID("0773458206");
         userDevice.setDevice(device);
 
-        Message<Person> message = target("user/create/LK").request().post(Entity.json(userDevice), new GenericType<Message<Person>>() {
+        Message<String> message = target("user/create/LK").request().post(Entity.json(userDevice), new GenericType<Message<String>>() {
         });
 
         Assert.assertTrue("Failed to create person.", message.isSuccess());
@@ -73,7 +73,7 @@ public class UserServiceTest extends JerseyTest {
         userDevice.setUserID("0770780211");
         userDevice.setDevice(device);
 
-        Message<Person> message = target("user/create/lk").request().post(Entity.json(userDevice), new GenericType<Message<Person>>() {
+        Message<String> message = target("user/create/lk").request().post(Entity.json(userDevice), new GenericType<Message<String>>() {
         });
 
         assertTrue("Failed to create person.", message.isSuccess());

@@ -61,7 +61,6 @@ public class UserService {
 
             userDevice.setUserID(formattedPhoneNumber);
             message = userServiceConnector.create(userDevice);
-
         } catch (NumberParseException e) {
             LOGGER.error("Exception in formatting phone number {}", userDevice.getUserID(), e);
 

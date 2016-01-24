@@ -32,7 +32,7 @@ public class UserServiceConnectorTest {
         userDevice.setUserID("+94779999999");
         userDevice.setDevice(device);
 
-        Message<Person> message = connector.create(userDevice);
+        Message<String> message = connector.create(userDevice);
 
         assertEquals("Failed to create the person", true, message.isSuccess());
     }
