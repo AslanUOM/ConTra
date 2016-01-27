@@ -1,7 +1,6 @@
 package com.aslan.contra.dto.ws;
 
 import com.aslan.contra.dto.common.Device;
-import com.google.gson.annotations.SerializedName;
 
 import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
