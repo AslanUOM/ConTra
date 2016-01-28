@@ -73,6 +73,10 @@ public class Device implements Serializable {
      */
     private String wifiMAC;
 
+    /**
+     * State of the device.
+     */
+    private String state;
 
     /**
      * List of available hardware sensors.
@@ -169,6 +173,14 @@ public class Device implements Serializable {
 
     public void setWifiMAC(String wifiMAC) {
         this.wifiMAC = wifiMAC;
+    }
+
+    public String getState() {
+        return state;
+    }
+
+    public void setState(String state) {
+        this.state = state;
     }
 
     @Override

@@ -21,4 +21,6 @@ public class Constant {
     public static final String LOCATION_MODEL_URL = "http://localhost:7474/contra/location";
 
     public static final String ENVIRONMENT_MODEL_URL = "http://localhost:7474/contra/environment";
+
+    public static final String CEP_LOCATION_ENDPOINT = "http://localhost:9763/endpoints/ConTraLocationReceiver";
 }

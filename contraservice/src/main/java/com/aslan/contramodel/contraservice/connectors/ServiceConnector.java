@@ -17,6 +17,11 @@ public abstract class ServiceConnector {
     private static final Logger LOGGER = LoggerFactory.getLogger(ServiceConnector.class);
     private static final String USERNAME = "neo4j";
     private static final String PASSWORD = "admin";
+    protected final CEPConnector cepConnector;
+
+    public ServiceConnector() {
+        this.cepConnector = new CEPConnector();
+    }
 
 
     public final WebTarget createWebTarget(String url) {

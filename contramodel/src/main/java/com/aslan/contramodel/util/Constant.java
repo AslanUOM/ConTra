@@ -41,6 +41,8 @@ public class Constant {
 
     public static final String WIFI_MAC = "wifiMAC";
 
+    public static final String STATE = "state";
+
 
     /**
      * Related to Environment.

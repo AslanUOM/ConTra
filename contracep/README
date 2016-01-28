@@ -14,7 +14,11 @@
 
         mvn package
 
-  2. Copy the contracep/targets/contracep-1.0-SNAPSHOT.jar file to {CEP_HOME}/repository/components/lib
+  If you wat to package the contraservice only, use the following command from the ConTra directory.
+
+          mvn -pl contracep -am package
+
+  2. Copy the contracep/target/contracep-1.0-SNAPSHOT.jar file to {CEP_HOME}/repository/components/lib
 
   3. Restart the CEP.
 

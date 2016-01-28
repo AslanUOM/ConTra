@@ -117,6 +117,7 @@ public class DeviceService extends Service {
             setOnlyIfNotNull(deviceNode, Constant.LAST_SEEN, device.getLastSeen().value());
             setOnlyIfNotNull(deviceNode, Constant.BATTERY_LEVEL, device.getBatteryLevel());
             setOnlyIfNotNull(deviceNode, Constant.PROXIMITY, device.getProximity());
+            setOnlyIfNotNull(deviceNode, Constant.STATE, device.getState());
 
             transaction.success();
         }
@@ -185,6 +186,7 @@ public class DeviceService extends Service {
                 device.setProximity(getIfAvailable(deviceNode, Constant.PROXIMITY, 0.0));
                 device.setToken((String) getIfAvailable(deviceNode, Constant.TOKEN, null));
                 device.setWifiMAC((String) getIfAvailable(deviceNode, Constant.WIFI_MAC, null));
+                device.setState((String) getIfAvailable(deviceNode, Constant.STATE, null));
 
             }
 
