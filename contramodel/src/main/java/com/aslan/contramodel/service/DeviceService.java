@@ -30,7 +30,9 @@ public class DeviceService extends Service {
 
     public boolean isActiveDevice(String userID, String deviceID) {
         LOGGER.debug("Checking whether {} is an active device of {}", deviceID, userID);
-        boolean active = false;
+        // TODO: Uncomment the logic once CEP is ready
+        return true;
+        /*boolean active = false;
         if (deviceID != null) {
             // Begin the transaction
             try (Transaction transaction = databaseService.beginTx()) {
@@ -50,7 +52,7 @@ public class DeviceService extends Service {
             }
         }
 
-        return active;
+        return active;*/
     }
 
     public void setActiveDevice(String userID, String deviceID) {
