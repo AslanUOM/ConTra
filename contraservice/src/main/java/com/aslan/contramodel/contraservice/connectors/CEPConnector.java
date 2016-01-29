@@ -30,6 +30,7 @@ public class CEPConnector {
 
 
         try {
+            LOGGER.debug("JSON {}", event);
             // Create an entity and add it to the method.
             StringEntity entity = new StringEntity(event.toString());
             method.setEntity(entity);

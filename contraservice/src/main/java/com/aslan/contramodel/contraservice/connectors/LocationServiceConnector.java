@@ -28,6 +28,7 @@ public class LocationServiceConnector extends ServiceConnector {
 
         // Update the model
         String url = UriBuilder.fromPath(Constant.LOCATION_MODEL_URL + "/create").toString();
+        Message<Location> locationMessage = post(url, userLocation, LOCATION_GENERIC_TYPE);
 
         // Send to the CEP
         Location location = userLocation.getLocation();
@@ -35,10 +36,11 @@ public class LocationServiceConnector extends ServiceConnector {
         Map<String, Object> payloadData = new HashMap<>();
         payloadData.put("latitude", location.getLatitude());
         payloadData.put("longitude", location.getLongitude());
-        Event event = new Event(metaData, payloadData);
+        payloadData.put("confidence", userLocation.getAccuracy());
+        Event<Map<String, Object>> event = new Event(metaData, payloadData);
         cepConnector.send(Constant.CEP_LOCATION_ENDPOINT, event);
 
         // Return the response from the model
-        return post(url, userLocation, LOCATION_GENERIC_TYPE);
+        return locationMessage;
     }
 }
