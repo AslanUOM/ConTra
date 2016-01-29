@@ -19,3 +19,5 @@
 split=com.aslan.contracep.function.SplitStringFunctionExtension
 within=com.aslan.contracep.function.GeoFenceFunctionExtension
 distance=com.aslan.contracep.function.GeoDistanceFunctionExecutor
+visitedFriends=com.aslan.contracep.function.TripPlanningStreamFunctionExtension
+prioritizedTouristSpots=com.aslan.contracep.function.TripPlannerStreamFunctionExtension
