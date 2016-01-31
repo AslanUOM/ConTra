@@ -50,6 +50,7 @@ public class EnvironmentService extends Service {
 
         Node timeNode = timelineService.createTime(userID, userEnvironment.getTime());
 
+        LOGGER.debug("Environment time node {}", timeNode);
         // Begin the transaction
         try (Transaction transaction = databaseService.beginTx()) {
             Relationship environmentRelationship = timeNode.getSingleRelationship(RelationshipTypes.ENVIRONMENT, Direction.OUTGOING);
@@ -63,8 +64,6 @@ public class EnvironmentService extends Service {
                 // Create a new node
                 environmentNode = databaseService.createNode(Labels.Environment);
                 environmentRelationship = timeNode.createRelationshipTo(environmentNode, RelationshipTypes.ENVIRONMENT);
-
-
             }
 
             if (environmentNode != null) {

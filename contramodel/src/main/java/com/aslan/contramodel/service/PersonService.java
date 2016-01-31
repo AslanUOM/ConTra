@@ -177,7 +177,7 @@ public class PersonService extends Service {
 
             // Using parameter for latitude, longitude and distance caused to unknown error.
             // Reason could be a bug in Neo4j spatial plugin
-            final String query = "START n = node:location_layer('withinDistance:[" + param.getLatitude() + ", " + param.getLongitude() + ", " + param.getDistance() + "]') MATCH (n)<-[:LOCATION]-(t:Minute)<-[:CHILD*1..5]-(:TimelineRoot)<-[:TIMELINE]-(f:Person)<-[:KNOWS]-(p:Person) WHERE ID(p) = {user_id} AND t.epoch > {time_one} AND t.epoch < {time_two}  RETURN f.userID as userID";
+            final String query = "START n = node:location_layer('withinDistance:[" + param.getLatitude() + ", " + param.getLongitude() + ", " + param.getDistance() + "]') MATCH (n)<-[:LOCATION]-(t:Time)-[*]-(:TimelineRoot)<-[:TIMELINE]-(f:Person)<-[:KNOWS]-(p:Person) WHERE ID(p) = {user_id} AND t.epoch > {time_one} AND t.epoch < {time_two}  RETURN f.userID as userID";
             ResourceIterator<String> iterator = databaseService.execute(query, map("user_id", person.getId(), "time_one", interval.getStartTime().value(), "time_two", interval.getEndTime().value())).columnAs("userID");
             while (iterator.hasNext()) {
                 people.add(iterator.next());

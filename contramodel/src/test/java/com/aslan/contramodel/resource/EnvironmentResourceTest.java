@@ -64,14 +64,17 @@ public class EnvironmentResourceTest {
         userEnvironment.setTime(Time.of(1991, 4, 20, 5, 52, 0));
         userEnvironment.setEnvironment(environment);
 
+        System.out.println(userEnvironment.getTime().value());
 
         HTTP.Response response = HTTP.POST(server.httpURI().resolve("/contra/environment/create").toString(), userEnvironment);
 
+        System.out.println(userEnvironment.getTime().value());
         // Check the status.
         assertEquals("Error in request.", HttpURLConnection.HTTP_OK, response.status());
 
         TimelineService service = new TimelineService(databaseService);
         Node timeNode = service.createTime("+94770780210", userEnvironment.getTime());
+        System.out.println(timeNode);
         Double temp;
         try (Transaction transaction = databaseService.beginTx()) {
             Node env = timeNode.getSingleRelationship(Service.RelationshipTypes.ENVIRONMENT, Direction.OUTGOING).getEndNode();

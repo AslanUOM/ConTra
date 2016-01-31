@@ -26,6 +26,7 @@ public abstract class Service {
 
         // Following labels are used for the Nodes to represent time
         public static final Label TimelineRoot = DynamicLabel.label("TimelineRoot");
+        public static final Label Time = DynamicLabel.label("Time");
         public static final Label Year = DynamicLabel.label("Year");
         public static final Label Month = DynamicLabel.label("Month");
         public static final Label Day = DynamicLabel.label("Day");
@@ -77,7 +78,12 @@ public abstract class Service {
         /**
          * Person -[:HAS]-> Device
          */
-        HAS
+        HAS,
+
+        /**
+         * TimelineRoot -[:LAST_TIME]-> Time
+         */
+        LAST_TIME
     }
 
 
