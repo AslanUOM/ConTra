@@ -94,7 +94,7 @@ public class TimelineService extends Service {
 
         if (relNext != null) {
             relNext.delete();
-            timeNode.createRelationshipTo(prevNode, RelationshipTypes.NEXT);
+            prevNode.createRelationshipTo(timeNode, RelationshipTypes.NEXT);
         }
 
         return timeNode;
