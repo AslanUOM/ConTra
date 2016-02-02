@@ -20,8 +20,6 @@ public class MeetingIdentificationStreamFunctionExtension extends
 
 	private static final Logger LOGGER = Logger
 			.getLogger(TripPlanningStreamFunctionExtension.class);
-	private static final String USERNAME_PASSWORD = "neo4j:root";
-	public static final String USER_MODEL_URL = "http://localhost:7474/contra/person";
 
 	boolean isUserInMeeting = false;
 
