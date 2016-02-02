@@ -165,7 +165,7 @@ public class TimelineService extends Service {
 
     private Node getLastNode(Node parent) {
         Iterable<Relationship> rootChildren = parent.getRelationships(Direction.OUTGOING, RelationshipTypes.CHILD);
-        int max = 0;
+        int max = Integer.MIN_VALUE;
         Node last = null;
 
         for (Relationship r : rootChildren) {
@@ -183,7 +183,7 @@ public class TimelineService extends Service {
 
     private Node getFirstNode(Node parent) {
         Iterable<Relationship> rootChildren = parent.getRelationships(Direction.OUTGOING, RelationshipTypes.CHILD);
-        int min = 0;
+        int min = Integer.MAX_VALUE;
         Node first = null;
 
         for (Relationship r : rootChildren) {

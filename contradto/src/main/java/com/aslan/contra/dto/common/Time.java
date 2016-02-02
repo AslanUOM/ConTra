@@ -97,6 +97,7 @@ public class Time implements Serializable {
 
     public Date toDate() {
         Calendar calendar = Calendar.getInstance();
+        calendar.set(Calendar.MILLISECOND, 0);
         calendar.set(year, month - 1, day, hour, minute, second);
         return calendar.getTime();
     }
