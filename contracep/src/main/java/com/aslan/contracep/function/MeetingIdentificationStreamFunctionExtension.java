@@ -13,8 +13,7 @@ import java.util.Map;
 import com.aslan.contracep.function.NaiveBayesClassifier.NaiveBayesClassifier;
 
 /**
- * This extension calculates the number of friends who visited for a particular
- * place in a particular period. address
+ * This extension identify whether the user is in a meeting or not
  */
 public class MeetingIdentificationStreamFunctionExtension extends
 		StreamFunctionProcessor {
@@ -27,9 +26,6 @@ public class MeetingIdentificationStreamFunctionExtension extends
 	boolean isUserInMeeting = false;
 
 	/**
-	 * The process method of the TripPlanningStreamFunctionExtension, used when
-	 * more than one function parameters are provided
-	 *
 	 * @param data
 	 *            the data values for the function parameters
 	 * @return the data for additional output attributes introduced by the
@@ -125,9 +121,6 @@ public class MeetingIdentificationStreamFunctionExtension extends
 	}
 
 	/**
-	 * The process method of TripPlanningStreamFunctionExtension, used when zero
-	 * or one function parameter is provided
-	 *
 	 * @param data
 	 * 
 	 *            null if the function parameter count is zero or runtime data
@@ -142,9 +135,6 @@ public class MeetingIdentificationStreamFunctionExtension extends
 	}
 
 	/**
-	 * The init method of the GeocodeStreamFunctionProcessor, this method will
-	 * be called before other methods
-	 *
 	 * @param inputDefinition
 	 *            the incoming stream definition
 	 * @param attributeExpressionExecutors
