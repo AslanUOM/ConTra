@@ -34,7 +34,7 @@ import java.util.List;
 
 /**
  * This extension calculates the number of friends who visited for a particular
- * place in a particular period. address
+ * place in a particular period. 
  */
 public class TripPlannerStreamFunctionExtension extends StreamFunctionProcessor {
 
@@ -44,12 +44,13 @@ public class TripPlannerStreamFunctionExtension extends StreamFunctionProcessor 
 	double longitude = 0.0, latitude = 0.0;
 	ArrayList<String> listOfFriends;
 	int countOfFriends;
-	String PrioritizedList = "";
+	String PrioritizedList;
 	
 
 	/**
 	 * The process method of the TripPlanningStreamFunctionExtension, used when
 	 * more than one function parameters are provided
+	 * this method returns the list of friends ID for every tourist spot as string array
 	 *
 	 * @param data
 	 *            the data values for the function parameters
@@ -59,6 +60,7 @@ public class TripPlannerStreamFunctionExtension extends StreamFunctionProcessor 
 	@Override
 	protected Object[] process(Object[] data) {
 
+		PrioritizedList ="";
 		String bufferOutput;
 		
 		ArrayList<VisitedPlaceInfo> listOfVisitedInfo = new ArrayList<VisitedPlaceInfo>();
@@ -91,7 +93,8 @@ public class TripPlannerStreamFunctionExtension extends StreamFunctionProcessor 
 			double distance = Double.valueOf(locationData[3].toString());
 
 			listOfFriends = new ArrayList<String>();
-
+			
+			//get the list of friends for the last five years for every tourist spots
 			for (int i = startYear - 1, j = endYear - 1; i >= startYear - 5 & j >= endYear - 5; i--, j--) {
 
 				startPeriod.set(Calendar.YEAR, i);
@@ -103,7 +106,8 @@ public class TripPlannerStreamFunctionExtension extends StreamFunctionProcessor 
 				Interval interval = new Interval();
 				interval.setStartTime(startTime);
 				interval.setEndTime(endTime);
-
+				
+				// create the NearbyKnownPeople object 
 				NearbyKnownPeople nearbyKnownPeople = new NearbyKnownPeople();
 				nearbyKnownPeople.setUserID(userID);
 				nearbyKnownPeople.setLongitude(longitude);
@@ -143,6 +147,10 @@ public class TripPlannerStreamFunctionExtension extends StreamFunctionProcessor 
 				} catch (IOException e) {
 					throw new ExecutionPlanRuntimeException("Error in input of excute method", e);
 				}
+				//if the user id not found
+				if(response.getStatusLine().getStatusCode() != 200){
+					return new Object[]{"USERID_NOT_FOUND"};
+				}
 				BufferedReader br;
 				String jsonResponse = "";
 
@@ -158,9 +166,11 @@ public class TripPlannerStreamFunctionExtension extends StreamFunctionProcessor 
 					throw new ExecutionPlanRuntimeException("Error in buffer reading.", e);
 				}
 
+				//change the json response string to json object
 				JsonParser jsonParser = new JsonParser();
 				JsonObject jsonObj = (JsonObject) jsonParser.parse(jsonResponse);
 
+				//retrive the list of friends from the json object
 				for (int k = 0; k < jsonObj.getAsJsonArray("entity").size(); k++) {
 					String friendID = jsonObj.getAsJsonArray("entity").get(k).toString();
 					if (!listOfFriends.contains(friendID))
@@ -168,6 +178,7 @@ public class TripPlannerStreamFunctionExtension extends StreamFunctionProcessor 
 				}
 
 			}
+			//get the count of list of friends
 			countOfFriends = listOfFriends.size();
 
 			VisitedPlaceInfo visitedPlaceInfo = new VisitedPlaceInfo();
@@ -183,13 +194,14 @@ public class TripPlannerStreamFunctionExtension extends StreamFunctionProcessor 
 
 		for (VisitedPlaceInfo visitedPlace : listOfVisitedInfo) {
 			if (PrioritizedList == "")
-				PrioritizedList = PrioritizedList + visitedPlace;
+				PrioritizedList = "\n" + PrioritizedList + visitedPlace + "\n";
 			else
-				PrioritizedList = PrioritizedList + "," + visitedPlace;
+				PrioritizedList = PrioritizedList + "," + visitedPlace + "\n";
 
 		}
+		
 		LOGGER.info(PrioritizedList);
-
+		
 		return new Object[] { PrioritizedList };
 
 	}
