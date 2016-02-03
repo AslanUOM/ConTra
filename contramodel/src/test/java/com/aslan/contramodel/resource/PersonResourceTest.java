@@ -201,4 +201,17 @@ public class PersonResourceTest {
 
         assertEquals("Near by friend is not found.", "+94779848507", message.getEntity().get(0));
     }
+
+    @Test
+    public void testFriends() throws Exception {
+        HTTP.Response response = HTTP.GET(server.httpURI().resolve("/contra/person/friendsof/+94770780210").toString());
+
+        Gson gson = new Gson();
+
+        Message<List<String>> message = gson.fromJson(response.rawContent(), new TypeToken<Message<List<String>>>() {
+        }.getType());
+
+
+        assertEquals("Failed to find the list of friends.", "+94779848507", message.getEntity().get(0));
+    }
 }

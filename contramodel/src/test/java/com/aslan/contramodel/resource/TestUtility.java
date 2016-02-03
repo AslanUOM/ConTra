@@ -86,6 +86,8 @@ public class TestUtility {
         personService.create(userDeviceAnnet);
         deviceService.setActiveDevice("+94771199331", "CC96601820A3292");
         locationService.create(userLocationAnnet);
+
+        personService.createKnows("+94770780210", "+94779848507");
     }
 
     public static Person createPerson(String userID, String name, String email) {

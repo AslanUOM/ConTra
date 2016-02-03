@@ -185,4 +185,33 @@ public class PersonResource {
 
         return Response.status(message.getStatus()).entity(message).build();
     }
+
+    @GET
+    @Path("/friendsof/{userID}")
+    @Produces(MediaType.APPLICATION_JSON)
+    public Response getFriends(@Encoded @PathParam("userID") String userID) throws IOException {
+        LOGGER.debug("Request to find friends of {}", userID);
+
+        Message<List<String>> message = new Message<>();
+
+        if (isNullOrEmpty(userID)) {
+            message.setStatus(HttpURLConnection.HTTP_BAD_REQUEST);
+            message.setMessage("Path parameter userID cannot be null");
+        } else {
+            try {
+                List<String> friends = service.friendsOf(userID);
+
+                message.setMessage("Successfully found the friends");
+                message.setEntity(friends);
+                message.setStatus(HttpURLConnection.HTTP_OK);
+                message.setSuccess(true);
+            } catch (org.neo4j.graphdb.NotFoundException e) {
+                LOGGER.error(e.getMessage(), e);
+                message.setStatus(HttpURLConnection.HTTP_NOT_FOUND);
+                message.setMessage(e.getMessage());
+            }
+        }
+
+        return Response.status(message.getStatus()).entity(message).build();
+    }
 }

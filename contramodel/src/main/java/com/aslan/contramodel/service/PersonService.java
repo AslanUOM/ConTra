@@ -191,6 +191,28 @@ public class PersonService extends Service {
     }
 
 
+    public List<String> friendsOf(String userID) {
+        LOGGER.debug("Searching for friends of {}", userID);
+        List<String> friends = new ArrayList<>();
+        try (Transaction transaction = databaseService.beginTx()) {
+            Node person = databaseService.findNode(Labels.Person, Constant.USER_ID, userID);
+            if (person == null) {
+                throw new NotFoundException("Person not found with id: " + userID);
+            }
+            Iterable<Relationship> relationships = person.getRelationships(RelationshipTypes.KNOWS, Direction.OUTGOING);
+            for (Relationship relationship : relationships) {
+                Node friend = relationship.getEndNode();
+                Object id = friend.getProperty(Constant.USER_ID);
+                if (id != null) {
+                    friends.add(id.toString());
+                }
+            }
+            // Commit the transaction
+            transaction.success();
+        }
+
+        return friends;
+    }
 }
 
 
