@@ -147,6 +147,10 @@ public class TripPlannerStreamFunctionExtension extends StreamFunctionProcessor 
 				} catch (IOException e) {
 					throw new ExecutionPlanRuntimeException("Error in input of excute method", e);
 				}
+				//if the user id not found
+				if(response.getStatusLine().getStatusCode() != 200){
+					return new Object[]{"USERID_NOT_FOUND"};
+				}
 				BufferedReader br;
 				String jsonResponse = "";
 
