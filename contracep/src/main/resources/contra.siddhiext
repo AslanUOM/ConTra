@@ -21,3 +21,4 @@ within=com.aslan.contracep.function.GeoFenceFunctionExtension
 distance=com.aslan.contracep.function.GeoDistanceFunctionExecutor
 visitedFriends=com.aslan.contracep.function.TripPlanningStreamFunctionExtension
 prioritizedTouristSpots=com.aslan.contracep.function.TripPlannerStreamFunctionExtension
+meetingIdentification=com.aslan.contracep.function.MeetingIdentificationStreamFunctionExtension
